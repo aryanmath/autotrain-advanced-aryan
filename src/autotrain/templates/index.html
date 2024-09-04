@@ -337,6 +337,10 @@
             </button>
           </label>
           <div class="flex items-center ps-4 border border-gray-300 rounded">
+            <input checked id="life-dataset-radio" type="radio" value="" name="dataset-radio"
+              class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+            <label for="life-dataset-radio" class="w-full py-4 ms-2 text-sm font-medium text-gray-900">LiFE
+              Dataset</label>
             <input checked id="upload-dataset-radio" type="radio" value="" name="dataset-radio"
               class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
             <label for="upload-dataset-radio" class="w-full py-4 ms-2 text-sm font-medium text-gray-900">Upload
@@ -345,6 +349,28 @@
               class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
             <label for="hub-dataset-radio" class="w-full py-4 ms-2 text-sm font-medium text-gray-900">Hub
               Dataset</label>
+          </div>
+        </div>
+        <div id="form-group">
+          <div id="life-data-tab-content">
+            <div class="form-group">
+              <label for="life_dataset" class="text-sm font-medium text-gray-700">LiFE Dataset
+              </label>
+              <input type="text" name="life_dataset" id="life_dataset"
+                class="mt-1 block w-full border border-gray-300 px-3 py-2.5 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+            <div class="columns-2 mb-2 mt-2">
+              <div class="form-group">
+                <label for="train_split" class="text-sm font-medium text-gray-700">Train split
+                </label>
+                <input type="text" name="train_split" id="train_split"
+                  class="mt-1 block w-full border border-gray-300 px-3 py-2 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                <label for="valid_split" class="text-sm font-medium text-gray-700">Valid split (optional)
+                </label>
+                <input type="text" name="valid_split" id="valid_split"
+                  class="mt-1 block w-full border border-gray-300 px-3 py-2 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+              </div>
+            </div>
           </div>
         </div>
         <div id="form-group">
@@ -597,26 +623,38 @@
     const uploadDataTabContent = document.getElementById("upload-data-tab-content");
     const hubDataTabContent = document.getElementById("hub-data-tab-content");
     const uploadDataTabs = document.getElementById("upload-data-tabs");
+    const lifeDatasetRadio = document.getElementById("life-dataset-radio");
+    const lifeDataTabContent = document.getElementById("life-data-tab-content")
 
     // Function to handle radio button click events
     function handleRadioButtonClick() {
       if (hubDatasetRadio.checked) {
         uploadDataTabContent.style.display = "none";
         uploadDataTabs.style.display = "none";
+        lifeDataTabContent.style.display = "none";
         hubDataTabContent.style.display = "block";
       } else if (uploadDatasetRadio.checked) {
         uploadDataTabContent.style.display = "block";
         uploadDataTabs.style.display = "block";
         hubDataTabContent.style.display = "none";
+        lifeDataTabContent.style.display = "none";
+      }
+      else if (lifeDatasetRadio.checked) {
+        uploadDataTabContent.style.display = "none";
+        uploadDataTabs.style.display = "none";
+        hubDataTabContent.style.display = "none";
+        lifeDataTabContent.style.display = "block";
       }
     }
 
     // Attach event listeners to radio buttons
     hubDatasetRadio.addEventListener("click", handleRadioButtonClick);
     uploadDatasetRadio.addEventListener("click", handleRadioButtonClick);
+    lifeDatasetRadio.addEventListener("click", handleRadioButtonClick);
 
     // Trigger initial click event to ensure correct display on page load
-    uploadDatasetRadio.click();
+    // uploadDatasetRadio.click();
+    lifeDatasetRadio.click();
   });
 </script>
 

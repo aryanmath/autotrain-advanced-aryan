@@ -209,6 +209,8 @@ class AutoTrainDataset:
             else:
                 if self.ext == "jsonl":
                     train_df.append(pd.read_json(file, lines=True))
+                elif self.ext == "life_jsonl":
+                    train_df.append(pd.json_normalize(file))
                 else:
                     train_df.append(pd.read_csv(file))
         if len(train_df) > 1:
