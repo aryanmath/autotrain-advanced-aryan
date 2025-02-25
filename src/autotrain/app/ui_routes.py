@@ -501,6 +501,7 @@ async def handle_form(
     data_files_training: List[UploadFile] = File(None),
     data_files_valid: List[UploadFile] = File(None),
     hub_dataset: str = Form(""),
+    life_dataset: str = Form(""),
     train_split: str = Form(""),
     valid_split: str = Form(""),
     token: str = Depends(user_authentication),
@@ -519,6 +520,7 @@ async def handle_form(
         data_files_training (List[UploadFile]): List of training data files.
         data_files_valid (List[UploadFile]): List of validation data files.
         hub_dataset (str): The Hugging Face Hub dataset identifier.
+        life_dataset (str): The LiFE dataset identifier.
         train_split (str): The training split identifier.
         valid_split (str): The validation split identifier.
         token (str): The authentication token.
@@ -558,22 +560,32 @@ async def handle_form(
             params[key] = None
     column_mapping = json.loads(column_mapping)
 
-    training_files = [f.file for f in data_files_training if f.filename != ""] if data_files_training else []
-    validation_files = [f.file for f in data_files_valid if f.filename != ""] if data_files_valid else []
+    if len(life_dataset) > 0:
+        training_files = []
+        validation_files = []
+    else:
+        training_files = [f.file for f in data_files_training if f.filename != ""] if data_files_training else []
+        validation_files = [f.file for f in data_files_valid if f.filename != ""] if data_files_valid else []
 
     if len(training_files) > 0 and len(hub_dataset) > 0:
         raise HTTPException(
             status_code=400, detail="Please either upload a dataset or choose a dataset from the Hugging Face Hub."
         )
 
-    if len(training_files) == 0 and len(hub_dataset) == 0:
+    if len(training_files) == 0 and len(hub_dataset) == 0 and len(life_dataset) == 0:
         raise HTTPException(
             status_code=400, detail="Please upload a dataset or choose a dataset from the Hugging Face Hub."
         )
 
-    if len(hub_dataset) > 0:
+    if len(hub_dataset) > 0 or len(life_dataset) > 0:
         if not train_split:
             raise HTTPException(status_code=400, detail="Please enter a training split.")
+
+    if len(life_dataset) > 0:
+        file_extension = 'life_jsonl'
+    else:
+        file_extension = os.path.splitext(data_files_training[0].filename)[1]
+        file_extension = file_extension[1:] if file_extension.startswith(".") else file_extension
 
     if len(hub_dataset) == 0:
         file_extension = os.path.splitext(data_files_training[0].filename)[1]
@@ -673,6 +685,7 @@ async def handle_form(
         data_path = dset.prepare()
     else:
         data_path = hub_dataset
+
     app_params = AppParams(
         job_params_json=json.dumps(params),
         token=token,
