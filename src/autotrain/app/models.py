@@ -401,7 +401,6 @@ def _fetch_asr_models():
 
     return hub_models
 
-
 def fetch_models():
     _mc = collections.defaultdict(list)
     _mc["text-classification"] = _fetch_text_classification_models()
