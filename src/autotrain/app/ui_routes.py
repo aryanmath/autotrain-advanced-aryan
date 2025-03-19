@@ -459,12 +459,12 @@ async def fetch_model_choices(
         hub_models = MODEL_CHOICE["text-classification"]
     elif task.startswith("llm"):
         hub_models = MODEL_CHOICE["llm"]
+    elif task in ["asr", "automatic-speech-recognition"]:
+        hub_models = MODEL_CHOICE["asr"]
     elif task.startswith("st:"):
         hub_models = MODEL_CHOICE["sentence-transformers"]
     elif task == "image-classification":
         hub_models = MODEL_CHOICE["image-classification"]
-    elif task == ["asr", "automatic-speech-recognition"]:
-        hub_models = MODEL_CHOICE["asr"]
     elif task == "seq2seq":
         hub_models = MODEL_CHOICE["seq2seq"]
     elif task == "tabular:classification":
