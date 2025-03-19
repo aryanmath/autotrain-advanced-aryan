@@ -226,6 +226,9 @@
                             <option value="tabular:classification">Tabular Classification</option>
                             <option value="tabular:regression">Tabular Regression</option>
                         </optgroup>
+                        <optgroup label="Audio Tasks">
+                            <option value="asr">Automatic Speech Recognition</option>
+                        </optgroup>
                     </select>
                 </li>
                 <li>
@@ -678,7 +681,7 @@
         </div>
     </div>
     <script>
-        var autotrain_local_value = {{ enable_local }};
+        var autotrain_local_value = {enable_local };
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
     <script>
