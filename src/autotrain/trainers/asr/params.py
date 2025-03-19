@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from autotrain.trainers import BaseParams
+from autotrain.trainers.common import BaseParams
 
 @dataclass
 class ASRParams(BaseParams):
