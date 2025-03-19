@@ -137,7 +137,7 @@ PARAMS["extractive-qa"] = ExtractiveQuestionAnsweringParams(
 ).model_dump()
 
 
-PARAMS["asr"] = ASRTrainingParams(
+PARAMS["asr"] = ASRParams(
     mixed_precision="fp16",
     log="tensorboard",
     batch_size=8,
