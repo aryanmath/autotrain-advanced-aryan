@@ -282,6 +282,7 @@ class APICreateProjectModel(BaseModel):
         "vlm:vqa",
         "extractive-question-answering",
         "image-object-detection",
+        "asr",
     ]
     base_model: str
     hardware: Literal[
@@ -319,6 +320,7 @@ class APICreateProjectModel(BaseModel):
         VLMTrainingParamsAPI,
         ExtractiveQuestionAnsweringParamsAPI,
         ObjectDetectionParamsAPI,
+        ASRParamsAPI,
     ]
     username: str
     column_mapping: Optional[
@@ -344,6 +346,7 @@ class APICreateProjectModel(BaseModel):
             VLMColumnMapping,
             ExtractiveQuestionAnsweringColumnMapping,
             ObjectDetectionColumnMapping,
+            ASRColumnMapping,
         ]
     ] = None
     hub_dataset: str
