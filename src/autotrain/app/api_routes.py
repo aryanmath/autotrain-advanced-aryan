@@ -583,6 +583,8 @@ class APICreateProjectModel(BaseModel):
             values["params"] = ExtractiveQuestionAnsweringParamsAPI(**values["params"])
         elif values.get("task") == "image-object-detection":
             values["params"] = ObjectDetectionParamsAPI(**values["params"])
+        elif values.get("task") == "asr":
+            values["params"] = ASRParamsAPI(**values["params"])
         return values
 
 
