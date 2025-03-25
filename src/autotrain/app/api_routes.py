@@ -23,7 +23,7 @@ from autotrain.trainers.text_classification.params import TextClassificationPara
 from autotrain.trainers.text_regression.params import TextRegressionParams
 from autotrain.trainers.token_classification.params import TokenClassificationParams
 from autotrain.trainers.vlm.params import VLMTrainingParams
-# from autotrain.trainers.asr.params import ASRParams
+from autotrain.trainers.asr.params import ASRParams
 
 
 FIELDS_TO_EXCLUDE = HIDDEN_PARAMS + ["push_to_hub"]
@@ -113,7 +113,7 @@ ExtractiveQuestionAnsweringParamsAPI = create_api_base_model(
     ExtractiveQuestionAnsweringParams, "ExtractiveQuestionAnsweringParamsAPI"
 )
 ObjectDetectionParamsAPI = create_api_base_model(ObjectDetectionParams, "ObjectDetectionParamsAPI")
-# ASRParamsAPI = create_api_base_model(ASRParams, "ASRParamsAPI")
+ASRParamsAPI = create_api_base_model(ASRParams, "ASRParamsAPI")
 
 
 class LLMSFTColumnMapping(BaseModel):
@@ -320,7 +320,7 @@ class APICreateProjectModel(BaseModel):
         VLMTrainingParamsAPI,
         ExtractiveQuestionAnsweringParamsAPI,
         ObjectDetectionParamsAPI,
-        # ASRParamsAPI,
+        ASRParamsAPI,
     ]
     username: str
     column_mapping: Optional[
@@ -591,8 +591,8 @@ class APICreateProjectModel(BaseModel):
             values["params"] = ExtractiveQuestionAnsweringParamsAPI(**values["params"])
         elif values.get("task") == "image-object-detection":
             values["params"] = ObjectDetectionParamsAPI(**values["params"])
-        # elif values.get("task") == "asr":
-        #     values["params"] = ASRParamsAPI(**values["params"])
+        elif values.get("task") == "asr":
+            values["params"] = ASRParamsAPI(**values["params"])
         return values
 
 
