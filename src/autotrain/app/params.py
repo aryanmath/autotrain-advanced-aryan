@@ -138,31 +138,31 @@ PARAMS["extractive-qa"] = ExtractiveQuestionAnsweringParams(
 ).model_dump()
 
 
-PARAMS["asr"] = ASRParams(
-    mixed_precision="fp16",
-    log="tensorboard",
-    batch_size=8,
-    epochs=3,
-    lr=1e-5,
-    optimizer="adamw_torch",
-    scheduler="linear",
-    gradient_accumulation=4,
-    warmup_steps=500,
-    max_steps=2000,
-    per_device_train_batch_size=8,
-    per_device_eval_batch_size=8,
-    eval_strategy="steps",
-    save_steps=1000,
-    eval_steps=1000,
-    logging_steps=25,
-    load_best_model_at_end=True,
-    metric_for_best_model="wer",
-    greater_is_better=False,
-    group_by_length=True,
-    fp16=True,
-    gradient_checkpointing=True,
-    save_total_limit=3,
-).model_dump()
+# PARAMS["asr"] = ASRParams(
+#     mixed_precision="fp16",
+#     log="tensorboard",
+#     batch_size=8,
+#     epochs=3,
+#     lr=1e-5,
+#     optimizer="adamw_torch",
+#     scheduler="linear",
+#     gradient_accumulation=4,
+#     warmup_steps=500,
+#     max_steps=2000,
+#     per_device_train_batch_size=8,
+#     per_device_eval_batch_size=8,
+#     eval_strategy="steps",
+#     save_steps=1000,
+#     eval_steps=1000,
+#     logging_steps=25,
+#     load_best_model_at_end=True,
+#     metric_for_best_model="wer",
+#     greater_is_better=False,
+#     group_by_length=True,
+#     fp16=True,
+#     gradient_checkpointing=True,
+#     save_total_limit=3,
+# ).model_dump()
 
 
 @dataclass
@@ -200,7 +200,7 @@ class AppParams:
         _munge_params_img_reg(): Processes parameters for image regression task.
         _munge_params_img_obj_det(): Processes parameters for image object detection task.
         _munge_params_tabular(): Processes parameters for tabular data task.
-        _munge_params_asr(): Processes parameters for automatic speech recognition task.
+        # _munge_params_asr(): Processes parameters for automatic speech recognition task.
     """
 
     job_params_json: str
@@ -229,8 +229,8 @@ class AppParams:
             return self._munge_params_img_clf()
         elif self.task == "image-object-detection":
             return self._munge_params_img_obj_det()
-        elif self.task == ["asr", "automatic-speech-recognition"]:
-            return self._munge_params_asr()
+        # elif self.task == ["asr", "automatic-speech-recognition"]:
+        #     return self._munge_params_asr()
         elif self.task.startswith("tabular"):
             return self._munge_params_tabular()
         elif self.task.startswith("llm"):
@@ -365,22 +365,22 @@ class AppParams:
         return TextClassificationParams(**_params)
 
 
-    def _munge_params_asr(self):
-        _params = self._munge_common_params()
-        _params["model"] = self.base_model
-        if "log" not in _params:
-            _params["log"] = "tensorboard"
-        if not self.using_hub_dataset:
-            _params["audio_column"] = "autotrain_audio"
-            _params["text_column"] = "autotrain_text"
-            _params["valid_split"] = "validation"
-        else:
-            _params["audio_column"] = self.column_mapping.get("audio" if not self.api else "audio_column", "audio")
-            _params["text_column"] = self.column_mapping.get("text" if not self.api else "text_column", "text")
-            _params["train_split"] = self.train_split
-            _params["valid_split"] = self.valid_split
+    # def _munge_params_asr(self):
+    #     _params = self._munge_common_params()
+    #     _params["model"] = self.base_model
+    #     if "log" not in _params:
+    #         _params["log"] = "tensorboard"
+    #     if not self.using_hub_dataset:
+    #         _params["audio_column"] = "autotrain_audio"
+    #         _params["text_column"] = "autotrain_text"
+    #         _params["valid_split"] = "validation"
+    #     else:
+    #         _params["audio_column"] = self.column_mapping.get("audio" if not self.api else "audio_column", "audio")
+    #         _params["text_column"] = self.column_mapping.get("text" if not self.api else "text_column", "text")
+    #         _params["train_split"] = self.train_split
+    #         _params["valid_split"] = self.valid_split
 
-        return ASRParams(**_params)
+    #     return ASRParams(**_params)
 
 
 
