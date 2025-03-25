@@ -113,6 +113,7 @@ ExtractiveQuestionAnsweringParamsAPI = create_api_base_model(
     ExtractiveQuestionAnsweringParams, "ExtractiveQuestionAnsweringParamsAPI"
 )
 ObjectDetectionParamsAPI = create_api_base_model(ObjectDetectionParams, "ObjectDetectionParamsAPI")
+ASRParamsAPI = create_api_base_model(ASRParams, "ASRParamsAPI")
 
 
 class LLMSFTColumnMapping(BaseModel):
