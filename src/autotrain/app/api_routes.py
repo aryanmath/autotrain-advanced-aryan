@@ -225,6 +225,11 @@ class ObjectDetectionColumnMapping(BaseModel):
     objects_column: str
 
 
+class ASRColumnMapping(BaseModel):
+    audio_column: str
+    text_column: str
+
+
 class APICreateProjectModel(BaseModel):
     """
     APICreateProjectModel is a Pydantic model that defines the schema for creating a project.
