@@ -544,6 +544,14 @@ class APICreateProjectModel(BaseModel):
             if not values.get("column_mapping").get("objects_column"):
                 raise ValueError("objects_column is required for image-object-detection")
             values["column_mapping"] = ObjectDetectionColumnMapping(**values["column_mapping"])
+        elif values.get("task") == "asr":
+            if not values.get("column_mapping"):
+                raise ValueError("column_mapping is required for asr")
+            if not values.get("column_mapping").get("audio_column"):
+                raise ValueError("audio_column is required for asr")
+            if not values.get("column_mapping").get("text_column"):
+                raise ValueError("text_column is required for asr")
+            values["column_mapping"] = ASRColumnMapping(**values["column_mapping"])
         return values
 
     @model_validator(mode="before")
