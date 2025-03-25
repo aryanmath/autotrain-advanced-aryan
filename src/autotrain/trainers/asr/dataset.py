@@ -27,14 +27,14 @@ class AudioSpeechRecognitionDataset:
         self.processor = processor
         self.config = config
         self.audio_column = self.config.audio_column
-        self.transcription_column = self.config.transcription_column
+        self.text_column = self.config.text_column
 
     def __len__(self):
         return len(self.data)
 
     def __getitem__(self, item):
         audio_path = self.data[item][self.audio_column]
-        transcription = self.data[item][self.transcription_column]
+        text = self.data[item][self.text_column]
 
         # Load audio file
         waveform, sample_rate = torchaudio.load(audio_path)
@@ -53,5 +53,5 @@ class AudioSpeechRecognitionDataset:
         return {
             "input_values": input_values,
             "attention_mask": attention_mask,
-            "labels": transcription,
+            "labels": text,
         } 
