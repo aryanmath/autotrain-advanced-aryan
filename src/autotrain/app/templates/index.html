@@ -97,6 +97,10 @@
                     fields = ['text', 'question', 'answer'];
                     fieldNames = ['context', 'question', 'answers'];
                     break;
+                case 'asr':
+                    fields = ['audio', 'text'];
+                    fieldNames = ['audio', 'text'];
+                    break;
                 default:
                     return; // Do nothing if task is not recognized
             }
