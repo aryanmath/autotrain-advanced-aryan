@@ -373,20 +373,20 @@ class AppParams:
 
 
     def _munge_params_asr(self):
-    _params = self._munge_common_params()
-    _params["model"] = self.base_model
-    if "log" not in _params:
-        _params["log"] = "tensorboard"
-    if not self.using_hub_dataset:
-        _params["audio_column"] = "autotrain_audio"
-        _params["text_column"] = "autotrain_text"
-        _params["valid_split"] = "validation"
-    else:
-        _params["audio_column"] = self.column_mapping.get("audio" if not self.api else "audio_column", "audio")
-        _params["text_column"] = self.column_mapping.get("text" if not self.api else "text_column", "text")
-        _params["train_split"] = self.train_split
-        _params["valid_split"] = self.valid_split
-    return ASRParams(**_params)
+        _params = self._munge_common_params()
+        _params["model"] = self.base_model
+        if "log" not in _params:
+            _params["log"] = "tensorboard"
+        if not self.using_hub_dataset:
+            _params["audio_column"] = "autotrain_audio"
+            _params["text_column"] = "autotrain_text"
+            _params["valid_split"] = "validation"
+        else:
+            _params["audio_column"] = self.column_mapping.get("audio" if not self.api else "audio_column", "audio")
+            _params["text_column"] = self.column_mapping.get("text" if not self.api else "text_column", "text")
+            _params["train_split"] = self.train_split
+            _params["valid_split"] = self.valid_split
+        return ASRParams(**_params)
 
 
     # def _munge_params_asr(self):
