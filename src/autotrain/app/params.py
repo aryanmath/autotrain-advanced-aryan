@@ -200,7 +200,7 @@ class AppParams:
         _munge_params_img_reg(): Processes parameters for image regression task.
         _munge_params_img_obj_det(): Processes parameters for image object detection task.
         _munge_params_tabular(): Processes parameters for tabular data task.
-        # _munge_params_asr(): Processes parameters for automatic speech recognition task.
+        _munge_params_asr(): Processes parameters for automatic speech recognition task.
     """
 
     job_params_json: str
