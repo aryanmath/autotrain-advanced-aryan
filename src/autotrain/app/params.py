@@ -235,7 +235,7 @@ class AppParams:
             return self._munge_params_img_clf()
         elif self.task == "image-object-detection":
             return self._munge_params_img_obj_det()
-        elif self.task == ["asr", "automatic-speech-recognition"]:
+        elif self.task in ["asr", "automatic-speech-recognition"]:
             return self._munge_params_asr()
         elif self.task.startswith("tabular"):
             return self._munge_params_tabular()
