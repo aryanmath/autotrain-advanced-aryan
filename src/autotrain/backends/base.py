@@ -15,6 +15,7 @@ from autotrain.trainers.text_classification.params import TextClassificationPara
 from autotrain.trainers.text_regression.params import TextRegressionParams
 from autotrain.trainers.token_classification.params import TokenClassificationParams
 from autotrain.trainers.vlm.params import VLMTrainingParams
+from autotrain.trainers.asr.params import ASRParams
 
 
 AVAILABLE_HARDWARE = {
@@ -71,7 +72,7 @@ class BaseBackend:
                       GenericParams, TabularParams, Seq2SeqParams,
                       TokenClassificationParams, TextRegressionParams, ObjectDetectionParams,
                       SentenceTransformersParams, ImageRegressionParams, VLMTrainingParams,
-                      ExtractiveQuestionAnsweringParams]): Training parameters.
+                      ExtractiveQuestionAnsweringParams, ASRParams]): Training parameters.
         backend (str): Backend type.
 
     Methods:
@@ -93,6 +94,7 @@ class BaseBackend:
         ImageRegressionParams,
         VLMTrainingParams,
         ExtractiveQuestionAnsweringParams,
+        ASRParams,
     ]
     backend: str
 
@@ -139,6 +141,8 @@ class BaseBackend:
             self.task_id = 31
         elif isinstance(self.params, ExtractiveQuestionAnsweringParams):
             self.task_id = 5
+        elif isinstance(self.params, ASRParams):
+            self.task_id = 6
         else:
             raise NotImplementedError
 
