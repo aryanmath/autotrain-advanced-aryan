@@ -26,6 +26,8 @@ HIDDEN_PARAMS = [
     "train_split",
     "valid_split",
     "text_column",
+    "image_column",
+    "audio_column",
     "rejected_text_column",
     "prompt_text_column",
     "push_to_hub",
