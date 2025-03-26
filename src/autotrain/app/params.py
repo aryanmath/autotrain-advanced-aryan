@@ -812,5 +812,28 @@ def get_task_params(task, param_type):
             "early_stopping_threshold",
         ]
         task_params = {k: v for k, v in task_params.items() if k not in more_hidden_params}
+        
+    if task == "asr" and param_type == "basic":
+        more_hidden_params = [
+            "optimizer",
+            "scheduler",
+            "gradient_accumulation",
+            "warmup_steps",
+            "max_steps",
+            "per_device_train_batch_size",
+            "per_device_eval_batch_size",
+            "eval_strategy",
+            "save_steps",
+            "eval_steps",
+            "logging_steps",
+            "load_best_model_at_end",
+            "metric_for_best_model",
+            "greater_is_better",
+            "group_by_length",
+            "fp16",
+            "gradient_checkpointing",
+            "save_total_limit"
+        ]
+        task_params = {k: v for k, v in task_params.items() if k not in more_hidden_params}
 
     return task_params
