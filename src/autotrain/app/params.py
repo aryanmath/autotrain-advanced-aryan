@@ -138,31 +138,37 @@ PARAMS["extractive-qa"] = ExtractiveQuestionAnsweringParams(
 ).model_dump()
 
 
+
 PARAMS["asr"] = ASRParams(
     mixed_precision="fp16",
     log="tensorboard",
-    batch_size=8,
-    epochs=3,
-    lr=1e-5,
-    optimizer="adamw_torch",
-    scheduler="linear",
-    gradient_accumulation=4,
-    warmup_steps=500,
-    max_steps=2000,
-    per_device_train_batch_size=8,
-    per_device_eval_batch_size=8,
-    eval_strategy="steps",
-    save_steps=1000,
-    eval_steps=1000,
-    logging_steps=25,
-    load_best_model_at_end=True,
-    metric_for_best_model="wer",
-    greater_is_better=False,
-    group_by_length=True,
-    fp16=True,
-    gradient_checkpointing=True,
-    save_total_limit=3,
 ).model_dump()
+
+# PARAMS["asr"] = ASRParams(
+#     mixed_precision="fp16",
+#     log="tensorboard",
+#     batch_size=8,
+#     epochs=3,
+#     lr=1e-5,
+#     optimizer="adamw_torch",
+#     scheduler="linear",
+#     gradient_accumulation=4,
+#     warmup_steps=500,
+#     max_steps=2000,
+#     per_device_train_batch_size=8,
+#     per_device_eval_batch_size=8,
+#     eval_strategy="steps",
+#     save_steps=1000,
+#     eval_steps=1000,
+#     logging_steps=25,
+#     load_best_model_at_end=True,
+#     metric_for_best_model="wer",
+#     greater_is_better=False,
+#     group_by_length=True,
+#     fp16=True,
+#     gradient_checkpointing=True,
+#     save_total_limit=3,
+# ).model_dump()
 
 
 @dataclass
