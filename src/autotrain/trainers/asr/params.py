@@ -4,7 +4,7 @@ from typing import Optional
 from autotrain.trainers.common import BaseParams
 
 @dataclass
-class ASRParams(BaseParams):
+class ASRParams(AutoTrainParams):
     """
     Parameters for Automatic Speech Recognition tasks.
     
