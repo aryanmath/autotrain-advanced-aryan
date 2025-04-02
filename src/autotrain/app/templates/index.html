@@ -98,8 +98,8 @@
                     fieldNames = ['context', 'question', 'answers'];
                     break;
                 case 'asr':
-                    fields = ['audio', 'text'];
-                    fieldNames = ['audio', 'text'];
+                    fields = ['audio_path' ,'audio', 'text'];
+                    fieldNames = ['audio_path','audio', 'text'];
                     break;
                 default:
                     return; // Do nothing if task is not recognized
