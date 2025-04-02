@@ -479,6 +479,32 @@ class AutoTrainImageRegressionDataset:
 
 @dataclass
 class AutoTrainASRDataset:
+    """
+    AutoTrainASRDataset is a class designed for handling Automatic Speech Recognition (ASR) datasets in the AutoTrain framework.
+
+    Attributes:
+        train_data (str): Path to the training data.
+        token (str): Authentication token.
+        project_name (str): Name of the project.
+        username (str): Username of the project owner.
+        valid_data (Optional[str]): Path to the validation data. Default is None.
+        percent_valid (Optional[float]): Percentage of training data to be used for validation if valid_data is not provided. Default is None.
+        local (bool): Flag indicating if the data is local. Default is False.
+        task (str): Task type. Default is "asr".
+        audio_column (str): Name of the column containing audio data. Default is "audio".
+        text_column (str): Name of the column containing text data. Default is "text".
+        audio_path (str): Name of the column containing audio file paths. Default is "audio_path".
+        audio_format (str): Audio file format. Default is "wav".
+        sampling_rate (int): Sampling rate of the audio data. Default is 16000.
+        text_column (str): Name of the column containing text data. Default is "text".
+
+    Methods:
+        __str__(): Returns a string representation of the dataset.
+
+    Raises:
+        ValueError: If both valid_data and percent_valid are provided.
+    """ 
+    
     train_data: str
     token: str  
     project_name: str
