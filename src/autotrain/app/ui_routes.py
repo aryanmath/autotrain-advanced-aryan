@@ -610,6 +610,17 @@ async def handle_form(
                 percent_valid=None,  # TODO: add to UI
                 local=hardware.lower() == "local-ui",
             )
+        elif task in "asr":
+            dset = AutoTrainASRDataset(
+                train_data=training_files[0],
+                token=token,
+                project_name=project_name,
+                username=autotrain_user,
+                valid_data=validation_files[0] if validation_files else None,
+                percent_valid=None,  # TODO: add to UI
+                local=hardware.lower() == "local-ui",
+            )
+
         elif task.startswith("vlm:"):
             dset = AutoTrainVLMDataset(
                 train_data=training_files[0],
@@ -651,6 +662,8 @@ async def handle_form(
                     raise NotImplementedError
             elif task == "token-classification":
                 dset_task = "text_token_classification"
+            elif task == "asr":
+                dset_task = "automatic_speech_recognition"
             elif task == "extractive-qa":
                 dset_task = "text_extractive_question_answering"
             else:

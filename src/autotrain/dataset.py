@@ -624,6 +624,8 @@ class AutoTrainDataset:
                 convert_to_class_label=self.convert_to_class_label,
             )
             return preprocessor.prepare()
+        
+
 
         elif self.task == "text_single_column_regression":
             text_column = self.column_mapping["text"]
@@ -719,6 +721,7 @@ class AutoTrainDataset:
                 local=self.local,
             )
             return preprocessor.prepare()
+        
 
         elif self.task == "tabular_binary_classification":
             id_column = self.column_mapping["id"]
@@ -810,5 +813,8 @@ class AutoTrainDataset:
                 local=self.local,
             )
             return preprocessor.prepare()
+        
+        
+
         else:
             raise ValueError(f"Task {self.task} not supported")
