@@ -227,6 +227,7 @@ class ObjectDetectionColumnMapping(BaseModel):
 
 
 class ASRColumnMapping(BaseModel):
+    audio_path_column: str
     audio_column: str
     text_column: str
 
@@ -547,6 +548,8 @@ class APICreateProjectModel(BaseModel):
         elif values.get("task") == "asr":
             if not values.get("column_mapping"):
                 raise ValueError("column_mapping is required for asr")
+            if not values.get("column_mapping").get("audio_path_column"):
+                raise ValueError("audio_path_column is required for asr")
             if not values.get("column_mapping").get("audio_column"):
                 raise ValueError("audio_column is required for asr")
             if not values.get("column_mapping").get("text_column"):
