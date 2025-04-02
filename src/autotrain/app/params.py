@@ -27,6 +27,7 @@ HIDDEN_PARAMS = [
     "valid_split",
     "text_column",
     "image_column",
+    "audio_path_column",
     "audio_column",
     "rejected_text_column",
     "prompt_text_column",
@@ -380,11 +381,13 @@ class AppParams:
         if "log" not in _params:
             _params["log"] = "tensorboard"
         if not self.using_hub_dataset:
+            _params["audio_path"] = "autotrain_audio_path"
             _params["audio_column"] = "autotrain_audio"
             _params["text_column"] = "autotrain_text"
             _params["valid_split"] = "validation"
         else:
             _params["audio_column"] = self.column_mapping.get("audio" if not self.api else "audio_column", "audio")
+            _params["audio_path"] = self.column_mapping.get("audio_path" if not self.api else "audio_path_column", "audio_path")
             _params["text_column"] = self.column_mapping.get("text" if not self.api else "text_column", "text")
             _params["train_split"] = self.train_split
             _params["valid_split"] = self.valid_split
