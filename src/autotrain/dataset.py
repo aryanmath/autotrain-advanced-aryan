@@ -475,6 +475,10 @@ class AutoTrainImageRegressionDataset:
             local=self.local,
         )
         return preprocessor.prepare()
+    
+
+@dataclass
+class 
 
 
 @dataclass
@@ -814,7 +818,7 @@ class AutoTrainDataset:
             )
             return preprocessor.prepare()
         
-        
+
 
         else:
             raise ValueError(f"Task {self.task} not supported")
