@@ -23,6 +23,7 @@ from autotrain.dataset import (
     AutoTrainImageRegressionDataset,
     AutoTrainObjectDetectionDataset,
     AutoTrainVLMDataset,
+    AutoTrainASRDataset,
 )
 from autotrain.help import get_app_help
 from autotrain.project import AutoTrainProject
@@ -610,6 +611,7 @@ async def handle_form(
                 percent_valid=None,  # TODO: add to UI
                 local=hardware.lower() == "local-ui",
             )
+            
         elif task in "asr":
             dset = AutoTrainASRDataset(
                 train_data=training_files[0],
