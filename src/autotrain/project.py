@@ -18,6 +18,7 @@ from autotrain.dataset import (
     AutoTrainImageRegressionDataset,
     AutoTrainObjectDetectionDataset,
     AutoTrainVLMDataset,
+    AutoTrainASRDataset,
 )
 from autotrain.trainers.clm.params import LLMTrainingParams
 from autotrain.trainers.extractive_question_answering.params import ExtractiveQuestionAnsweringParams
@@ -31,6 +32,7 @@ from autotrain.trainers.text_classification.params import TextClassificationPara
 from autotrain.trainers.text_regression.params import TextRegressionParams
 from autotrain.trainers.token_classification.params import TokenClassificationParams
 from autotrain.trainers.vlm.params import VLMTrainingParams
+from autotrain.trainers.asr.params import ASRParams
 
 
 def tabular_munge_data(params, local):
@@ -84,6 +86,7 @@ def tabular_munge_data(params, local):
         else:
             params.target_columns = [f"autotrain_label_{i}" for i in range(len(col_map_label))]
     return params
+
 
 
 def llm_munge_data(params, local):

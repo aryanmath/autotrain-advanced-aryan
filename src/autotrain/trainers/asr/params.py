@@ -99,6 +99,7 @@ class ASRParams(AutoTrainParams):
     data_path: str = Field("", title="Data path")
     train_split: str = Field("train", title="Train split")
     valid_split: Optional[str] = Field("validation", title="Validation split")
+    audio_path_column: str = Field("audio_path", title="Audio path column")
     audio_column: str = Field("audio", title="Audio column")
     text_column: str = Field("transcription", title="Text column")
     epochs: int = Field(3, title="Number of training epochs")
@@ -124,6 +125,9 @@ class ASRParams(AutoTrainParams):
     gradient_checkpointing: bool = Field(True, title="Gradient checkpointing")
     save_total_limit: int = Field(3, title="Save total limit")
     log: str = Field("tensorboard", title="Log")
+
+    class Config:
+        arbitrary_types_allowed = True
 
 # from typing import Optional
 # from pydantic import Field
