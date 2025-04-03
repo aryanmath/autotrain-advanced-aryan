@@ -167,7 +167,7 @@ DEFAULT_COLUMN_MAPPING["extractive-qa"] = {
     "text_column": "context",
     "question_column": "question",
     "answer_column": "answers"}
-DEFAULT_COLUMN_MAPPING["asr"] = {"audio_column": "audio", "text_column": "sentence"}
+DEFAULT_COLUMN_MAPPING["asr"] = {"audio_column": "path", "text_column": "sentence"}
 VALID_TASKS = [k for k in DEFAULT_COLUMN_MAPPING.keys()]
 
 
