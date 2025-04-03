@@ -17,6 +17,7 @@ from autotrain.trainers.text_classification.params import TextClassificationPara
 from autotrain.trainers.text_regression.params import TextRegressionParams
 from autotrain.trainers.token_classification.params import TokenClassificationParams
 from autotrain.trainers.vlm.params import VLMTrainingParams
+from autotrain.trainers.asr.params import ASRParams
 
 
 CPU_COMMAND = [
@@ -114,6 +115,7 @@ def launch_command(params):
             - ImageRegressionParams
             - Seq2SeqParams
             - VLMTrainingParams
+            - ASRParams
 
     Returns:
         list: A list of command line arguments to be executed for training.
