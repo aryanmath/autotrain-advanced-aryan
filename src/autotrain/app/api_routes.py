@@ -227,7 +227,6 @@ class ObjectDetectionColumnMapping(BaseModel):
 
 
 class ASRColumnMapping(BaseModel):
-    audio_path_column: str
     audio_column: str
     text_column: str
 
