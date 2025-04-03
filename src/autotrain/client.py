@@ -110,6 +110,9 @@ PARAMS["extractive-qa"] = {
 PARAMS["asr"] = {
     "mixed_precision": "fp16",
     "log": "tensorboard",
+    "gradient_accumulation": 1,
+    "epochs": 3,
+    "max_seq_length": 16000,
 }
 
 
@@ -165,7 +168,6 @@ DEFAULT_COLUMN_MAPPING["extractive-qa"] = {
     "question_column": "question",
     "answer_column": "answers"}
 DEFAULT_COLUMN_MAPPING["asr"] = {"audio_column": "audio", "text_column": "sentence"}
-
 VALID_TASKS = [k for k in DEFAULT_COLUMN_MAPPING.keys()]
 
 

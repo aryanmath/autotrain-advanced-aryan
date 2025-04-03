@@ -5,13 +5,12 @@ log: tensorboard
 backend: local
 
 data:
-  path: data/ # Path to the directory containing the train and valid files
-  train_split: train # This must be either train.csv or train.json
-  valid_split: valid # This must be either valid.csv or valid.json
+  path: data/
+  train_split: train
+  valid_split: valid
   column_mapping:
-    audio_column: path
-    text_column: sentence
-
+    audio_column: path      # Matches your dataset
+    text_column: sentence   # Matches your dataset
 params:
   epochs: 10
   batch_size: 16
