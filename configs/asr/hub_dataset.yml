@@ -10,9 +10,8 @@ data:
   train_split: train.100 # Name of the training split
   valid_split: validation # Name of the validation split
   column_mapping:
-    audio_path_column: audio_path # Name of the column containing the audio file paths
-    audio_column: audio
-    text_column: sentence # Name of the column containing the transcriptions
+    audio: path
+    text: sentence
 params:
   epochs: 10
   batch_size: 16
