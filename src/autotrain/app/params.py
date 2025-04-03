@@ -145,6 +145,9 @@ PARAMS["extractive-qa"] = ExtractiveQuestionAnsweringParams(
 PARAMS["asr"] = ASRParams(
     mixed_precision="fp16",
     log="tensorboard",
+    gradient_accumulation=1,
+    epochs=3,
+    max_seq_length=16000,
 ).model_dump()
 
 # PARAMS["asr"] = ASRParams(
@@ -375,23 +378,43 @@ class AppParams:
     
 
 
+    # def _munge_params_asr(self):
+    #     _params = self._munge_common_params()
+    #     _params["model"] = self.base_model
+    #     if "log" not in _params:
+    #         _params["log"] = "tensorboard"
+    #     if not self.using_hub_dataset:
+    #         _params["audio_path"] = "autotrain_audio_path"
+    #         _params["audio_column"] = "autotrain_audio"
+    #         _params["text_column"] = "autotrain_text"
+    #         _params["valid_split"] = "validation"
+    #     else:
+    #         _params["audio_column"] = self.column_mapping.get("audio" if not self.api else "audio_column", "audio")
+    #         _params["text_column"] = self.column_mapping.get("sentence" if not self.api else "text_column", "sentence")
+    #         _params["train_split"] = self.train_split
+    #         _params["valid_split"] = self.valid_split
+    #     return ASRParams(**_params)
+
     def _munge_params_asr(self):
         _params = self._munge_common_params()
         _params["model"] = self.base_model
         if "log" not in _params:
             _params["log"] = "tensorboard"
+    
+        _params["audio_column"] = self.column_mapping.get("audio_column", "path")
+        _params["text_column"] = self.column_mapping.get("text_column", "sentence")
+
+        if "sampling_rate" not in _params:  # Optional
+            _params["sampling_rate"] = 16000
+    
         if not self.using_hub_dataset:
             _params["audio_path"] = "autotrain_audio_path"
-            _params["audio_column"] = "autotrain_audio"
-            _params["text_column"] = "autotrain_text"
-            _params["valid_split"] = "validation"
+            _params["valid_split"] = self.valid_split if self.valid_split else "validation"
         else:
-            _params["audio_column"] = self.column_mapping.get("audio" if not self.api else "audio_column", "audio")
-            _params["text_column"] = self.column_mapping.get("sentence" if not self.api else "text_column", "sentence")
             _params["train_split"] = self.train_split
             _params["valid_split"] = self.valid_split
+    
         return ASRParams(**_params)
-
 
     # def _munge_params_asr(self):
     #     _params = self._munge_common_params()
@@ -817,24 +840,11 @@ def get_task_params(task, param_type):
         
     if task == "asr" and param_type == "basic":
         more_hidden_params = [
-            "optimizer",
-            "scheduler",
-            "gradient_accumulation",
-            "warmup_steps",
-            "max_steps",
-            "per_device_train_batch_size",
-            "per_device_eval_batch_size",
-            "eval_strategy",
-            "save_steps",
-            "eval_steps",
-            "logging_steps",
-            "load_best_model_at_end",
-            "metric_for_best_model",
-            "greater_is_better",
-            "group_by_length",
-            "fp16",
-            "gradient_checkpointing",
-            "save_total_limit"
+            "optimizer", "scheduler", "gradient_accumulation", "warmup_steps", "max_steps",
+            "per_device_train_batch_size", "per_device_eval_batch_size", "eval_strategy",
+            "save_steps", "eval_steps", "logging_steps", "load_best_model_at_end",
+            "metric_for_best_model", "greater_is_better", "group_by_length", "fp16",
+            "gradient_checkpointing", "save_total_limit", "sampling_rate"  # Optional
         ]
         task_params = {k: v for k, v in task_params.items() if k not in more_hidden_params}
 
