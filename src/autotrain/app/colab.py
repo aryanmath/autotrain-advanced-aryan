@@ -301,7 +301,7 @@ def colab_app():
             dataset_source_dropdown.disabled = False
             valid_split.disabled = False
         elif task == "asr":
-            col_mapping.value = '{"audio": "audio", "text": "sentence"}'
+            col_mapping.value = '{"audio": "path", "text": "sentence"}'
             dataset_source_dropdown.disabled = False
             valid_split.disabled = False
         else:
