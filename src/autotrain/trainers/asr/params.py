@@ -99,7 +99,7 @@ class ASRParams(AutoTrainParams):
     data_path: str = Field("", title="Data path")
     train_split: str = Field("train", title="Train split")
     valid_split: Optional[str] = Field("validation", title="Validation split")
-    audio_column: str = Field("audio", title="Audio column")
+    audio_column: str = Field("path", title="Audio column")
     text_column: str = Field("sentence", title="Text column")
     epochs: int = Field(3, title="Number of training epochs")
     batch_size: int = Field(8, title="Batch size")
