@@ -9,8 +9,8 @@ data:
   train_split: train # This must be either train.csv or train.json
   valid_split: valid # This must be either valid.csv or valid.json
   column_mapping:
-    audio: path
-    text: sentence
+    audio_column: path
+    text_column: sentence
 
 params:
   epochs: 10
