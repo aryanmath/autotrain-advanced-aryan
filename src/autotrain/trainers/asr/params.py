@@ -89,8 +89,8 @@ class ASRParams(AutoTrainParams):
     """
     Parameters for Automatic Speech Recognition tasks.
     """
-    task: str = Field("automatic-speech-recognition", title="Task")
-    base_model: str = Field("facebook/wav2vec2-large-960h", title="Base model")
+    task: str = Field("asr", title="Task")
+    base_model: str = Field("facebook/wav2vec2-base-960h", title="Base model")
     project_name: str = Field("autotrain-asr", title="Project name")
     backend: str = Field("local", title="Backend")
     push_to_hub: bool = Field(True, title="Push to hub")
@@ -101,6 +101,7 @@ class ASRParams(AutoTrainParams):
     valid_split: Optional[str] = Field("validation", title="Validation split")
     audio_column: str = Field("path", title="Audio column")
     text_column: str = Field("sentence", title="Text column")
+    sampling_rate: int = Field(16000, title="Sampling rate")
     epochs: int = Field(3, title="Number of training epochs")
     batch_size: int = Field(8, title="Batch size")
     lr: float = Field(1e-5, title="Learning rate")
