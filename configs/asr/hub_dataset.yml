@@ -1,11 +1,12 @@
-task: automatic-speech-recognition
+# task: automatic-speech-recognition
+task: asr
 base_model: facebook/wav2vec2-base-960h
 project_name: autotrain-asr-project
 log: tensorboard
 backend: local 
 
 data:
-  dataset_name: librispeech_asr
+  dataset_name: Prajwal-143/ASR-Tamil-cleaned # Name of the dataset on the Hugging Face Hub
   config_name: clean
   train_split: train.100
   valid_split: validation
@@ -37,8 +38,8 @@ params:
   save_total_limit: 3
 
 hub:
-  username: ${HF_USERNAME}
-  token: ${HF_TOKEN}
+  username: mathur
+  token: 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
   push_to_hub: true
 # base_model: facebook/wav2vec2-base-960h
 # project_name: autotrain-asr-project
