@@ -387,8 +387,7 @@ class AppParams:
             _params["valid_split"] = "validation"
         else:
             _params["audio_column"] = self.column_mapping.get("audio" if not self.api else "audio_column", "audio")
-            _params["audio_path"] = self.column_mapping.get("audio_path" if not self.api else "audio_path_column", "audio_path")
-            _params["text_column"] = self.column_mapping.get("text" if not self.api else "text_column", "text")
+            _params["text_column"] = self.column_mapping.get("sentence" if not self.api else "text_column", "sentence")
             _params["train_split"] = self.train_split
             _params["valid_split"] = self.valid_split
         return ASRParams(**_params)
