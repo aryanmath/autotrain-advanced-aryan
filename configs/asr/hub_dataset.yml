@@ -38,8 +38,8 @@ params:
   save_total_limit: 3
 
 hub:
-  username: mathur
-  token: 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
+  username: ${HF_USERNAME}
+  token: ${HF_TOKEN}
   push_to_hub: true
 # base_model: facebook/wav2vec2-base-960h
 # project_name: autotrain-asr-project
