@@ -1,4 +1,4 @@
-task: automatic-speech-recognition
+task: asr
 base_model: facebook/wav2vec2-base-960h
 project_name: autotrain-asr-project
 log: tensorboard
