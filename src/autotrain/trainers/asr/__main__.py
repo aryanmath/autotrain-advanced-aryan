@@ -5,13 +5,10 @@ import json
 import os
 
 import evaluate
-import numpy as np
 import torch
 from datasets import load_dataset
 from transformers import (
-    AutoFeatureExtractor,
     AutoModelForCTC,
-    AutoTokenizer,
     Trainer,
     TrainingArguments,
 )
@@ -19,6 +16,13 @@ from transformers import (
 from autotrain import logger
 from autotrain.dataset import AutoTrainASRDataset
 from autotrain.trainers.asr.params import ASRParams
+from autotrain.trainers.asr.utils import (
+    ASRDataCollator,
+    preprocess_audio_dataset,
+    compute_metrics,
+    load_asr_components,
+    save_to_hub,
+)
 from autotrain.trainers.common import monitor, set_seed
 
 
@@ -31,20 +35,6 @@ def parse_args():
         help="Path to the training configuration JSON file",
     )
     return parser.parse_args()
-
-
-def compute_metrics(eval_pred, processor, metric):
-    predictions, labels = eval_pred
-    # Predictions are logits, take argmax to get token IDs
-    predictions = np.argmax(predictions, axis=-1)
-    # Decode predictions and labels using the processor
-    decoded_preds = processor.batch_decode(predictions)
-    # Replace -100 (padding token) with processor.tokenizer.pad_token_id
-    labels = np.where(labels != -100, labels, processor.tokenizer.pad_token_id)
-    decoded_labels = processor.batch_decode(labels)
-    # Compute WER (Word Error Rate)
-    result = metric.compute(predictions=decoded_preds, references=decoded_labels)
-    return {"wer": result}
 
 
 @monitor
@@ -78,43 +68,24 @@ def train(config):
         eval_dataset = None  # Validation split handled elsewhere if needed
 
     # Load feature extractor and tokenizer
-    logger.info("Loading feature extractor and tokenizer...")
-    feature_extractor = AutoFeatureExtractor.from_pretrained(params.model)
-    tokenizer = AutoTokenizer.from_pretrained(params.model)
+    feature_extractor, tokenizer = load_asr_components(params.model)
 
     # Preprocess dataset
-    def preprocess_function(examples):
-        audio = examples[params.audio_column]
-        target_text = examples[params.text_column]
-
-        # Process audio
-        inputs = feature_extractor(
-            audio["array"],
-            sampling_rate=audio["sampling_rate"],
-            return_tensors="pt",
-            padding=True,
-        ).input_values[0]
-
-        # Tokenize target text
-        with tokenizer.as_target_tokenizer():
-            labels = tokenizer(target_text, return_tensors="pt", padding=True).input_ids[0]
-
-        return {
-            "input_values": inputs,
-            "labels": labels,
-        }
-
     logger.info("Preprocessing dataset...")
-    dataset = dataset.map(
-        preprocess_function,
-        remove_columns=dataset.column_names,
-        desc="Preprocessing training data",
+    dataset = preprocess_audio_dataset(
+        dataset,
+        feature_extractor,
+        tokenizer,
+        audio_column=params.audio_column,
+        text_column=params.text_column,
     )
     if eval_dataset:
-        eval_dataset = eval_dataset.map(
-            preprocess_function,
-            remove_columns=eval_dataset.column_names,
-            desc="Preprocessing validation data",
+        eval_dataset = preprocess_audio_dataset(
+            eval_dataset,
+            feature_extractor,
+            tokenizer,
+            audio_column=params.audio_column,
+            text_column=params.text_column,
         )
 
     # Load model
@@ -129,8 +100,8 @@ def train(config):
     training_args = TrainingArguments(
         output_dir=params.project_name,
         num_train_epochs=params.epochs,
-        per_device_train_batch_size=params.batch_size,
-        per_device_eval_batch_size=params.batch_size,
+        per_device_train_batch_size=params.per_device_train_batch_size,
+        per_device_eval_batch_size=params.per_device_eval_batch_size,
         gradient_accumulation_steps=params.gradient_accumulation,
         learning_rate=params.lr,
         warmup_steps=params.warmup_steps,
@@ -146,13 +117,22 @@ def train(config):
         fp16=params.fp16 if torch.cuda.is_available() else False,
         gradient_checkpointing=params.gradient_checkpointing,
         save_total_limit=params.save_total_limit,
-        push_to_hub=False,  # Handled separately if needed
-        report_to=["tensorboard"],
+        push_to_hub=False,  # Handled separately via save_to_hub
+        report_to=[params.log],
         disable_tqdm=False,
     )
 
     # Load WER metric
     wer_metric = evaluate.load("wer")
+
+    # Initialize data collator
+    data_collator = ASRDataCollator(
+        feature_extractor=feature_extractor,
+        tokenizer=tokenizer,
+        padding=True,
+        max_length=None,
+        pad_to_multiple_of=None,
+    )
 
     # Initialize trainer
     trainer = Trainer(
@@ -161,6 +141,7 @@ def train(config):
         train_dataset=dataset,
         eval_dataset=eval_dataset,
         tokenizer=feature_extractor,  # Feature extractor acts as tokenizer for inputs
+        data_collator=data_collator,
         compute_metrics=lambda eval_pred: compute_metrics(eval_pred, tokenizer, wer_metric),
     )
 
@@ -175,13 +156,16 @@ def train(config):
     tokenizer.save_pretrained(params.project_name)
 
     # Push to hub if configured
-    if params.username and params.token:
+    if params.push_to_hub and params.username and params.token:
         logger.info("Pushing to Hugging Face Hub...")
-        trainer.push_to_hub(
-            repo_id=f"{params.username}/{params.project_name}",
-            token=params.token,
+        save_to_hub(
+            model=trainer.model,
+            feature_extractor=feature_extractor,
+            tokenizer=tokenizer,
+            hub_username=params.username,
+            hub_token=params.token,
+            project_name=params.project_name,
         )
-
 
 if __name__ == "__main__":
     args = parse_args()
