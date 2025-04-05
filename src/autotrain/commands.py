@@ -357,6 +357,29 @@ def launch_command(params):
                     os.path.join(params.project_name, "training_params.json"),
                 ]
             )
+
+    
+
+    elif isinstance(params, ASRParams):
+        distributed_backend = getattr(params, "distributed_backend", None)
+        cmd = get_accelerate_command(num_gpus, params.gradient_accumulation, distributed_backend)
+        if num_gpus > 0:
+            cmd.append("--mixed_precision")
+            if params.mixed_precision == "fp16":
+                cmd.append("fp16")
+            elif params.mixed_precision == "bf16":
+                cmd.append("bf16")
+            else:
+                cmd.append("no")
+        cmd.extend(
+            [
+                "-m",
+                "autotrain.trainers.asr",
+                "--training_config",
+                os.path.join(params.project_name, "training_params.json"),
+            ]
+        )
+
     elif isinstance(params, Seq2SeqParams):
         if num_gpus == 0:
             logger.warning("No GPU found. Forcing training on CPU. This will be super slow!")
