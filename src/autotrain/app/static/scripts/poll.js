@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     }
 
     setInterval(pollAccelerators, 10000);
-    setInterval(pollModelTrainingStatus, 5000);
+    setInterval(pollModelTrainingStatus,40000);
     pollAccelerators();
     pollModelTrainingStatus();
 });
