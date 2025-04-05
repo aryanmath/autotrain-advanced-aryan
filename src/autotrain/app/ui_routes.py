@@ -289,6 +289,64 @@ UI_PARAMS = {
         "label": "Distributed backend",
         "options": ["ddp", "deepspeed"],
     },
+    "sampling_rate": {
+        "type": "number",
+        "label": "Sampling Rate",
+    },
+    "warmup_steps": {
+        "type": "number",
+        "label": "Warmup Steps",
+    },
+    "max_steps": {
+        "type": "number",
+        "label": "Max Steps",
+    },
+    "per_device_train_batch_size": {
+        "type": "number",
+        "label": "Per Device Train Batch Size",
+    },
+    "per_device_eval_batch_size": {
+        "type": "number",
+        "label": "Per Device Eval Batch Size",
+    },
+    "save_steps": {
+        "type": "number",
+        "label": "Save Steps",
+    },
+    "eval_steps": {
+        "type": "number",
+        "label": "Evaluation Steps",
+    },
+    "load_best_model_at_end": {
+        "type": "dropdown",
+        "label": "Load Best Model at End",
+        "options": [True, False],
+    },
+    "metric_for_best_model": {
+        "type": "dropdown",
+        "label": "Metric for Best Model",
+        "options": ["wer"],  # Add more metrics if needed (e.g., "cer")
+    },
+    "greater_is_better": {
+        "type": "dropdown",
+        "label": "Greater is Better",
+        "options": [True, False],
+    },
+    "group_by_length": {
+        "type": "dropdown",
+        "label": "Group by Length",
+        "options": [True, False],
+    },
+    "fp16": {
+        "type": "dropdown",
+        "label": "FP16",
+        "options": [True, False],
+    },
+    "gradient_checkpointing": {
+        "type": "dropdown",
+        "label": "Gradient Checkpointing",
+        "options": [True, False],
+    },
 }
 
 
@@ -611,7 +669,7 @@ async def handle_form(
                 percent_valid=None,  # TODO: add to UI
                 local=hardware.lower() == "local-ui",
             )
-            
+
         elif task in "asr":
             dset = AutoTrainASRDataset(
                 train_data=training_files[0],
