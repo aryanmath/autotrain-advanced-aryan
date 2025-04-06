@@ -300,7 +300,7 @@ class APICreateProjectModel(BaseModel):
         "spaces-l40sx8",
         "spaces-a10g-largex2",
         "spaces-a10g-largex4",
-        # "local",
+        "local",
     ]
     params: Union[
         LLMSFTTrainingParamsAPI,
