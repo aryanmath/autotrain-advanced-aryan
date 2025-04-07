@@ -795,7 +795,7 @@ async def available_accelerators(authenticated: bool = Depends(user_authenticati
     This function is used to fetch the number of available accelerators
     :return: JSONResponse
     """
-    print("hello i m here bro")
+    print("hello i m here bro",response_class=JSONResponse)
     if AUTOTRAIN_LOCAL == 0:
         return {"accelerators": "Not available in cloud mode."}
     cuda_available = torch.cuda.is_available()
