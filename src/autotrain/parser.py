@@ -19,6 +19,7 @@ from autotrain.project import (
     text_reg_munge_data,
     token_clf_munge_data,
     vlm_munge_data,
+    asr_munge_data
 )
 from autotrain.tasks import TASKS
 from autotrain.trainers.clm.params import LLMTrainingParams
@@ -104,7 +105,7 @@ class AutoTrainConfigParser:
             "image_single_column_regression": img_reg_munge_data,
             "vlm": vlm_munge_data,
             "text_extractive_question_answering": ext_qa_munge_data,
-            "asr": ext_qa_munge_data,
+            "asr": asr_munge_data,
         }
         self.task_aliases = {
             "llm": "lm_training",
