@@ -565,8 +565,8 @@ class AutoTrainProject:
             return img_clf_munge_data(self.params, self.local)
         elif isinstance(self.params, ImageRegressionParams):
             return img_reg_munge_data(self.params, self.local)
-        # elif isinstance(self.params, ASRParams):
-        #     return asr_munge_data(self.params, self.local)
+        elif isinstance(self.params, ASRParams):
+            return asr_munge_data(self.params, self.local)
         elif isinstance(self.params, ObjectDetectionParams):
             return img_obj_detect_munge_data(self.params, self.local)
         elif isinstance(self.params, SentenceTransformersParams):
