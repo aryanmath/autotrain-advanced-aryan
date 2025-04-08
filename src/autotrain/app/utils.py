@@ -21,7 +21,7 @@ def run_training(params, task_id, local=False, wait=False):
     Returns:
         int or None: The process ID if running locally and not waiting, otherwise None.
     """
-    if task_id == "asr":
+    if task_id == "32":
         # Convert params to dict if necessary
         if not isinstance(params, dict):
             params = params.dict() if hasattr(params, "dict") else vars(params)
