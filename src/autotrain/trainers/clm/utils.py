@@ -484,7 +484,7 @@ def process_input_data(config):
             - valid_data (Dataset or None): Processed validation dataset if valid_split is provided, otherwise None.
     """
     if config.data_path == f"{config.project_name}/autotrain-data":
-        logger.info("loading dataset from disk")
+        logger.info("loading dataset from disk", config.data_path)
         train_data = load_from_disk(config.data_path)[config.train_split]
     else:
         if ":" in config.train_split:

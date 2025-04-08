@@ -147,7 +147,6 @@ def post_process_predictions(predictions, tokenizer):
     decoded_preds = tokenizer.batch_decode(predictions, skip_special_tokens=True)
     return [pred.strip() for pred in decoded_preds]
 
-from autotrain.trainers.asr.__main__ import train as asr_train
 
 def run_training(params, task_id, local=False, wait=False):
     if task_id == "asr":
