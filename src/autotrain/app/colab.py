@@ -42,7 +42,7 @@ def colab_app():
         "ST Pair Scoring",
         "ST Triplet",
         "ST Question Answering",
-        "Automtic Speech Recognition",
+        "Automatic Speech Recognition",
     ]
 
     TASK_MAP = {
@@ -65,7 +65,7 @@ def colab_app():
         "ST Pair Scoring": "st:pair_score",
         "ST Triplet": "st:triplet",
         "ST Question Answering": "st:qa",
-        "Automtic Speech Recognition": "st:asr",
+        "Automatic Speech Recognition": "st:asr",
     }
 
     def _get_params(task, param_type):
