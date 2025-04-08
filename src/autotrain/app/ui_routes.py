@@ -347,6 +347,21 @@ UI_PARAMS = {
         "label": "Gradient Checkpointing",
         "options": [True, False],
     },
+    "audio_column": {
+        "type": "string",
+        "label": "Audio Column",
+        "default": "path",
+    },
+    "text_column": {
+        "type": "string",
+        "label": "Text Column",
+        "default": "sentence",
+    },
+    "sampling_rate": {
+        "type": "number",
+        "label": "Sampling Rate",
+        "default": 16000,
+    },
 }
 
 
