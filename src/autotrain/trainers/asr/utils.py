@@ -64,7 +64,7 @@ def preprocess_audio_dataset(dataset, feature_extractor, tokenizer, audio_column
         audio_inputs = feature_extractor(
             [audio["array"] for audio in examples[audio_column]],
             sampling_rate=feature_extractor.sampling_rate,
-            return_tensors="np",
+            return_tensors="pt",
             padding=True,
         ).input_values
 
@@ -75,7 +75,7 @@ def preprocess_audio_dataset(dataset, feature_extractor, tokenizer, audio_column
                 truncation=True,
                 padding="max_length",
                 max_length=tokenizer.model_max_length,
-                return_tensors="np",
+                return_tensors="pt",
             ).input_ids
 
         return {
@@ -146,3 +146,23 @@ def post_process_predictions(predictions, tokenizer):
     """
     decoded_preds = tokenizer.batch_decode(predictions, skip_special_tokens=True)
     return [pred.strip() for pred in decoded_preds]
+
+from autotrain.trainers.asr.__main__ import train as asr_train
+
+def run_training(params, task_id, local=False, wait=False):
+    if task_id == "asr":
+        # Convert params to dict if it's an object (e.g., ASRParams)
+        if hasattr(params, "dict"):
+            params = params.dict()
+        # Call the ASR training function
+        asr_train(params)
+        if local and not wait:
+            import os
+            return os.getpid()  # Return process ID for local training
+        return None
+    elif task_id == "text_classification":
+        # Existing logic for other tasks
+        from autotrain.trainers.text_classification import train
+        train(params)
+    else:
+        raise NotImplementedError
