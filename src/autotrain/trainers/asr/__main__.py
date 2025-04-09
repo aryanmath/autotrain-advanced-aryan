@@ -1,176 +1,128 @@
-#!/usr/bin/env python
-
 import argparse
 import json
-import os
+from functools import partial
 
-import evaluate
-import torch
-from datasets import load_dataset
+from accelerate.state import PartialState
+from datasets import load_dataset, load_from_disk
+from huggingface_hub import HfApi
 from transformers import (
+    AutoConfig,
     AutoModelForCTC,
+    AutoProcessor,
     Trainer,
     TrainingArguments,
+    EarlyStoppingCallback,
 )
+from transformers.trainer_callback import PrinterCallback
 
 from autotrain import logger
-from autotrain.dataset import AutoTrainASRDataset
-from autotrain.trainers.asr.params import ASRParams
-from autotrain.trainers.asr.utils import (
-    ASRDataCollator,
-    preprocess_audio_dataset,
-    compute_metrics,
-    load_asr_components,
-    save_to_hub,
+from autotrain.trainers.common import (
+    ALLOW_REMOTE_CODE,
+    LossLoggingCallback,
+    TrainStartCallback,
+    UploadLogs,
+    monitor,
+    pause_space,
+    remove_autotrain_data,
+    save_training_params,
 )
-from autotrain.trainers.common import monitor, set_seed
+from autotrain.trainers.asr.dataset import ASRDataset
+from autotrain.trainers.asr.params import ASRParams
+from autotrain.trainers.asr.utils import compute_metrics
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Fine-tune an ASR model with AutoTrain")
-    parser.add_argument(
-        "--training_config",
-        type=str,
-        required=True,
-        help="Path to the training configuration JSON file",
-    )
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--training_config", type=str, required=True)
     return parser.parse_args()
 
 
 @monitor
 def train(config):
-    # Load parameters from config
-    params = ASRParams(**config)
-    set_seed(params.seed)
+    if isinstance(config, dict):
+        config = ASRParams(**config)
 
-    # Load dataset
-    logger.info("Loading dataset...")
-    if params.data_path.startswith("huggingface_hub:"):
-        dataset_path = params.data_path.replace("huggingface_hub:", "")
-        dataset = load_dataset(dataset_path, split=params.train_split)
-        if params.valid_split:
-            eval_dataset = load_dataset(dataset_path, split=params.valid_split)
-        else:
-            eval_dataset = None
+    train_data = None
+    valid_data = None
+
+    if config.data_path == f"{config.project_name}/autotrain-data":
+        train_data = load_from_disk(config.data_path)[config.train_split]
     else:
-        dataset_args = {
-            "train_data": params.data_path,
-            "token": params.token,
-            "project_name": params.project_name,
-            "username": params.username,
-            "valid_data": None,
-            "percent_valid": None,
-            "local": True,
-        }
-        dset = AutoTrainASRDataset(**dataset_args)
-        data_path = dset.prepare()
-        dataset = load_dataset("audiofolder", data_dir=data_path, split="train")
-        eval_dataset = None  # Validation split handled elsewhere if needed
-
-    # Load feature extractor and tokenizer
-    feature_extractor, tokenizer = load_asr_components(params.model)
-
-    # Preprocess dataset
-    logger.info("Preprocessing dataset...")
-    dataset = preprocess_audio_dataset(
-        dataset,
-        feature_extractor,
-        tokenizer,
-        audio_column=params.audio_column,
-        text_column=params.text_column,
-    )
-    if eval_dataset:
-        eval_dataset = preprocess_audio_dataset(
-            eval_dataset,
-            feature_extractor,
-            tokenizer,
-            audio_column=params.audio_column,
-            text_column=params.text_column,
+        train_data = load_dataset(
+            config.data_path,
+            split=config.train_split,
+            token=config.token,
+            trust_remote_code=ALLOW_REMOTE_CODE,
         )
 
-    # Load model
-    logger.info(f"Loading model: {params.model}")
-    model = AutoModelForCTC.from_pretrained(
-        params.model,
-        ctc_loss_reduction="mean",
-        pad_token_id=tokenizer.pad_token_id,
-    )
+    if config.valid_split is not None:
+        valid_data = load_dataset(
+            config.data_path,
+            split=config.valid_split,
+            token=config.token,
+            trust_remote_code=ALLOW_REMOTE_CODE,
+        )
 
-    # Define training arguments
+    processor = AutoProcessor.from_pretrained(config.model, token=config.token, trust_remote_code=ALLOW_REMOTE_CODE)
+    train_data = ASRDataset(data=train_data, processor=processor, config=config)
+    if valid_data:
+        valid_data = ASRDataset(data=valid_data, processor=processor, config=config)
+
     training_args = TrainingArguments(
-        output_dir=params.project_name,
-        num_train_epochs=params.epochs,
-        per_device_train_batch_size=params.per_device_train_batch_size,
-        per_device_eval_batch_size=params.per_device_eval_batch_size,
-        gradient_accumulation_steps=params.gradient_accumulation,
-        learning_rate=params.lr,
-        warmup_steps=params.warmup_steps,
-        max_steps=params.max_steps if params.max_steps > 0 else -1,
-        eval_strategy=params.eval_strategy,
-        save_strategy=params.eval_strategy,
-        save_steps=params.save_steps,
-        eval_steps=params.eval_steps,
-        logging_steps=params.logging_steps,
-        load_best_model_at_end=params.load_best_model_at_end,
-        metric_for_best_model=params.metric_for_best_model,
-        greater_is_better=params.greater_is_better,
-        fp16=params.fp16 if torch.cuda.is_available() else False,
-        gradient_checkpointing=params.gradient_checkpointing,
-        save_total_limit=params.save_total_limit,
-        push_to_hub=False,  # Handled separately via save_to_hub
-        report_to=[params.log],
-        disable_tqdm=False,
+        output_dir=config.project_name,
+        per_device_train_batch_size=config.batch_size,
+        per_device_eval_batch_size=config.batch_size,
+        learning_rate=config.lr,
+        num_train_epochs=config.epochs,
+        evaluation_strategy="steps" if valid_data else "no",
+        save_steps=config.save_steps,
+        eval_steps=config.eval_steps,
+        logging_steps=config.logging_steps,
+        save_total_limit=config.save_total_limit,
+        gradient_accumulation_steps=config.gradient_accumulation,
+        report_to=config.log,
+        push_to_hub=config.push_to_hub,
+        load_best_model_at_end=True if valid_data else False,
     )
 
-    # Load WER metric
-    wer_metric = evaluate.load("wer")
+    model = AutoModelForCTC.from_pretrained(config.model, trust_remote_code=ALLOW_REMOTE_CODE, token=config.token)
 
-    # Initialize data collator
-    data_collator = ASRDataCollator(
-        feature_extractor=feature_extractor,
-        tokenizer=tokenizer,
-        padding=True,
-        max_length=None,
-        pad_to_multiple_of=None,
-    )
+    callbacks = [LossLoggingCallback(), TrainStartCallback(), UploadLogs(config=config)]
+    if valid_data:
+        callbacks.append(
+            EarlyStoppingCallback(
+                early_stopping_patience=config.early_stopping_patience,
+                early_stopping_threshold=config.early_stopping_threshold,
+            )
+        )
 
-    # Initialize trainer
     trainer = Trainer(
         model=model,
         args=training_args,
-        train_dataset=dataset,
-        eval_dataset=eval_dataset,
-        tokenizer=feature_extractor,  # Feature extractor acts as tokenizer for inputs
-        data_collator=data_collator,
-        compute_metrics=lambda eval_pred: compute_metrics(eval_pred, tokenizer, wer_metric),
+        train_dataset=train_data,
+        eval_dataset=valid_data,
+        tokenizer=processor,
+        compute_metrics=compute_metrics,
+        callbacks=callbacks,
     )
 
-    # Train the model
-    logger.info("Starting training...")
     trainer.train()
+    trainer.save_model(config.project_name)
+    processor.save_pretrained(config.project_name)
 
-    # Save the model
-    logger.info("Saving model...")
-    trainer.save_model()
-    feature_extractor.save_pretrained(params.project_name)
-    tokenizer.save_pretrained(params.project_name)
+    if config.push_to_hub:
+        remove_autotrain_data(config)
+        save_training_params(config)
+        api = HfApi(token=config.token)
+        api.create_repo(repo_id=f"{config.username}/{config.project_name}", repo_type="model", private=True)
+        api.upload_folder(folder_path=config.project_name, repo_id=f"{config.username}/{config.project_name}")
 
-    # Push to hub if configured
-    if params.push_to_hub and params.username and params.token:
-        logger.info("Pushing to Hugging Face Hub...")
-        save_to_hub(
-            model=trainer.model,
-            feature_extractor=feature_extractor,
-            tokenizer=tokenizer,
-            hub_username=params.username,
-            hub_token=params.token,
-            project_name=params.project_name,
-        )
+    if PartialState().process_index == 0:
+        pause_space(config)
+
 
 if __name__ == "__main__":
     args = parse_args()
-    if not os.path.exists(args.training_config):
-        raise ValueError(f"Training config file not found: {args.training_config}")
-    with open(args.training_config, "r") as f:
-        config = json.load(f)
+    training_config = json.load(open(args.training_config))
+    config = ASRParams(**training_config)
     train(config)
