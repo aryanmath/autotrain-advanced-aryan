@@ -43,6 +43,7 @@ def colab_app():
         "ST Triplet",
         "ST Question Answering",
         "Automatic Speech Recognition",
+        "asr"
     ]
 
     TASK_MAP = {
