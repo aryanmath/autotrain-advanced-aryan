@@ -20,6 +20,7 @@ from autotrain.cli.run_tools import RunAutoTrainToolsCommand
 from autotrain.parser import AutoTrainConfigParser
 
 
+
 def main():
     parser = argparse.ArgumentParser(
         "AutoTrain advanced CLI",
