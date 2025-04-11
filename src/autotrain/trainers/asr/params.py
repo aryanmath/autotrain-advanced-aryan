@@ -28,6 +28,7 @@ class ASRParams(AutoTrainParams):
     epochs: int = Field(10, title="Number of training epochs")
     batch_size: int = Field(16, title="Batch size for training")
     warmup_steps: int = Field(500, title="Warmup steps")
+    project_name: str = Field("project-name", title="Name of the project for output directory")
     gradient_accumulation: int = Field(2, title="Gradient accumulation steps")
     save_steps: int = Field(500, title="Save steps")
     eval_steps: int = Field(500, title="Evaluation steps")
