@@ -65,7 +65,7 @@ def run_training(params, task_id, local=False, wait=False):
         params = VLMTrainingParams(**params)
     elif task_id == 5:
         params = ExtractiveQuestionAnsweringParams(**params)
-    elif task_id == 32:  # Add this condition for ASR
+    elif task_id == 11:  # Add this condition for ASR
         params = ASRParams(**params)
     else:
         raise NotImplementedError
