@@ -17,6 +17,7 @@ class ASRParams(AutoTrainParams):
         gradient_accumulation (int): Number of steps to accumulate gradients before updating. Default is 2.
         save_steps (int): Number of steps between saving checkpoints. Default is 500.
         eval_steps (int): Number of steps between evaluations. Default is 500.
+        project_name: str = Field("project-name", title="Name of the project for output directory")
         logging_steps (int): Number of steps between logging. Default is 50.
         audio_column (str): Name of the column containing audio data. Default is "audio".
         text_column (str): Name of the column containing text data. Default is "text".
