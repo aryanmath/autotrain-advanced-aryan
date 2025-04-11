@@ -738,7 +738,7 @@ async def handle_form(
             elif task == "token-classification":
                 dset_task = "text_token_classification"
             elif task == "asr":
-                dset_task = "asr"
+                dset_task = "automatic_speech_recognition"
             elif task == "extractive-qa":
                 dset_task = "text_extractive_question_answering"
             else:
