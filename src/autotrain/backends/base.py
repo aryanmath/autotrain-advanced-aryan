@@ -142,7 +142,7 @@ class BaseBackend:
         elif isinstance(self.params, ExtractiveQuestionAnsweringParams):
             self.task_id = 5
         elif isinstance(self.params, ASRParams):
-            self.task_id = 6
+            self.task_id = 11
         else:
             raise NotImplementedError
 
