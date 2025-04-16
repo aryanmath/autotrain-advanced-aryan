@@ -67,7 +67,7 @@ def colab_app():
         "ST Triplet": "st:triplet",
         "ST Question Answering": "st:qa",
         "asr": "asr",
-        "Automatic Speech Recognition": "asr",S
+        # "Automatic Speech Recognition": "asr",
     }
 
     def _get_params(task, param_type):
