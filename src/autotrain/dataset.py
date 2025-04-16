@@ -310,6 +310,7 @@ class AutoTrainVLMDataset:
     valid_data: Optional[str] = None
     percent_valid: Optional[float] = None
     local: bool = False
+    
 
     def __str__(self) -> str:
         info = f"Dataset: {self.project_name} ({self.task})\n"
@@ -505,20 +506,29 @@ class AutoTrainASRDataset:
         ValueError: If both valid_data and percent_valid are provided.
     """ 
     
+    # train_data: str
+    # token: str  
+    # project_name: str
+    # username: str
+    # valid_data: Optional[str] = None
+    # percent_valid: Optional[float] = None
+    # local: bool = False
+    # task: str = "speech_recognition"
+    # audio_column: str = "audio"
+    # text_column: str = "text"
+    # audio_path: str = "audio_path"
+    # audio_format: str = "wav"
+    # sampling_rate: int = 16000
+    # text_column: str = "text"
+    
     train_data: str
-    token: str  
+    token: str
     project_name: str
     username: str
     valid_data: Optional[str] = None
     percent_valid: Optional[float] = None
     local: bool = False
-    task: str = "asr"
-    audio_column: str = "audio"
-    text_column: str = "text"
-    audio_path: str = "audio_path"
-    audio_format: str = "wav"
-    sampling_rate: int = 16000
-    text_column: str = "text"
+    
     def __str__(self) -> str:
         info = f"Dataset: {self.project_name} ({self.task})\n"
         info += f"Train data: {self.train_data}\n"
@@ -909,6 +919,25 @@ class AutoTrainDataset:
                 train_data=self.train_df,
                 id_column=id_column,
                 label_column=label_column,
+                username=self.username,
+                project_name=self.project_name,
+                valid_data=self.valid_df,
+                test_size=self.percent_valid,
+                token=self.token,
+                seed=42,
+                local=self.local,
+            )
+            return preprocessor.prepare()
+        
+        elif self.task == "speech_recognition":
+            if "audio" not in self.column_mapping or "text" not in self.column_mapping:
+                raise ValueError("For speech_recognition task, column_mapping must include 'audio' and 'text'")
+            audio_column = self.column_mapping["audio"]
+            text_column = self.column_mapping["text"]
+            preprocessor = AudioSpeechRecognitionPreprocessor(
+                train_data=self.train_df,
+                audio_column=audio_column,
+                text_column=text_column,
                 username=self.username,
                 project_name=self.project_name,
                 valid_data=self.valid_df,

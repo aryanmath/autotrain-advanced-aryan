@@ -34,4 +34,5 @@ TASKS = {
     **NLP_TASKS,
     **VISION_TASKS,
     **TABULAR_TASKS,
+    **AUDIO_TASKS,
 }
