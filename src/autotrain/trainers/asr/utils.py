@@ -1,5 +1,6 @@
 import numpy as np
 from datasets import load_metric
+import evaluate
 
 
 def compute_metrics(pred):
