@@ -15,8 +15,8 @@ from autotrain.trainers.text_classification.params import TextClassificationPara
 from autotrain.trainers.text_regression.params import TextRegressionParams
 from autotrain.trainers.token_classification.params import TokenClassificationParams
 from autotrain.trainers.vlm.params import VLMTrainingParams
-from autotrain.trainers.asr.params import ASRParams
-
+# from autotrain.trainers.asr.params import ASRParams
+from autotrain.trainers.asr.params import WhisperTrainingParams
 
 AVAILABLE_HARDWARE = {
     # hugging face spaces
@@ -94,7 +94,9 @@ class BaseBackend:
         ImageRegressionParams,
         VLMTrainingParams,
         ExtractiveQuestionAnsweringParams,
-        ASRParams,
+        # ASRParams,
+        WhisperTrainingParams,
+        
     ]
     backend: str
 
@@ -141,8 +143,10 @@ class BaseBackend:
             self.task_id = 31
         elif isinstance(self.params, ExtractiveQuestionAnsweringParams):
             self.task_id = 5
-        elif isinstance(self.params, ASRParams):
+        elif isinstance(self.params, WhisperTrainingParams):
             self.task_id = 11
+        # elif isinstance(self.params, ASRParams):
+        #     self.task_id = 11
         else:
             raise NotImplementedError
 
