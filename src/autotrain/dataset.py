@@ -588,7 +588,7 @@ class AutoTrainASRDataset:
                 username=self.username,
                 local=self.local,
                 audio_column='path',  # Hardcode based on user's dataset
-                text_column='text',   # Hardcode based on user's dataset
+                text_column='sentence',   # Hardcode based on user's dataset
             )
             return preprocessor.prepare()
 
