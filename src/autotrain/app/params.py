@@ -27,9 +27,9 @@ HIDDEN_PARAMS = [
     "train_split",
     "valid_split",
     "text_column",
-    "image_column",
-    "audio_path_column",
-    "audio_column",
+    # "image_column",
+    # "audio_path_column",
+    # "audio_column",
     "rejected_text_column",
     "prompt_text_column",
     "push_to_hub",
@@ -141,13 +141,19 @@ PARAMS["extractive-qa"] = ExtractiveQuestionAnsweringParams(
     max_doc_stride=128,
 ).model_dump()
 
-PARAMS["asr"] = ASRParams(
+PARAMS["speech-recognition"] = WhisperTrainingParams(
     mixed_precision="fp16",
     log="tensorboard",
-    gradient_accumulation=1,
-    epochs=3,
-    max_seq_length=16000,
+    use_peft=True,
 ).model_dump()
+
+# PARAMS["asr"] = ASRParams(
+#     mixed_precision="fp16",
+#     log="tensorboard",
+#     gradient_accumulation=1,
+#     epochs=3,
+#     max_seq_length=16000,
+# ).model_dump()
 
 
 @dataclass
@@ -214,8 +220,10 @@ class AppParams:
             return self._munge_params_img_clf()
         elif self.task == "image-object-detection":
             return self._munge_params_img_obj_det()
-        elif self.task in ["asr", "automatic-speech-recognition"]:
+        elif self.task == "speech-recognition":
             return self._munge_params_asr()
+        # elif self.task in ["asr", "automatic-speech-recognition"]:
+        #     return self._munge_params_asr()
         elif self.task.startswith("tabular"):
             return self._munge_params_tabular()
         elif self.task.startswith("llm"):
@@ -349,26 +357,42 @@ class AppParams:
             _params["valid_split"] = self.valid_split
         return TextClassificationParams(**_params)
 
+    # def _munge_params_asr(self):
+    #     _params = self._munge_common_params()
+    #     _params["model"] = self.base_model
+    #     if "log" not in _params:
+    #         _params["log"] = "tensorboard"
+    
+    #     _params["audio_column"] = self.column_mapping.get("audio_column", "path")
+    #     _params["text_column"] = self.column_mapping.get("text_column", "sentence")
+
+    #     if "sampling_rate" not in _params:  # Optional
+    #         _params["sampling_rate"] = 16000
+    
+    #     if not self.using_hub_dataset:
+    #         _params["audio_path"] = "autotrain_audio_path"
+    #         _params["valid_split"] = self.valid_split if self.valid_split else "validation"
+    #     else:
+    #         _params["train_split"] = self.train_split
+    #         _params["valid_split"] = self.valid_split
+    
+    #     return ASRParams(**_params)
+    
     def _munge_params_asr(self):
         _params = self._munge_common_params()
         _params["model"] = self.base_model
         if "log" not in _params:
             _params["log"] = "tensorboard"
-    
-        _params["audio_column"] = self.column_mapping.get("audio_column", "path")
-        _params["text_column"] = self.column_mapping.get("text_column", "sentence")
-
-        if "sampling_rate" not in _params:  # Optional
-            _params["sampling_rate"] = 16000
-    
         if not self.using_hub_dataset:
-            _params["audio_path"] = "autotrain_audio_path"
-            _params["valid_split"] = self.valid_split if self.valid_split else "validation"
+            _params["audio_column"] = "autotrain_audio"
+            _params["text_column"] = "autotrain_text"
+            _params["valid_split"] = "validation"
         else:
+            _params["audio_column"] = self.column_mapping.get("audio" if not self.api else "audio_column", "audio")
+            _params["text_column"] = self.column_mapping.get("text" if not self.api else "text_column", "text")
             _params["train_split"] = self.train_split
             _params["valid_split"] = self.valid_split
-    
-        return ASRParams(**_params)
+        return WhisperTrainingParams(**_params)
 
     def _munge_params_extractive_qa(self):
         _params = self._munge_common_params()
@@ -773,15 +797,33 @@ def get_task_params(task, param_type):
         ]
         task_params = {k: v for k, v in task_params.items() if k not in more_hidden_params}
         
-    if task == "asr" and param_type == "basic":
+    if task == "speech-recognition" and param_type == "basic":
         more_hidden_params = [
-            "optimizer", "scheduler", "gradient_accumulation", "warmup_steps", "max_steps",
-            "per_device_train_batch_size", "per_device_eval_batch_size", "eval_strategy",
-            "save_steps", "eval_steps", "logging_steps", "load_best_model_at_end",
-            "metric_for_best_model", "greater_is_better", "group_by_length", "fp16",
-            "gradient_checkpointing", "save_total_limit", "sampling_rate"
+            "warmup_ratio",
+            "weight_decay",
+            "max_grad_norm",
+            "seed",
+            "logging_steps",
+            "auto_find_batch_size",
+            "save_total_limit",
+            "eval_strategy",
+            "early_stopping_patience",
+            "early_stopping_threshold",
+            "lora_r",
+            "lora_alpha",
+            "lora_dropout",
+            "target_modules",
         ]
         task_params = {k: v for k, v in task_params.items() if k not in more_hidden_params}
+    # if task == "asr" and param_type == "basic":
+    #     more_hidden_params = [
+    #         "optimizer", "scheduler", "gradient_accumulation", "warmup_steps", "max_steps",
+    #         "per_device_train_batch_size", "per_device_eval_batch_size", "eval_strategy",
+    #         "save_steps", "eval_steps", "logging_steps", "load_best_model_at_end",
+    #         "metric_for_best_model", "greater_is_better", "group_by_length", "fp16",
+    #         "gradient_checkpointing", "save_total_limit", "sampling_rate"
+    #     ]
+    #     task_params = {k: v for k, v in task_params.items() if k not in more_hidden_params}
 
     return task_params
 
