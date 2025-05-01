@@ -580,15 +580,17 @@ class AutoTrainASRDataset:
             if self.valid_data:
                 valid_dir = self.valid_data
 
-        preprocessor = AudioSpeechRecognitionPreprocessor(
-            train_data=train_dir,
-            valid_data=valid_dir,
-            token=self.token,
-            project_name=self.project_name,
-            username=self.username,
-            local=self.local,
-        )
-        return preprocessor.prepare()
+            preprocessor = AudioSpeechRecognitionPreprocessor(
+                train_data=train_dir,
+                valid_data=valid_dir,
+                token=self.token,
+                project_name=self.project_name,
+                username=self.username,
+                local=self.local,
+                audio_column='path',  # Hardcode based on user's dataset
+                text_column='text',   # Hardcode based on user's dataset
+            )
+            return preprocessor.prepare()
 
 
 
