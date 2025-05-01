@@ -533,14 +533,16 @@ async def fetch_model_choices(
         hub_models = MODEL_CHOICE["text-classification"]
     elif task.startswith("llm"):
         hub_models = MODEL_CHOICE["llm"]
-    elif task in ["asr", "automatic-speech-recognition"]:
-        hub_models = MODEL_CHOICE["asr"]
+    # elif task in ["asr", "automatic-speech-recognition"]:
+    #     hub_models = MODEL_CHOICE["asr"]
     elif task.startswith("st:"):
         hub_models = MODEL_CHOICE["sentence-transformers"]
     elif task == "image-classification":
         hub_models = MODEL_CHOICE["image-classification"]
     elif task == "seq2seq":
         hub_models = MODEL_CHOICE["seq2seq"]
+    elif task == "speech-recognition":
+        hub_models = MODEL_CHOICE["speech-recognition"]
     elif task == "tabular:classification":
         hub_models = MODEL_CHOICE["tabular-classification"]
     elif task == "tabular:regression":
@@ -737,8 +739,10 @@ async def handle_form(
                     raise NotImplementedError
             elif task == "token-classification":
                 dset_task = "text_token_classification"
-            elif task == "asr":
+            elif task == "speech-recognition":
                 dset_task = "speech_recognition"
+            # elif task == "asr":
+            #     dset_task = "speech_recognition"
             elif task == "extractive-qa":
                 dset_task = "text_extractive_question_answering"
             else:
