@@ -34,7 +34,8 @@ from autotrain.trainers.text_classification.params import TextClassificationPara
 from autotrain.trainers.text_regression.params import TextRegressionParams
 from autotrain.trainers.token_classification.params import TokenClassificationParams
 from autotrain.trainers.vlm.params import VLMTrainingParams
-from autotrain.trainers.asr.params import ASRParams
+# from autotrain.trainers.asr.params import ASRParams
+from autotrain.trainers.asr.params import WhisperTrainingParams
 
 
 @dataclass
@@ -89,7 +90,9 @@ class AutoTrainConfigParser:
             "image_single_column_regression": ImageRegressionParams,
             "vlm": VLMTrainingParams,
             "text_extractive_question_answering": ExtractiveQuestionAnsweringParams,
-            "asr": ASRParams,
+            # "asr": ASRParams,
+            "speech_recognition": WhisperTrainingParams,
+            
 
         }
         self.munge_data_map = {
@@ -105,7 +108,8 @@ class AutoTrainConfigParser:
             "image_single_column_regression": img_reg_munge_data,
             "vlm": vlm_munge_data,
             "text_extractive_question_answering": ext_qa_munge_data,
-            "asr": asr_munge_data,
+            # "asr": asr_munge_data,
+            "speech_recognition": asr_munge_data,
         }
         self.task_aliases = {
             "llm": "lm_training",
@@ -156,8 +160,12 @@ class AutoTrainConfigParser:
             "ext_qa": "text_extractive_question_answering",
             "ext-qa": "text_extractive_question_answering",
             "extractive-qa": "text_extractive_question_answering",
-            "asr": "asr",
-            "automatic_speech_recognition": "asr",
+            # "asr": "asr",
+            # "automatic_speech_recognition": "asr",
+            "asr": "speech_recognition",
+            "whisper": "speech_recognition",
+            "speech-recognition": "speech_recognition",
+            "automatic-speech-recognition": "speech_recognition",
         }
 
         task = self.config.get("task")
