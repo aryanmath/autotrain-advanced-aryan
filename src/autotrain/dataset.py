@@ -934,8 +934,8 @@ class AutoTrainDataset:
         elif self.task == "speech_recognition":
             if "audio" not in self.column_mapping or "text" not in self.column_mapping:
                 raise ValueError("For speech_recognition task, column_mapping must include 'audio' and 'text'")
-            audio_column = self.column_mapping["audio"]
-            text_column = self.column_mapping["text"]
+            audio_column = self.column_mapping["path"]
+            text_column = self.column_mapping["sentence"]
             preprocessor = AudioSpeechRecognitionPreprocessor(
                 train_data=self.train_df,
                 audio_column=audio_column,
@@ -949,8 +949,7 @@ class AutoTrainDataset:
                 local=self.local,
             )
             return preprocessor.prepare()
-        
-
+    
 
         else:
             raise ValueError(f"Task {self.task} not supported")
