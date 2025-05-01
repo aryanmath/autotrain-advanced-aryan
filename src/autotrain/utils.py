@@ -16,7 +16,8 @@ from autotrain.trainers.text_classification.params import TextClassificationPara
 from autotrain.trainers.text_regression.params import TextRegressionParams
 from autotrain.trainers.token_classification.params import TokenClassificationParams
 from autotrain.trainers.vlm.params import VLMTrainingParams
-from autotrain.trainers.asr.params import ASRParams  # Add this import
+# from autotrain.trainers.asr.params import ASRParams  # Add this import
+from autotrain.trainers.asr.params import WhisperTrainingParams
 
 ALLOW_REMOTE_CODE = os.environ.get("ALLOW_REMOTE_CODE", "true").lower() == "true"
 
@@ -65,9 +66,11 @@ def run_training(params, task_id, local=False, wait=False):
         params = VLMTrainingParams(**params)
     elif task_id == 5:
         params = ExtractiveQuestionAnsweringParams(**params)
-    elif task_id == 11:  # Add this condition for ASR
-        params = ASRParams(**params)
-    else:
+    elif task_id == 11:
+        params = WhisperTrainingParams(**params)
+    # elif task_id == 11:  # Add this condition for ASR
+    #     params = ASRParams(**params)
+    # else:
         raise NotImplementedError
 
     params.save(output_dir=params.project_name)
