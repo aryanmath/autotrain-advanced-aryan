@@ -23,6 +23,7 @@ from autotrain.dataset import (
     AutoTrainImageRegressionDataset,
     AutoTrainObjectDetectionDataset,
     AutoTrainVLMDataset,
+    AutoTrainASRDataset,
 )
 from autotrain.help import get_app_help
 from autotrain.project import AutoTrainProject
@@ -288,6 +289,79 @@ UI_PARAMS = {
         "label": "Distributed backend",
         "options": ["ddp", "deepspeed"],
     },
+    "sampling_rate": {
+        "type": "number",
+        "label": "Sampling Rate",
+    },
+    "warmup_steps": {
+        "type": "number",
+        "label": "Warmup Steps",
+    },
+    "max_steps": {
+        "type": "number",
+        "label": "Max Steps",
+    },
+    "per_device_train_batch_size": {
+        "type": "number",
+        "label": "Per Device Train Batch Size",
+    },
+    "per_device_eval_batch_size": {
+        "type": "number",
+        "label": "Per Device Eval Batch Size",
+    },
+    "save_steps": {
+        "type": "number",
+        "label": "Save Steps",
+    },
+    "eval_steps": {
+        "type": "number",
+        "label": "Evaluation Steps",
+    },
+    "load_best_model_at_end": {
+        "type": "dropdown",
+        "label": "Load Best Model at End",
+        "options": [True, False],
+    },
+    "metric_for_best_model": {
+        "type": "dropdown",
+        "label": "Metric for Best Model",
+        "options": ["wer"],  # Add more metrics if needed (e.g., "cer")
+    },
+    "greater_is_better": {
+        "type": "dropdown",
+        "label": "Greater is Better",
+        "options": [True, False],
+    },
+    "group_by_length": {
+        "type": "dropdown",
+        "label": "Group by Length",
+        "options": [True, False],
+    },
+    "fp16": {
+        "type": "dropdown",
+        "label": "FP16",
+        "options": [True, False],
+    },
+    "gradient_checkpointing": {
+        "type": "dropdown",
+        "label": "Gradient Checkpointing",
+        "options": [True, False],
+    },
+    "audio_column": {
+        "type": "string",
+        "label": "Audio Column",
+        "default": "path",
+    },
+    "text_column": {
+        "type": "string",
+        "label": "Text Column",
+        "default": "sentence",
+    },
+    "sampling_rate": {
+        "type": "number",
+        "label": "Sampling Rate",
+        "default": 16000,
+    },
 }
 
 
@@ -459,12 +533,16 @@ async def fetch_model_choices(
         hub_models = MODEL_CHOICE["text-classification"]
     elif task.startswith("llm"):
         hub_models = MODEL_CHOICE["llm"]
+    # elif task in ["asr", "automatic-speech-recognition"]:
+    #     hub_models = MODEL_CHOICE["asr"]
     elif task.startswith("st:"):
         hub_models = MODEL_CHOICE["sentence-transformers"]
     elif task == "image-classification":
         hub_models = MODEL_CHOICE["image-classification"]
     elif task == "seq2seq":
         hub_models = MODEL_CHOICE["seq2seq"]
+    elif task == "speech-recognition":
+        hub_models = MODEL_CHOICE["speech-recognition"]
     elif task == "tabular:classification":
         hub_models = MODEL_CHOICE["tabular-classification"]
     elif task == "tabular:regression":
@@ -608,6 +686,18 @@ async def handle_form(
                 percent_valid=None,  # TODO: add to UI
                 local=hardware.lower() == "local-ui",
             )
+
+        elif task in "asr":
+            dset = AutoTrainASRDataset(
+                train_data=training_files[0],
+                token=token,
+                project_name=project_name,
+                username=autotrain_user,
+                valid_data=validation_files[0] if validation_files else None,
+                percent_valid=None,  # TODO: add to UI
+                local=hardware.lower() == "local-ui",
+            )
+
         elif task.startswith("vlm:"):
             dset = AutoTrainVLMDataset(
                 train_data=training_files[0],
@@ -649,6 +739,10 @@ async def handle_form(
                     raise NotImplementedError
             elif task == "token-classification":
                 dset_task = "text_token_classification"
+            elif task == "speech-recognition":
+                dset_task = "speech_recognition"
+            # elif task == "asr":
+            #     dset_task = "speech_recognition"
             elif task == "extractive-qa":
                 dset_task = "text_extractive_question_answering"
             else:

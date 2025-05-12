@@ -1,4 +1,34 @@
-document.addEventListener('DOMContentLoaded', function () {
+document.getElementById('task').addEventListener('change', function () {
+    const selectedTask = this.value;
+    if (selectedTask === 'asr') {
+        // Ensure audio and text columns are mapped
+        const audioColumn = document.getElementById('col_map_audio');
+        const textColumn = document.getElementById('col_map_text');
+        if (!audioColumn || !textColumn) {
+            alert('Please map audio and text columns for ASR.');
+        }
+    }
+});document.getElementById('task').addEventListener('change', function () {
+    const selectedTask = this.value;
+    if (selectedTask === 'asr') {
+        // Ensure audio and text columns are mapped
+        const audioColumn = document.getElementById('col_map_audio');
+        const textColumn = document.getElementById('col_map_text');
+        if (!audioColumn || !textColumn) {
+            alert('Please map audio and text columns for ASR.');
+        }
+    }
+});document.getElementById('task').addEventListener('change', function () {
+    const selectedTask = this.value;
+    if (selectedTask === 'asr') {
+        // Ensure audio and text columns are mapped
+        const audioColumn = document.getElementById('col_map_audio');
+        const textColumn = document.getElementById('col_map_text');
+        if (!audioColumn || !textColumn) {
+            alert('Please map audio and text columns for ASR.');
+        }
+    }
+});document.addEventListener('DOMContentLoaded', function () {
     const dataSource = document.getElementById("dataset_source");
     const uploadDataTabContent = document.getElementById("upload-data-tab-content");
     const hubDataTabContent = document.getElementById("hub-data-tab-content");

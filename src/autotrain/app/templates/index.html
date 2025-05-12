@@ -97,6 +97,10 @@
                     fields = ['text', 'question', 'answer'];
                     fieldNames = ['context', 'question', 'answers'];
                     break;
+                case 'speech-recognition':
+                    fields = ['audio', 'text'];
+                    fieldNames = ['audio', 'transcription'];
+                    break;
                 default:
                     return; // Do nothing if task is not recognized
             }
@@ -226,6 +230,12 @@
                             <option value="tabular:classification">Tabular Classification</option>
                             <option value="tabular:regression">Tabular Regression</option>
                         </optgroup>
+                        <optgroup label="Audio Tasks">
+                            <option value="speech-recognition">Speech Recognition (ASR)</option>
+                        </optgroup>
+                        {% comment %} <optgroup label="Audio Tasks">
+                            <option value="asr">Automatic Speech Recognition</option>
+                        </optgroup> {% endcomment %}
                     </select>
                 </li>
                 <li>
@@ -678,7 +688,7 @@
         </div>
     </div>
     <script>
-        var autotrain_local_value = {{ enable_local }};
+        var autotrain_local_value = {enable_local };
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
     <script>

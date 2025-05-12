@@ -23,6 +23,7 @@ from autotrain.trainers.text_classification.params import TextClassificationPara
 from autotrain.trainers.text_regression.params import TextRegressionParams
 from autotrain.trainers.token_classification.params import TokenClassificationParams
 from autotrain.trainers.vlm.params import VLMTrainingParams
+from autotrain.trainers.asr.params import ASRParams
 
 
 FIELDS_TO_EXCLUDE = HIDDEN_PARAMS + ["push_to_hub"]
@@ -112,6 +113,7 @@ ExtractiveQuestionAnsweringParamsAPI = create_api_base_model(
     ExtractiveQuestionAnsweringParams, "ExtractiveQuestionAnsweringParamsAPI"
 )
 ObjectDetectionParamsAPI = create_api_base_model(ObjectDetectionParams, "ObjectDetectionParamsAPI")
+ASRParamsAPI = create_api_base_model(ASRParams, "ASRParamsAPI")
 
 
 class LLMSFTColumnMapping(BaseModel):
@@ -224,6 +226,11 @@ class ObjectDetectionColumnMapping(BaseModel):
     objects_column: str
 
 
+class ASRColumnMapping(BaseModel):
+    audio_column: str
+    text_column: str
+
+
 class APICreateProjectModel(BaseModel):
     """
     APICreateProjectModel is a Pydantic model that defines the schema for creating a project.
@@ -275,6 +282,7 @@ class APICreateProjectModel(BaseModel):
         "vlm:vqa",
         "extractive-question-answering",
         "image-object-detection",
+        "asr",
     ]
     base_model: str
     hardware: Literal[
@@ -292,7 +300,7 @@ class APICreateProjectModel(BaseModel):
         "spaces-l40sx8",
         "spaces-a10g-largex2",
         "spaces-a10g-largex4",
-        # "local",
+        "local",
     ]
     params: Union[
         LLMSFTTrainingParamsAPI,
@@ -312,6 +320,7 @@ class APICreateProjectModel(BaseModel):
         VLMTrainingParamsAPI,
         ExtractiveQuestionAnsweringParamsAPI,
         ObjectDetectionParamsAPI,
+        ASRParamsAPI,
     ]
     username: str
     column_mapping: Optional[
@@ -337,6 +346,7 @@ class APICreateProjectModel(BaseModel):
             VLMColumnMapping,
             ExtractiveQuestionAnsweringColumnMapping,
             ObjectDetectionColumnMapping,
+            ASRColumnMapping,
         ]
     ] = None
     hub_dataset: str
@@ -534,6 +544,14 @@ class APICreateProjectModel(BaseModel):
             if not values.get("column_mapping").get("objects_column"):
                 raise ValueError("objects_column is required for image-object-detection")
             values["column_mapping"] = ObjectDetectionColumnMapping(**values["column_mapping"])
+        elif values.get("task") == "asr":
+            if not values.get("column_mapping"):
+                raise ValueError("column_mapping is required for asr")
+            if not values.get("column_mapping").get("audio_column"):
+                raise ValueError("audio_column is required for asr")
+            if not values.get("column_mapping").get("text_column"):
+                raise ValueError("text_column is required for asr")
+            values["column_mapping"] = ASRColumnMapping(**values["column_mapping"])
         return values
 
     @model_validator(mode="before")
@@ -573,6 +591,8 @@ class APICreateProjectModel(BaseModel):
             values["params"] = ExtractiveQuestionAnsweringParamsAPI(**values["params"])
         elif values.get("task") == "image-object-detection":
             values["params"] = ObjectDetectionParamsAPI(**values["params"])
+        elif values.get("task") == "asr":
+            values["params"] = ASRParamsAPI(**values["params"])
         return values
 
 

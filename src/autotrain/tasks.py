@@ -5,6 +5,7 @@ NLP_TASKS = {
     "text_extractive_question_answering": 5,
     "text_summarization": 8,
     "text_single_column_regression": 10,
+    "asr": 32,
     "speech_recognition": 11,
     "natural_language_inference": 22,
     "lm_training": 9,

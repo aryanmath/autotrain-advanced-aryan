@@ -51,6 +51,7 @@ def train(config):
             train_data = load_from_disk(config.data_path)[config.train_split]
         else:
             if ":" in config.train_split:
+                print("Loading dataset from huggingface_hub",config.data_path)
                 dataset_config_name, split = config.train_split.split(":")
                 train_data = load_dataset(
                     config.data_path,

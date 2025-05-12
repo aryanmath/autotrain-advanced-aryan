@@ -18,6 +18,8 @@ from autotrain.cli.run_text_regression import RunAutoTrainTextRegressionCommand
 from autotrain.cli.run_token_classification import RunAutoTrainTokenClassificationCommand
 from autotrain.cli.run_tools import RunAutoTrainToolsCommand
 from autotrain.parser import AutoTrainConfigParser
+from autotrain.cli.run_asr import RunAutoTrainASRCommand
+
 
 
 def main():
@@ -44,6 +46,7 @@ def main():
     RunAutoTrainToolsCommand.register_subcommand(commands_parser)
     RunAutoTrainTextRegressionCommand.register_subcommand(commands_parser)
     RunAutoTrainObjectDetectionCommand.register_subcommand(commands_parser)
+    RunAutoTrainASRCommand.register_subcommand(commands_parser)
     RunAutoTrainSentenceTransformersCommand.register_subcommand(commands_parser)
     RunAutoTrainImageRegressionCommand.register_subcommand(commands_parser)
     RunAutoTrainExtractiveQACommand.register_subcommand(commands_parser)

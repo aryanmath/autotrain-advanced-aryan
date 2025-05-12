@@ -7,7 +7,6 @@ import requests
 
 from autotrain import config, logger
 
-
 def graceful_exit(signum, frame):
     logger.info("SIGTERM received. Performing cleanup...")
     sys.exit(0)

@@ -30,6 +30,8 @@ from autotrain.preprocessor.vision import (
     ObjectDetectionPreprocessor,
 )
 from autotrain.preprocessor.vlm import VLMPreprocessor
+from autotrain.preprocessor.audio import AudioSpeechRecognitionPreprocessor
+
 
 
 def remove_non_image_files(folder):
@@ -308,6 +310,7 @@ class AutoTrainVLMDataset:
     valid_data: Optional[str] = None
     percent_valid: Optional[float] = None
     local: bool = False
+    
 
     def __str__(self) -> str:
         info = f"Dataset: {self.project_name} ({self.task})\n"
@@ -473,6 +476,122 @@ class AutoTrainImageRegressionDataset:
             local=self.local,
         )
         return preprocessor.prepare()
+    
+
+@dataclass
+class AutoTrainASRDataset:
+    """
+    AutoTrainASRDataset is a class designed for handling Automatic Speech Recognition (ASR) datasets in the AutoTrain framework.
+
+    Attributes:
+        train_data (str): Path to the training data.
+        token (str): Authentication token.
+        project_name (str): Name of the project.
+        username (str): Username of the project owner.
+        valid_data (Optional[str]): Path to the validation data. Default is None.
+        percent_valid (Optional[float]): Percentage of training data to be used for validation if valid_data is not provided. Default is None.
+        local (bool): Flag indicating if the data is local. Default is False.
+        task (str): Task type. Default is "asr".
+        audio_column (str): Name of the column containing audio data. Default is "audio".
+        text_column (str): Name of the column containing text data. Default is "text".
+        audio_path (str): Name of the column containing audio file paths. Default is "audio_path".
+        audio_format (str): Audio file format. Default is "wav".
+        sampling_rate (int): Sampling rate of the audio data. Default is 16000.
+        text_column (str): Name of the column containing text data. Default is "text".
+
+    Methods:
+        __str__(): Returns a string representation of the dataset.
+
+    Raises:
+        ValueError: If both valid_data and percent_valid are provided.
+    """ 
+    
+    # train_data: str
+    # token: str  
+    # project_name: str
+    # username: str
+    # valid_data: Optional[str] = None
+    # percent_valid: Optional[float] = None
+    # local: bool = False
+    # task: str = "speech_recognition"
+    # audio_column: str = "audio"
+    # text_column: str = "text"
+    # audio_path: str = "audio_path"
+    # audio_format: str = "wav"
+    # sampling_rate: int = 16000
+    # text_column: str = "text"
+    
+    train_data: str
+    token: str
+    project_name: str
+    username: str
+    valid_data: Optional[str] = None
+    percent_valid: Optional[float] = None
+    local: bool = False
+    
+    def __str__(self) -> str:
+        info = f"Dataset: {self.project_name} ({self.task})\n"
+        info += f"Train data: {self.train_data}\n"
+        info += f"Valid data: {self.valid_data}\n"
+        return info
+    def __post_init__(self):
+        if not self.valid_data and self.percent_valid is None:
+            self.percent_valid = 0.2
+        elif self.valid_data and self.percent_valid is not None:
+            raise ValueError("You can only specify one of valid_data or percent_valid")
+        elif self.valid_data:
+            self.percent_valid = 0.0
+    def prepare(self):
+        valid_dir = None
+        if not isinstance(self.train_data, str):
+            cache_dir = os.environ.get("HF_HOME")
+            if not cache_dir:
+                cache_dir = os.path.join(os.path.expanduser("~"), ".cache", "huggingface")
+
+            random_uuid = uuid.uuid4()
+            train_dir = os.path.join(cache_dir, "autotrain", str(random_uuid))
+            os.makedirs(train_dir, exist_ok=True)
+            self.train_data.seek(0)
+            content = self.train_data.read()
+            bytes_io = io.BytesIO(content)
+            zip_ref = zipfile.ZipFile(bytes_io, "r")
+            zip_ref.extractall(train_dir)
+            # remove the __MACOSX directory
+            macosx_dir = os.path.join(train_dir, "__MACOSX")
+            if os.path.exists(macosx_dir):
+                os.system(f"rm -rf {macosx_dir}")
+            remove_non_image_files(train_dir)
+            if self.valid_data:
+                random_uuid = uuid.uuid4()
+                valid_dir = os.path.join(cache_dir, "autotrain", str(random_uuid))
+                os.makedirs(valid_dir, exist_ok=True)
+                self.valid_data.seek(0)
+                content = self.valid_data.read()
+                bytes_io = io.BytesIO(content)
+                zip_ref = zipfile.ZipFile(bytes_io, "r")
+                zip_ref.extractall(valid_dir)
+                # remove the __MACOSX directory
+                macosx_dir = os.path.join(valid_dir, "__MACOSX")
+                if os.path.exists(macosx_dir):
+                    os.system(f"rm -rf {macosx_dir}")
+                remove_non_image_files(valid_dir)
+        else:
+            train_dir = self.train_data
+            if self.valid_data:
+                valid_dir = self.valid_data
+
+            preprocessor = AudioSpeechRecognitionPreprocessor(
+                train_data=train_dir,
+                valid_data=valid_dir,
+                token=self.token,
+                project_name=self.project_name,
+                username=self.username,
+                local=self.local,
+                audio_column='path',  # Hardcode based on user's dataset
+                text_column='sentence',   # Hardcode based on user's dataset
+            )
+            return preprocessor.prepare()
+
 
 
 @dataclass
@@ -622,6 +741,8 @@ class AutoTrainDataset:
                 convert_to_class_label=self.convert_to_class_label,
             )
             return preprocessor.prepare()
+        
+
 
         elif self.task == "text_single_column_regression":
             text_column = self.column_mapping["text"]
@@ -717,6 +838,7 @@ class AutoTrainDataset:
                 local=self.local,
             )
             return preprocessor.prepare()
+        
 
         elif self.task == "tabular_binary_classification":
             id_column = self.column_mapping["id"]
@@ -808,5 +930,26 @@ class AutoTrainDataset:
                 local=self.local,
             )
             return preprocessor.prepare()
+        
+        elif self.task == "speech_recognition":
+            if "audio" not in self.column_mapping or "text" not in self.column_mapping:
+                raise ValueError("For speech_recognition task, column_mapping must include 'audio' and 'text'")
+            audio_column = self.column_mapping["audio"]
+            text_column = self.column_mapping["text"]
+            preprocessor = AudioSpeechRecognitionPreprocessor(
+                train_data=self.train_df,
+                audio_column=audio_column,
+                text_column=text_column,
+                username=self.username,
+                project_name=self.project_name,
+                valid_data=self.valid_df,
+                test_size=self.percent_valid,
+                token=self.token,
+                seed=42,
+                local=self.local,
+            )
+            return preprocessor.prepare()
+    
+
         else:
             raise ValueError(f"Task {self.task} not supported")

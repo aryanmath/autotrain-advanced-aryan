@@ -17,6 +17,8 @@ from autotrain.trainers.text_classification.params import TextClassificationPara
 from autotrain.trainers.text_regression.params import TextRegressionParams
 from autotrain.trainers.token_classification.params import TokenClassificationParams
 from autotrain.trainers.vlm.params import VLMTrainingParams
+# from autotrain.trainers.asr.params import ASRParams
+from autotrain.trainers.asr.params import WhisperTrainingParams
 
 
 CPU_COMMAND = [
@@ -114,6 +116,8 @@ def launch_command(params):
             - ImageRegressionParams
             - Seq2SeqParams
             - VLMTrainingParams
+            # - ASRParams
+            - WhisperTrainingParams
 
     Returns:
         list: A list of command line arguments to be executed for training.
@@ -355,6 +359,29 @@ def launch_command(params):
                     os.path.join(params.project_name, "training_params.json"),
                 ]
             )
+
+    
+
+    # elif isinstance(params, ASRParams):
+    #     distributed_backend = getattr(params, "distributed_backend", None)
+    #     cmd = get_accelerate_command(num_gpus, params.gradient_accumulation, distributed_backend)
+    #     if num_gpus > 0:
+    #         cmd.append("--mixed_precision")
+    #         if params.mixed_precision == "fp16":
+    #             cmd.append("fp16")
+    #         elif params.mixed_precision == "bf16":
+    #             cmd.append("bf16")
+    #         else:
+    #             cmd.append("no")
+    #     cmd.extend(
+    #         [
+    #             "-m",
+    #             "autotrain.trainers.asr",
+    #             "--training_config",
+    #             os.path.join(params.project_name, "training_params.json"),
+    #         ]
+    #     )
+
     elif isinstance(params, Seq2SeqParams):
         if num_gpus == 0:
             logger.warning("No GPU found. Forcing training on CPU. This will be super slow!")
@@ -490,6 +517,7 @@ def launch_command(params):
                     str(params.gradient_accumulation),
                 ]
 
+    
         if num_gpus > 0:
             cmd.append("--mixed_precision")
             if params.mixed_precision == "fp16":
@@ -507,9 +535,53 @@ def launch_command(params):
                 os.path.join(params.project_name, "training_params.json"),
             ]
         )
+    elif isinstance(params, WhisperTrainingParams):
+        cmd = get_accelerate_command(num_gpus, params.gradient_accumulation_steps)
+        if num_gpus > 0:
+            cmd.append("--mixed_precision")
+            if params.mixed_precision == "fp16":
+                cmd.append("fp16")
+            elif params.mixed_precision == "bf16":
+                cmd.append("bf16")
+            else:
+                cmd.append("no")
+
+        cmd.extend(
+            [
+                "-m",
+                "autotrain.trainers.asr",
+                "--training_config",
+                os.path.join(params.project_name, "training_params.json"),
+            ]
+        )
+        return cmd
+    # elif isinstance(params, ASRParams):
+    #     distributed_backend = getattr(params, "distributed_backend", None)
+    #     cmd = get_accelerate_command(num_gpus, params.gradient_accumulation, distributed_backend)
+    #     if num_gpus > 0:
+    #         cmd.append("--mixed_precision")
+    #         if params.mixed_precision == "fp16":
+    #             cmd.append("fp16")
+    #         elif params.mixed_precision == "bf16":
+    #             cmd.append("bf16")
+    #         else:
+    #             cmd.append("no")
+
+    #     cmd.extend(
+    #         [
+    #             "-m",
+    #             "autotrain.trainers.asr",
+    #             "--training_config",
+    #             os.path.join(params.project_name, "training_params.json"),
+    #         ]
+    #     )
+
 
     else:
         raise ValueError("Unsupported params type")
+    
+
+
 
     logger.info(cmd)
     logger.info(params)

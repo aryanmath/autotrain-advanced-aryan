@@ -107,6 +107,15 @@ PARAMS["extractive-qa"] = {
     "max_doc_stride": 128,
 }
 
+PARAMS["asr"] = {
+    "mixed_precision": "fp16",
+    "log": "tensorboard",
+    "gradient_accumulation": 1,
+    "epochs": 3,
+    "max_seq_length": 16000,
+}
+
+
 DEFAULT_COLUMN_MAPPING = {}
 DEFAULT_COLUMN_MAPPING["llm:sft"] = {"text_column": "text"}
 DEFAULT_COLUMN_MAPPING["llm:generic"] = {"text_column": "text"}
@@ -157,9 +166,8 @@ DEFAULT_COLUMN_MAPPING["tabular:regression"] = {"id_column": "id", "target_colum
 DEFAULT_COLUMN_MAPPING["extractive-qa"] = {
     "text_column": "context",
     "question_column": "question",
-    "answer_column": "answers",
-}
-
+    "answer_column": "answers"}
+DEFAULT_COLUMN_MAPPING["asr"] = {"audio_column": "path", "text_column": "sentence"}
 VALID_TASKS = [k for k in DEFAULT_COLUMN_MAPPING.keys()]
 
 
