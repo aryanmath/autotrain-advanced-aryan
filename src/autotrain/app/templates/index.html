@@ -740,34 +740,33 @@
             const hubDataTab = document.getElementById('hub-data-tab-content');
             const lifeAppDataTab = document.getElementById('life-app-data-tab-content');
             const uploadDataTabs = document.getElementById('upload-data-tabs');
+            const uploadDataTabContent = document.getElementById('upload-data-tab-content');
 
-            datasetSource.addEventListener('change', function() {
-                const selectedValue = this.value;
+            function handleDataSource() {
+                const selectedValue = datasetSource.value;
                 
                 // Hide all tabs first
-                hubDataTab.classList.add('hidden');
-                lifeAppDataTab.classList.add('hidden');
-                uploadDataTabs.classList.add('hidden');
+                hubDataTab.style.display = 'none';
+                lifeAppDataTab.style.display = 'none';
+                uploadDataTabs.style.display = 'none';
+                uploadDataTabContent.style.display = 'none';
                 
-                // Show the appropriate tab
+                // Show the selected tab
                 if (selectedValue === 'hub') {
-                    hubDataTab.classList.remove('hidden');
+                    hubDataTab.style.display = 'block';
                 } else if (selectedValue === 'life_app') {
-                    lifeAppDataTab.classList.remove('hidden');
+                    lifeAppDataTab.style.display = 'block';
                 } else if (selectedValue === 'local') {
-                    uploadDataTabs.classList.remove('hidden');
+                    uploadDataTabs.style.display = 'block';
+                    uploadDataTabContent.style.display = 'block';
                 }
-            });
-
-            // Initialize the view based on the default selection
-            const initialValue = datasetSource.value;
-            if (initialValue === 'hub') {
-                hubDataTab.classList.remove('hidden');
-            } else if (initialValue === 'life_app') {
-                lifeAppDataTab.classList.remove('hidden');
-            } else if (initialValue === 'local') {
-                uploadDataTabs.classList.remove('hidden');
             }
+
+            // Add event listener for changes in the dataset source dropdown
+            datasetSource.addEventListener('change', handleDataSource);
+            
+            // Initialize the state based on the default selection
+            handleDataSource();
         });
     </script>
 </body>
