@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const uploadDataTabContent = document.getElementById("upload-data-tab-content");
     const hubDataTabContent = document.getElementById("hub-data-tab-content");
     const uploadDataTabs = document.getElementById("upload-data-tabs");
-    const lifeAppDataTabContent = document.getElementById('life-app-data-tab-content');
 
     const jsonCheckbox = document.getElementById('show-json-parameters');
     const jsonParametersDiv = document.getElementById('json-parameters');
@@ -52,27 +51,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function handleDataSource() {
-        const dataSource = document.getElementById('dataset_source');
-        const uploadDataTabContent = document.getElementById('upload-data-tab-content');
-        const uploadDataTabs = document.getElementById('upload-data-tabs');
-        const hubDataTabContent = document.getElementById('hub-data-tab-content');
-        const lifeAppDataTabContent = document.getElementById('life-app-data-tab-content');
-
         if (dataSource.value === "hub") {
             uploadDataTabContent.style.display = "none";
             uploadDataTabs.style.display = "none";
             hubDataTabContent.style.display = "block";
-            lifeAppDataTabContent.style.display = "none";
-        } else if (dataSource.value === "life_app") {
-            uploadDataTabContent.style.display = "none";
-            uploadDataTabs.style.display = "none";
-            hubDataTabContent.style.display = "none";
-            lifeAppDataTabContent.style.display = "block";
         } else if (dataSource.value === "local") {
             uploadDataTabContent.style.display = "block";
             uploadDataTabs.style.display = "block";
             hubDataTabContent.style.display = "none";
-            lifeAppDataTabContent.style.display = "none";
         }
     }
 
@@ -201,51 +187,4 @@ document.addEventListener('DOMContentLoaded', function () {
     handleDataSource();
     observeParamChanges();
     updateTextarea();
-});
-
-document.getElementById('start-training-button').addEventListener('click', async function() {
-    const formData = new FormData();
-    formData.append('project_name', document.getElementById('project_name').value);
-    formData.append('task', document.getElementById('task').value);
-    formData.append('base_model', document.getElementById('base_model').value);
-    formData.append('hardware', document.getElementById('hardware').value);
-    formData.append('params', document.getElementById('params_json').value);
-    formData.append('autotrain_user', document.getElementById('autotrain_user').value);
-    formData.append('column_mapping', JSON.stringify(columnMapping));
-    formData.append('dataset_source', document.getElementById('dataset_source').value);
-
-    const dataSource = document.getElementById('dataset_source').value;
-    if (dataSource === 'life_app') {
-        formData.append('life_app_api_key', document.getElementById('life_app_api_key').value);
-        formData.append('life_app_dataset_id', document.getElementById('life_app_dataset_id').value);
-    } else if (dataSource === 'hub') {
-        formData.append('hub_dataset', document.getElementById('hub_dataset').value);
-        formData.append('train_split', document.getElementById('train_split').value);
-        formData.append('valid_split', document.getElementById('valid_split').value);
-    } else {
-        const trainingFiles = document.getElementById('data_files_training').files;
-        const validationFiles = document.getElementById('data_files_valid').files;
-        for (let i = 0; i < trainingFiles.length; i++) {
-            formData.append('data_files_training', trainingFiles[i]);
-        }
-        for (let i = 0; i < validationFiles.length; i++) {
-            formData.append('data_files_valid', validationFiles[i]);
-        }
-    }
-
-    try {
-        const response = await fetch('/ui/create_project', {
-            method: 'POST',
-            body: formData
-        });
-        const data = await response.json();
-        if (data.success) {
-            window.location.href = data.monitor_url;
-        } else {
-            alert('Error: ' + data.detail);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred while submitting the form.');
-    }
 });
