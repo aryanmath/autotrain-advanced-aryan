@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function () {
             uploadDataTabContent.style.display = "none";
             uploadDataTabs.style.display = "none";
             hubDataTabContent.style.display = "block";
-        } else if (dataSource.value === "local") {
+        } else if (dataSource.value === "local" || dataSource.value === "life_app") {
             uploadDataTabContent.style.display = "block";
             uploadDataTabs.style.display = "block";
             hubDataTabContent.style.display = "none";
