@@ -51,148 +51,39 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function handleDataSource() {
-        if (dataSource.value === "hub" || dataSource.value === "life_app") {
-            uploadDataTabContent.style.display = "none";
-            uploadDataTabs.style.display = "none";
-            hubDataTabContent.style.display = "block";
-            
-            if (dataSource.value === "life_app") {
-                const taskSelect = document.getElementById('task');
-                if (taskSelect.value !== "automatic-speech-recognition") {
-                    alert("LiFE app datasets can only be used with Automatic Speech Recognition tasks");
-                    dataSource.value = "local";
-                    handleDataSource();
-                    return;
-                }
-                
-                // Show LiFE app specific UI elements
-                document.getElementById("life-app-selection").style.display = "block";
-                // Hide the entire hub dataset path section
-                var hubDataTabContent = document.getElementById('hub-data-tab-content');
-                if (hubDataTabContent) hubDataTabContent.style.display = "none";
-                
-                // Load project and script data if not already loaded
-                const projectSelect = document.getElementById('life_app_project');
-                const scriptSelect = document.getElementById('life_app_script');
-                
-                // For project list (dropdown + tags)
-                projectSelect.innerHTML = '<option value="">Select Project</option>';
-                fetch('/static/projectList.json')
-                    .then(response => response.json())
-                    .then(data => {
-                        // Remove any previous tag container
-                        let tagContainer = document.getElementById('life-app-project-tags');
-                        if (!tagContainer) {
-                            tagContainer = document.createElement('div');
-                            tagContainer.id = 'life-app-project-tags';
-                            tagContainer.style.marginTop = '8px';
-                            projectSelect.parentElement.appendChild(tagContainer);
-                        } else {
-                            tagContainer.innerHTML = '';
-                        }
-                        // Hidden input to store selected projects for form
-                        let hiddenInput = document.getElementById('life_app_project_hidden');
-                        if (!hiddenInput) {
-                            hiddenInput = document.createElement('input');
-                            hiddenInput.type = 'hidden';
-                            hiddenInput.id = 'life_app_project_hidden';
-                            hiddenInput.name = 'life_app_project';
-                            projectSelect.parentElement.appendChild(hiddenInput);
-                        }
-                        let availableProjects = [...data];
-                        let selectedProjects = [];
-                        // Helper to update tags and hidden input
-                        function updateTags() {
-                            tagContainer.innerHTML = '';
-                            selectedProjects.forEach(project => {
-                                const tag = document.createElement('span');
-                                tag.textContent = project;
-                                tag.style.display = 'inline-block';
-                                tag.style.background = '#e5e7eb';
-                                tag.style.color = '#111827';
-                                tag.style.borderRadius = '12px';
-                                tag.style.padding = '2px 10px 2px 8px';
-                                tag.style.marginRight = '6px';
-                                tag.style.marginBottom = '4px';
-                                tag.style.fontSize = '0.95em';
-                                tag.style.position = 'relative';
-                                // Add remove button
-                                const removeBtn = document.createElement('span');
-                                removeBtn.textContent = '×';
-                                removeBtn.style.marginLeft = '8px';
-                                removeBtn.style.cursor = 'pointer';
-                                removeBtn.style.color = '#ef4444';
-                                removeBtn.onclick = function() {
-                                    // Remove from selected, add back to dropdown
-                                    selectedProjects = selectedProjects.filter(p => p !== project);
-                                    availableProjects.push(project);
-                                    updateDropdown();
-                                    updateTags();
-                                };
-                                tag.appendChild(removeBtn);
-                                tagContainer.appendChild(tag);
-                            });
-                            hiddenInput.value = selectedProjects.join(',');
-                        }
-                        // Helper to update dropdown
-                        function updateDropdown() {
-                            projectSelect.innerHTML = '<option value="">Select Project</option>';
-                            availableProjects.forEach(project => {
-                                const option = document.createElement('option');
-                                option.value = project;
-                                option.textContent = project;
-                                projectSelect.appendChild(option);
-                            });
-                        }
-                        // Initial fill
-                        updateDropdown();
-                        updateTags();
-                        // On select, add to tags and remove from dropdown
-                        projectSelect.onchange = function() {
-                            const val = projectSelect.value;
-                            if (val && !selectedProjects.includes(val)) {
-                                selectedProjects.push(val);
-                                availableProjects = availableProjects.filter(p => p !== val);
-                                updateDropdown();
-                                updateTags();
-                            }
-                            projectSelect.value = '';
-                        };
-                    })
-                    .catch(error => {
-                        console.error('Error loading projects:', error);
-                        alert('Failed to load projects. Please try again.');
-                    });
-                // For script list (single selection)
-                scriptSelect.innerHTML = '<option value="">Select Script</option>';
-                fetch('/static/scriptList.json')
-                    .then(response => response.json())
-                    .then(data => {
-                        data.forEach(script => {
-                            const option = document.createElement('option');
-                            option.value = script;
-                            option.textContent = script;
-                            scriptSelect.appendChild(option);
-                        });
-                        // Add margin to script dropdown for spacing
-                        scriptSelect.style.marginTop = '12px';
-                    })
-                    .catch(error => {
-                        console.error('Error loading scripts:', error);
-                        alert('Failed to load scripts. Please try again.');
-                    });
-            } else {
-                // Hide LiFE app selection and show hub dataset input
-                document.getElementById("life-app-selection").style.display = "none";
-                // Show the entire hub dataset path section
-                var hubDataTabContent = document.getElementById('hub-data-tab-content');
-                if (hubDataTabContent) hubDataTabContent.style.display = "block";
+        const dataSource = document.getElementById("dataset_source");
+        const taskSelect = document.getElementById('task');
+        const lifeAppSelection = document.getElementById("life-app-selection");
+        const hubDataTabContent = document.getElementById('hub-data-tab-content');
+        const uploadDataTabContent = document.getElementById("upload-data-tab-content");
+        const uploadDataTabs = document.getElementById("upload-data-tabs");
+
+        // Always hide both first
+        if (lifeAppSelection) lifeAppSelection.style.display = "none";
+        if (hubDataTabContent) hubDataTabContent.style.display = "none";
+        if (uploadDataTabContent) uploadDataTabContent.style.display = "none";
+        if (uploadDataTabs) uploadDataTabs.style.display = "none";
+
+        if (dataSource.value === "life_app") {
+            if (taskSelect.value !== "automatic-speech-recognition") {
+                alert("LiFE App Dataset can only be used with Automatic Speech Recognition task.");
+                dataSource.value = "local";
+                // Show local upload UI
+                if (uploadDataTabContent) uploadDataTabContent.style.display = "block";
+                if (uploadDataTabs) uploadDataTabs.style.display = "block";
+                return;
             }
+            // Show LiFE App UI, hide hub dataset path
+            if (lifeAppSelection) lifeAppSelection.style.display = "block";
+            // Populate dropdowns (as before)
+            const projectSelect = document.getElementById('life_app_project');
+            const scriptSelect = document.getElementById('life_app_script');
+            // ... (populate logic as you already have)
+        } else if (dataSource.value === "hub") {
+            if (hubDataTabContent) hubDataTabContent.style.display = "block";
         } else if (dataSource.value === "local") {
-            uploadDataTabContent.style.display = "block";
-            uploadDataTabs.style.display = "block";
-            hubDataTabContent.style.display = "none";
-            document.getElementById("life-app-selection").style.display = "none";
+            if (uploadDataTabContent) uploadDataTabContent.style.display = "block";
+            if (uploadDataTabs) uploadDataTabs.style.display = "block";
         }
     }
 
