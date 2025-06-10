@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const scriptSelect = document.getElementById('life_app_script');
                 
                 if (projectSelect.options.length <= 1) {
-                    fetch('C:/Users/Aryan/Downloads/AutoTrain-20250602T092050Z-1-001/AutoTrain/projectList.json')
+                    fetch('/static/projectList.json')
                         .then(response => response.json())
                         .then(data => {
                             data.forEach(project => {
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 
                 if (scriptSelect.options.length <= 1) {
-                    fetch('C:/Users/Aryan/Downloads/AutoTrain-20250602T092050Z-1-001/AutoTrain/scriptList.json')
+                    fetch('/static/scriptList.json')
                         .then(response => response.json())
                         .then(data => {
                             data.forEach(script => {
