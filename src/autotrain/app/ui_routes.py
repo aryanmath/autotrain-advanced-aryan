@@ -501,6 +501,7 @@ async def handle_form(
     train_split: str = Form(""),
     valid_split: str = Form(""),
     token: str = Depends(user_authentication),
+    request: Request,
 ):
     """
     Handle form submission for creating and managing AutoTrain projects.
@@ -537,7 +538,10 @@ async def handle_form(
     training_files = [f.file for f in data_files_training if f.filename != ""] if data_files_training else []
     validation_files = [f.file for f in data_files_valid if f.filename != ""] if data_files_valid else []
 
-    data_source = request.form.get("dataset_source", "local")
+    form = await request.form()
+    data_source = form.get("dataset_source", "local")
+    selected_project = form.get("life_app_project")
+    selected_script = form.get("life_app_script")
     
     # Handle LiFE app datasets for ASR tasks
     if data_source == "life_app":
@@ -547,10 +551,6 @@ async def handle_form(
                 detail="LiFE app datasets can only be used with Automatic Speech Recognition tasks"
             )
             
-        # Get selected project and script from form
-        selected_project = request.form.get("life_app_project")
-        selected_script = request.form.get("life_app_script")
-        
         if not selected_project or not selected_script:
             raise HTTPException(
                 status_code=400,
