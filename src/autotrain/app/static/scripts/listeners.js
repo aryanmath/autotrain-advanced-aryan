@@ -67,9 +67,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 
                 // Show LiFE app specific UI elements
                 document.getElementById("life-app-selection").style.display = "block";
-                // Hide hub dataset path if present
-                var hubDatasetPath = document.querySelector('[name="hub_dataset"]')?.parentElement;
-                if (hubDatasetPath) hubDatasetPath.style.display = "none";
+                // Hide the entire hub dataset path section
+                var hubDataTabContent = document.getElementById('hub-data-tab-content');
+                if (hubDataTabContent) hubDataTabContent.style.display = "none";
                 
                 // Load project and script data if not already loaded
                 const projectSelect = document.getElementById('life_app_project');
@@ -184,10 +184,9 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 // Hide LiFE app selection and show hub dataset input
                 document.getElementById("life-app-selection").style.display = "none";
-                document.getElementById("hub_dataset").style.display = "block";
-                // Show hub dataset path if present
-                var hubDatasetPath = document.querySelector('[name="hub_dataset"]')?.parentElement;
-                if (hubDatasetPath) hubDatasetPath.style.display = "block";
+                // Show the entire hub dataset path section
+                var hubDataTabContent = document.getElementById('hub-data-tab-content');
+                if (hubDataTabContent) hubDataTabContent.style.display = "block";
             }
         } else if (dataSource.value === "local") {
             uploadDataTabContent.style.display = "block";
