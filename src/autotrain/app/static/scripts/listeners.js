@@ -76,17 +76,89 @@ document.addEventListener('DOMContentLoaded', function () {
                 const projectSelect = document.getElementById('life_app_project');
                 const scriptSelect = document.getElementById('life_app_script');
                 
-                // For project list (multiple selection)
+                // For project list (dropdown + tags)
                 projectSelect.innerHTML = '<option value="">Select Project</option>';
                 fetch('/static/projectList.json')
                     .then(response => response.json())
                     .then(data => {
-                        data.forEach(project => {
-                            const option = document.createElement('option');
-                            option.value = project;
-                            option.textContent = project;
-                            projectSelect.appendChild(option);
-                        });
+                        // Remove any previous tag container
+                        let tagContainer = document.getElementById('life-app-project-tags');
+                        if (!tagContainer) {
+                            tagContainer = document.createElement('div');
+                            tagContainer.id = 'life-app-project-tags';
+                            tagContainer.style.marginTop = '8px';
+                            projectSelect.parentElement.appendChild(tagContainer);
+                        } else {
+                            tagContainer.innerHTML = '';
+                        }
+                        // Hidden input to store selected projects for form
+                        let hiddenInput = document.getElementById('life_app_project_hidden');
+                        if (!hiddenInput) {
+                            hiddenInput = document.createElement('input');
+                            hiddenInput.type = 'hidden';
+                            hiddenInput.id = 'life_app_project_hidden';
+                            hiddenInput.name = 'life_app_project';
+                            projectSelect.parentElement.appendChild(hiddenInput);
+                        }
+                        let availableProjects = [...data];
+                        let selectedProjects = [];
+                        // Helper to update tags and hidden input
+                        function updateTags() {
+                            tagContainer.innerHTML = '';
+                            selectedProjects.forEach(project => {
+                                const tag = document.createElement('span');
+                                tag.textContent = project;
+                                tag.style.display = 'inline-block';
+                                tag.style.background = '#e5e7eb';
+                                tag.style.color = '#111827';
+                                tag.style.borderRadius = '12px';
+                                tag.style.padding = '2px 10px 2px 8px';
+                                tag.style.marginRight = '6px';
+                                tag.style.marginBottom = '4px';
+                                tag.style.fontSize = '0.95em';
+                                tag.style.position = 'relative';
+                                // Add remove button
+                                const removeBtn = document.createElement('span');
+                                removeBtn.textContent = '×';
+                                removeBtn.style.marginLeft = '8px';
+                                removeBtn.style.cursor = 'pointer';
+                                removeBtn.style.color = '#ef4444';
+                                removeBtn.onclick = function() {
+                                    // Remove from selected, add back to dropdown
+                                    selectedProjects = selectedProjects.filter(p => p !== project);
+                                    availableProjects.push(project);
+                                    updateDropdown();
+                                    updateTags();
+                                };
+                                tag.appendChild(removeBtn);
+                                tagContainer.appendChild(tag);
+                            });
+                            hiddenInput.value = selectedProjects.join(',');
+                        }
+                        // Helper to update dropdown
+                        function updateDropdown() {
+                            projectSelect.innerHTML = '<option value="">Select Project</option>';
+                            availableProjects.forEach(project => {
+                                const option = document.createElement('option');
+                                option.value = project;
+                                option.textContent = project;
+                                projectSelect.appendChild(option);
+                            });
+                        }
+                        // Initial fill
+                        updateDropdown();
+                        updateTags();
+                        // On select, add to tags and remove from dropdown
+                        projectSelect.onchange = function() {
+                            const val = projectSelect.value;
+                            if (val && !selectedProjects.includes(val)) {
+                                selectedProjects.push(val);
+                                availableProjects = availableProjects.filter(p => p !== val);
+                                updateDropdown();
+                                updateTags();
+                            }
+                            projectSelect.value = '';
+                        };
                     })
                     .catch(error => {
                         console.error('Error loading projects:', error);
