@@ -67,10 +67,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 
                 // Show LiFE app specific UI elements
                 document.getElementById("life-app-selection").style.display = "block";
-                document.getElementById("hub_dataset").style.display = "none";
-                // Hide hub dataset path if present
-                var hubDatasetPath = document.querySelector('[name="hub_dataset"]')?.parentElement;
-                if (hubDatasetPath) hubDatasetPath.style.display = "none";
+                // document.getElementById("hub_dataset").style.display = "none";
+                // // Hide hub dataset path if present
+                // var hubDatasetPath = document.querySelector('[name="hub_dataset"]')?.parentElement;
+                // if (hubDatasetPath) hubDatasetPath.style.display = "none";
                 
                 // Load project and script data if not already loaded
                 const projectSelect = document.getElementById('life_app_project');
