@@ -330,4 +330,32 @@ document.addEventListener('DOMContentLoaded', function () {
             handleDataSource();
         }
     });
+
+    function enforceLifeAppRules() {
+        const dataSource = document.getElementById("dataset_source");
+        const taskSelect = document.getElementById('task');
+        const lifeAppSelection = document.getElementById("life-app-selection");
+        const hubDataTabContent = document.getElementById('hub-data-tab-content');
+        if (dataSource.value === "life_app") {
+            if (taskSelect.value !== "automatic-speech-recognition") {
+                alert("LiFE App Dataset can only be used with Automatic Speech Recognition task.");
+                dataSource.value = "local";
+                lifeAppSelection.style.display = "none";
+                if (hubDataTabContent) hubDataTabContent.style.display = "block";
+                return;
+            }
+            // Show LiFE App UI, hide hub dataset path
+            lifeAppSelection.style.display = "block";
+            if (hubDataTabContent) hubDataTabContent.style.display = "none";
+        } else {
+            // Show hub dataset path, hide LiFE App UI
+            lifeAppSelection.style.display = "none";
+            if (hubDataTabContent) hubDataTabContent.style.display = "block";
+        }
+    }
+    // Call on page load
+    enforceLifeAppRules();
+    // Call on dataset source or task change
+    document.getElementById('dataset_source').addEventListener('change', enforceLifeAppRules);
+    document.getElementById('task').addEventListener('change', enforceLifeAppRules);
 });
