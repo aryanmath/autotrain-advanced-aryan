@@ -488,6 +488,7 @@ async def fetch_model_choices(
 
 @ui_router.post("/create_project", response_class=JSONResponse)
 async def handle_form(
+    request: Request,
     project_name: str = Form(...),
     task: str = Form(...),
     base_model: str = Form(...),
@@ -501,7 +502,6 @@ async def handle_form(
     train_split: str = Form(""),
     valid_split: str = Form(""),
     token: str = Depends(user_authentication),
-    request: Request,
 ):
     """
     Handle form submission for creating and managing AutoTrain projects.
