@@ -73,39 +73,38 @@ document.addEventListener('DOMContentLoaded', function () {
                 const projectSelect = document.getElementById('life_app_project');
                 const scriptSelect = document.getElementById('life_app_script');
                 
-                if (projectSelect.options.length <= 1) {
-                    fetch('/static/projectList.json')
-                        .then(response => response.json())
-                        .then(data => {
-                            data.forEach(project => {
-                                const option = document.createElement('option');
-                                option.value = project.path;
-                                option.textContent = project.name;
-                                projectSelect.appendChild(option);
-                            });
-                        })
-                        .catch(error => {
-                            console.error('Error loading projects:', error);
-                            alert('Failed to load projects. Please try again.');
+                // For project list (multiple selection)
+                projectSelect.innerHTML = '<option value="">Select Project</option>';
+                fetch('/static/projectList.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(project => {
+                            const option = document.createElement('option');
+                            option.value = project;
+                            option.textContent = project;
+                            projectSelect.appendChild(option);
                         });
-                }
-                
-                if (scriptSelect.options.length <= 1) {
-                    fetch('/static/scriptList.json')
-                        .then(response => response.json())
-                        .then(data => {
-                            data.forEach(script => {
-                                const option = document.createElement('option');
-                                option.value = script.path;
-                                option.textContent = script.name;
-                                scriptSelect.appendChild(option);
-                            });
-                        })
-                        .catch(error => {
-                            console.error('Error loading scripts:', error);
-                            alert('Failed to load scripts. Please try again.');
+                    })
+                    .catch(error => {
+                        console.error('Error loading projects:', error);
+                        alert('Failed to load projects. Please try again.');
+                    });
+                // For script list (single selection)
+                scriptSelect.innerHTML = '<option value="">Select Script</option>';
+                fetch('/static/scriptList.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(script => {
+                            const option = document.createElement('option');
+                            option.value = script;
+                            option.textContent = script;
+                            scriptSelect.appendChild(option);
                         });
-                }
+                    })
+                    .catch(error => {
+                        console.error('Error loading scripts:', error);
+                        alert('Failed to load scripts. Please try again.');
+                    });
             } else {
                 // Hide LiFE app selection and show hub dataset input
                 document.getElementById("life-app-selection").style.display = "none";
