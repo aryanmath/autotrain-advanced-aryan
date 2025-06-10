@@ -51,14 +51,71 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function handleDataSource() {
-        if (dataSource.value === "hub") {
+        if (dataSource.value === "hub" || dataSource.value === "life_app") {
             uploadDataTabContent.style.display = "none";
             uploadDataTabs.style.display = "none";
             hubDataTabContent.style.display = "block";
-        } else if (dataSource.value === "local" || dataSource.value === "life_app") {
+            
+            if (dataSource.value === "life_app") {
+                const taskSelect = document.getElementById('task');
+                if (taskSelect.value !== "automatic-speech-recognition") {
+                    alert("LiFE app datasets can only be used with Automatic Speech Recognition tasks");
+                    dataSource.value = "local";
+                    handleDataSource();
+                    return;
+                }
+                
+                // Show LiFE app specific UI elements
+                document.getElementById("life-app-selection").style.display = "block";
+                document.getElementById("hub_dataset").style.display = "none";
+                
+                // Load project and script data if not already loaded
+                const projectSelect = document.getElementById('life_app_project');
+                const scriptSelect = document.getElementById('life_app_script');
+                
+                if (projectSelect.options.length <= 1) {
+                    fetch('C:/Users/Aryan/Downloads/AutoTrain-20250602T092050Z-1-001/AutoTrain/projectList.json')
+                        .then(response => response.json())
+                        .then(data => {
+                            data.forEach(project => {
+                                const option = document.createElement('option');
+                                option.value = project.path;
+                                option.textContent = project.name;
+                                projectSelect.appendChild(option);
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error loading projects:', error);
+                            alert('Failed to load projects. Please try again.');
+                        });
+                }
+                
+                if (scriptSelect.options.length <= 1) {
+                    fetch('C:/Users/Aryan/Downloads/AutoTrain-20250602T092050Z-1-001/AutoTrain/scriptList.json')
+                        .then(response => response.json())
+                        .then(data => {
+                            data.forEach(script => {
+                                const option = document.createElement('option');
+                                option.value = script.path;
+                                option.textContent = script.name;
+                                scriptSelect.appendChild(option);
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error loading scripts:', error);
+                            alert('Failed to load scripts. Please try again.');
+                        });
+                }
+            } else {
+                // Hide LiFE app selection and show hub dataset input
+                document.getElementById("life-app-selection").style.display = "none";
+                document.getElementById("hub_dataset").style.display = "block";
+            }
+        } else if (dataSource.value === "local") {
             uploadDataTabContent.style.display = "block";
             uploadDataTabs.style.display = "block";
             hubDataTabContent.style.display = "none";
+            document.getElementById("life-app-selection").style.display = "none";
         }
     }
 
@@ -187,4 +244,13 @@ document.addEventListener('DOMContentLoaded', function () {
     handleDataSource();
     observeParamChanges();
     updateTextarea();
+
+    // Add event listener for task changes
+    document.getElementById('task').addEventListener('change', function() {
+        if (dataSource.value === "life_app" && this.value !== "automatic-speech-recognition") {
+            alert("LiFE app datasets can only be used with Automatic Speech Recognition tasks");
+            dataSource.value = "local";
+            handleDataSource();
+        }
+    });
 });

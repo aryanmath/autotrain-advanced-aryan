@@ -504,27 +504,6 @@ async def handle_form(
 ):
     """
     Handle form submission for creating and managing AutoTrain projects.
-
-    Args:
-        project_name (str): The name of the project.
-        task (str): The task type (e.g., "image-classification", "text-classification").
-        base_model (str): The base model to use for training.
-        hardware (str): The hardware configuration (e.g., "local-ui").
-        params (str): JSON string of additional parameters.
-        autotrain_user (str): The username of the AutoTrain user.
-        column_mapping (str): JSON string mapping columns to their roles.
-        data_files_training (List[UploadFile]): List of training data files.
-        data_files_valid (List[UploadFile]): List of validation data files.
-        hub_dataset (str): The Hugging Face Hub dataset identifier.
-        train_split (str): The training split identifier.
-        valid_split (str): The validation split identifier.
-        token (str): The authentication token.
-
-    Returns:
-        dict: A dictionary containing the success status and monitor URL.
-
-    Raises:
-        HTTPException: If there are conflicts or validation errors in the form submission.
     """
     train_split = train_split.strip()
     if len(train_split) == 0:
@@ -558,21 +537,47 @@ async def handle_form(
     training_files = [f.file for f in data_files_training if f.filename != ""] if data_files_training else []
     validation_files = [f.file for f in data_files_valid if f.filename != ""] if data_files_valid else []
 
-    if len(training_files) > 0 and len(hub_dataset) > 0:
+    data_source = request.form.get("dataset_source", "local")
+    
+    # Handle LiFE app datasets for ASR tasks
+    if data_source == "life_app":
+        if task != "automatic-speech-recognition":
+            raise HTTPException(
+                status_code=400, 
+                detail="LiFE app datasets can only be used with Automatic Speech Recognition tasks"
+            )
+            
+        # Get selected project and script from form
+        selected_project = request.form.get("life_app_project")
+        selected_script = request.form.get("life_app_script")
+        
+        if not selected_project or not selected_script:
+            raise HTTPException(
+                status_code=400,
+                detail="Please select both a project and a script from LiFE app"
+            )
+            
+        # TODO: In the future, this will be replaced with API calls to LiFE app
+        # For now, we're using the paths from the JSON files
+        data_path = selected_project
+        
+        # Add script path to params
+        params["life_app_script"] = selected_script
+        
+    elif len(training_files) > 0 and len(hub_dataset) > 0:
         raise HTTPException(
             status_code=400, detail="Please either upload a dataset or choose a dataset from the Hugging Face Hub."
         )
-
-    if len(training_files) == 0 and len(hub_dataset) == 0:
+    elif len(training_files) == 0 and len(hub_dataset) == 0:
         raise HTTPException(
             status_code=400, detail="Please upload a dataset or choose a dataset from the Hugging Face Hub."
         )
-
-    if len(hub_dataset) > 0:
+    elif len(hub_dataset) > 0:
         if not train_split:
             raise HTTPException(status_code=400, detail="Please enter a training split.")
-
-    if len(hub_dataset) == 0:
+        data_path = hub_dataset
+    else:
+        # Handle local dataset upload
         file_extension = os.path.splitext(data_files_training[0].filename)[1]
         file_extension = file_extension[1:] if file_extension.startswith(".") else file_extension
         if task == "image-classification":
@@ -582,7 +587,7 @@ async def handle_form(
                 project_name=project_name,
                 username=autotrain_user,
                 valid_data=validation_files[0] if validation_files else None,
-                percent_valid=None,  # TODO: add to UI
+                percent_valid=None,
                 local=hardware.lower() == "local-ui",
             )
         elif task == "image-regression":
@@ -592,7 +597,7 @@ async def handle_form(
                 project_name=project_name,
                 username=autotrain_user,
                 valid_data=validation_files[0] if validation_files else None,
-                percent_valid=None,  # TODO: add to UI
+                percent_valid=None,
                 local=hardware.lower() == "local-ui",
             )
         elif task == "image-object-detection":
@@ -602,7 +607,7 @@ async def handle_form(
                 project_name=project_name,
                 username=autotrain_user,
                 valid_data=validation_files[0] if validation_files else None,
-                percent_valid=None,  # TODO: add to UI
+                percent_valid=None,
                 local=hardware.lower() == "local-ui",
             )
         elif task.startswith("vlm:"):
@@ -613,7 +618,7 @@ async def handle_form(
                 username=autotrain_user,
                 column_mapping=column_mapping,
                 valid_data=validation_files[0] if validation_files else None,
-                percent_valid=None,  # TODO: add to UI
+                percent_valid=None,
                 local=hardware.lower() == "local-ui",
             )
         else:
@@ -662,7 +667,7 @@ async def handle_form(
                 username=autotrain_user,
                 column_mapping=column_mapping,
                 valid_data=validation_files,
-                percent_valid=None,  # TODO: add to UI
+                percent_valid=None,
                 local=hardware.lower() == "local-ui",
                 ext=file_extension,
             )
@@ -670,8 +675,7 @@ async def handle_form(
                 dset_args["convert_to_class_label"] = True
             dset = AutoTrainDataset(**dset_args)
         data_path = dset.prepare()
-    else:
-        data_path = hub_dataset
+
     app_params = AppParams(
         job_params_json=json.dumps(params),
         token=token,
