@@ -68,17 +68,42 @@ document.addEventListener('DOMContentLoaded', function () {
             if (taskSelect.value !== "automatic-speech-recognition") {
                 alert("LiFE App Dataset can only be used with Automatic Speech Recognition task.");
                 dataSource.value = "local";
-                // Show local upload UI
                 if (uploadDataTabContent) uploadDataTabContent.style.display = "block";
                 if (uploadDataTabs) uploadDataTabs.style.display = "block";
                 return;
             }
-            // Show LiFE App UI, hide hub dataset path
             if (lifeAppSelection) lifeAppSelection.style.display = "block";
-            // Populate dropdowns (as before)
+
+            // Populate project dropdown
             const projectSelect = document.getElementById('life_app_project');
             const scriptSelect = document.getElementById('life_app_script');
-            // ... (populate logic as you already have)
+            if (projectSelect) {
+                projectSelect.innerHTML = '<option value="">Select Project</option>';
+                fetch('/static/projectList.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(project => {
+                            const option = document.createElement('option');
+                            option.value = project;
+                            option.textContent = project;
+                            projectSelect.appendChild(option);
+                        });
+                    });
+            }
+            // Populate script dropdown
+            if (scriptSelect) {
+                scriptSelect.innerHTML = '<option value="">Select Script</option>';
+                fetch('/static/scriptList.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(script => {
+                            const option = document.createElement('option');
+                            option.value = script;
+                            option.textContent = script;
+                            scriptSelect.appendChild(option);
+                        });
+                    });
+            }
         } else if (dataSource.value === "hub") {
             if (hubDataTabContent) hubDataTabContent.style.display = "block";
         } else if (dataSource.value === "local") {
