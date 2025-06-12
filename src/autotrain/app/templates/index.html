@@ -752,6 +752,23 @@
             }
         });
     </script>
+    <script>
+        // Fetch and populate LiFE App dataset files
+        fetch('/ui/life_app_dataset_files')
+            .then(response => response.json())
+            .then(data => {
+                console.log("Data from life_app_dataset_files:", data);
+                const select = document.getElementById('life_app_dataset_file');
+                data.forEach(filename => {
+                    const option = document.createElement('option');
+                    option.value = filename;
+                    option.textContent = filename;
+                    select.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error fetching LiFE App dataset files:', error));
+    });
+    </script>
 </body>
 
 </html>
