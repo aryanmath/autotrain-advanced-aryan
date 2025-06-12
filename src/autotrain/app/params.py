@@ -522,6 +522,7 @@ class AppParams:
             _params["text_column"] = self.column_mapping.get("text" if not self.api else "text_column", "transcription")
             _params["train_split"] = self.train_split
             _params["valid_split"] = self.valid_split
+        # NOTE: Unlike other tasks, this returns a dict, not a Pydantic Params object
         return _params
 
 
