@@ -30,12 +30,14 @@ document.addEventListener('DOMContentLoaded', function () {
         const hubDataTabContent = document.getElementById("hub-data-tab-content");
         const uploadDataTabContent = document.getElementById("upload-data-tab-content");
         const uploadDataTabs = document.getElementById("upload-data-tabs");
+        const lifeAppDatasetUploadContainer = document.getElementById("life_app_dataset_upload_container");
 
         // Always hide all specific sections first
         if (lifeAppSelection) lifeAppSelection.style.display = "none";
         if (hubDataTabContent) hubDataTabContent.style.display = "none";
         if (uploadDataTabContent) uploadDataTabContent.style.display = "none";
         if (uploadDataTabs) uploadDataTabs.style.display = "none";
+        if (lifeAppDatasetUploadContainer) lifeAppDatasetUploadContainer.style.display = "none";
 
         if (dataSource.value === "life_app") {
             if (taskSelect.value !== "automatic-speech-recognition") {
@@ -50,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (lifeAppSelection) lifeAppSelection.style.display = "block";
             loadLifeAppProjects(); // Load projects with tag functionality
             loadLifeAppScripts(); // Load scripts
-            loadLifeAppDatasets(); // Load datasets into the dropdown
+            if (lifeAppDatasetUploadContainer) lifeAppDatasetUploadContainer.style.display = "block"; // Show dataset upload
 
         } else if (dataSource.value === "huggingface") {
             if (hubDataTabContent) hubDataTabContent.style.display = "block";
@@ -187,24 +189,17 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Function to load datasets (re-added)
-    async function loadLifeAppDatasets() {
-        const datasetSelect = document.getElementById('life_app_dataset');
-        if (datasetSelect) {
-            datasetSelect.innerHTML = '<option value="">Select Dataset File</option>'; // Changed placeholder
+    // Event listener for the new dataset file input
+    const lifeAppDatasetFileInput = document.getElementById('life_app_dataset_file');
+    const lifeAppDatasetFilenameDisplay = document.getElementById('life_app_dataset_filename');
 
-            // For now, hardcode dataset.json as the only option
-            // In the future, this can be updated to fetch a list of dataset filenames
-            const option = document.createElement('option');
-            option.value = 'dataset.json'; // The actual filename to be passed
-            option.textContent = 'dataset.json'; // Display the filename
-            datasetSelect.appendChild(option);
-
-            // Removed the fetch logic here, as we are not reading the content of dataset.json for dropdown options
-            // .catch(error => {
-            //     console.error('Error loading datasets:', error);
-            //     alert('Failed to load datasets. Please try again.');
-            // });
-        }
+    if (lifeAppDatasetFileInput && lifeAppDatasetFilenameDisplay) {
+        lifeAppDatasetFileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                lifeAppDatasetFilenameDisplay.textContent = this.files[0].name;
+            } else {
+                lifeAppDatasetFilenameDisplay.textContent = '';
+            }
+        });
     }
 });
