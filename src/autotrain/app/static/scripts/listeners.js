@@ -73,102 +73,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
             if (lifeAppSelection) lifeAppSelection.style.display = "block";
-
-            // --- Multi-select with tags for Project ---
-            const projectSelect = document.getElementById('life_app_project');
-            const scriptSelect = document.getElementById('life_app_script');
-            let tagContainer = document.getElementById('life-app-project-tags');
-            if (!tagContainer) {
-                tagContainer = document.createElement('div');
-                tagContainer.id = 'life-app-project-tags';
-                tagContainer.style.marginTop = '8px';
-                projectSelect.parentElement.appendChild(tagContainer);
-            } else {
-                tagContainer.innerHTML = '';
-            }
-            let hiddenInput = document.getElementById('life_app_project_hidden');
-            if (!hiddenInput) {
-                hiddenInput = document.createElement('input');
-                hiddenInput.type = 'hidden';
-                hiddenInput.id = 'life_app_project_hidden';
-                hiddenInput.name = 'life_app_project';
-                projectSelect.parentElement.appendChild(hiddenInput);
-            }
-
-            // Fetch and populate projects
-            fetch('/static/projectList.json')
-                .then(response => response.json())
-                .then(data => {
-                    let availableProjects = [...data];
-                    let selectedProjects = [];
-                    function updateTags() {
-                        tagContainer.innerHTML = '';
-                        selectedProjects.forEach(project => {
-                            const tag = document.createElement('span');
-                            tag.textContent = project;
-                            tag.style.display = 'inline-block';
-                            tag.style.background = '#e5e7eb';
-                            tag.style.color = '#111827';
-                            tag.style.borderRadius = '12px';
-                            tag.style.padding = '2px 10px 2px 8px';
-                            tag.style.marginRight = '6px';
-                            tag.style.marginBottom = '4px';
-                            tag.style.fontSize = '0.95em';
-                            tag.style.position = 'relative';
-                            // Remove button
-                            const removeBtn = document.createElement('span');
-                            removeBtn.textContent = '×';
-                            removeBtn.style.marginLeft = '8px';
-                            removeBtn.style.cursor = 'pointer';
-                            removeBtn.style.color = '#ef4444';
-                            removeBtn.onclick = function() {
-                                selectedProjects = selectedProjects.filter(p => p !== project);
-                                availableProjects.push(project);
-                                updateDropdown();
-                                updateTags();
-                            };
-                            tag.appendChild(removeBtn);
-                            tagContainer.appendChild(tag);
-                        });
-                        hiddenInput.value = selectedProjects.join(',');
-                    }
-                    function updateDropdown() {
-                        projectSelect.innerHTML = '<option value=\"\">Select Project</option>';
-                        availableProjects.forEach(project => {
-                            const option = document.createElement('option');
-                            option.value = project;
-                            option.textContent = project;
-                            projectSelect.appendChild(option);
-                        });
-                    }
-                    updateDropdown();
-                    updateTags();
-                    projectSelect.onchange = function() {
-                        const val = projectSelect.value;
-                        if (val && !selectedProjects.includes(val)) {
-                            selectedProjects.push(val);
-                            availableProjects = availableProjects.filter(p => p !== val);
-                            updateDropdown();
-                            updateTags();
-                        }
-                        projectSelect.value = '';
-                    };
-                });
-
-            // --- Script dropdown (single select) ---
-            if (scriptSelect) {
-                scriptSelect.innerHTML = '<option value=\"\">Select Script</option>';
-                fetch('/static/scriptList.json')
-                    .then(response => response.json())
-                    .then(data => {
-                        data.forEach(script => {
-                            const option = document.createElement('option');
-                            option.value = script;
-                            option.textContent = script;
-                            scriptSelect.appendChild(option);
-                        });
-                    });
-            }
+            // Call the dedicated function to load projects and handle tags
+            loadLifeAppProjects();
         } else if (dataSource.value === "hub") {
             if (hubDataTabContent) hubDataTabContent.style.display = "block";
         } else if (dataSource.value === "local") {
@@ -363,7 +269,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const lifeAppSelection = document.getElementById('life-app-selection');
         if (this.value === 'life_app') {
             lifeAppSelection.style.display = 'block';
-            // Dynamically load projects when LiFE App is selected
             loadLifeAppProjects();
         } else {
             lifeAppSelection.style.display = 'none';
@@ -373,7 +278,10 @@ document.addEventListener('DOMContentLoaded', function () {
     // Function to load projects
     async function loadLifeAppProjects() {
         const projectSelect = document.getElementById('life-app-project');
+        const projectTagsContainer = document.getElementById('life-app-project-tags');
         projectSelect.innerHTML = ''; // Clear existing options
+        projectTagsContainer.innerHTML = ''; // Clear existing tags
+
         try {
             const response = await fetch('/static/projectList.json');
             const projects = await response.json();
@@ -383,6 +291,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 option.textContent = project.project_name;
                 projectSelect.appendChild(option);
             });
+            updateProjectTags(); // Update tags after loading projects
         } catch (error) {
             console.error('Error loading projects:', error);
             alert('Failed to load projects. Please check console for details.');
@@ -422,8 +331,41 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Function to update project tags
+    function updateProjectTags() {
+        const projectSelect = document.getElementById('life-app-project');
+        const projectTagsContainer = document.getElementById('life-app-project-tags');
+        projectTagsContainer.innerHTML = ''; // Clear existing tags
+
+        Array.from(projectSelect.selectedOptions).forEach(option => {
+            const tag = document.createElement('span');
+            tag.className = 'bg-blue-200 text-blue-800 text-sm font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-900';
+            tag.textContent = option.textContent;
+
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'ml-1 text-blue-800 hover:text-blue-600 focus:outline-none';
+            removeBtn.innerHTML = '&times;';
+            removeBtn.onclick = () => {
+                // Deselect the option in the dropdown
+                for (let i = 0; i < projectSelect.options.length; i++) {
+                    if (projectSelect.options[i].value === option.value) {
+                        projectSelect.options[i].selected = false;
+                        break;
+                    }
+                }
+                updateProjectTags(); // Refresh tags
+                loadLifeAppScripts(); // Re-filter scripts
+            };
+            tag.appendChild(removeBtn);
+            projectTagsContainer.appendChild(tag);
+        });
+    }
+
     // Event listener for project selection change
-    document.getElementById('life-app-project').addEventListener('change', loadLifeAppScripts);
+    document.getElementById('life-app-project').addEventListener('change', () => {
+        loadLifeAppScripts();
+        updateProjectTags();
+    });
 
     // Initial call to load projects if already on LiFE App selection (e.g., after a refresh)
     if (document.getElementById('dataset_source').value === 'life_app') {

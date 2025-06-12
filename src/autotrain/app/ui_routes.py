@@ -507,6 +507,9 @@ async def handle_form(
     hub_dataset: str = Form(""),
     train_split: str = Form(""),
     valid_split: str = Form(""),
+    life_app_project: Optional[List[str]] = Form(None, alias="life-app-project"),
+    life_app_script: Optional[str] = Form(None, alias="life-app-script"),
+    life_app_dataset_file: Optional[str] = Form(None, alias="life-app-dataset-file"),
     token: str = Depends(user_authentication),
 ):
     """
@@ -557,18 +560,26 @@ async def handle_form(
                 detail="LiFE app datasets can only be used with Automatic Speech Recognition tasks"
             )
             
-        if not selected_project or not selected_script:
+        if not life_app_project or not life_app_script or not life_app_dataset_file:
             raise HTTPException(
                 status_code=400,
-                detail="Please select both a project and a script from LiFE app"
+                detail="Please select project(s), script, and dataset file from LiFE App."
             )
             
-        # TODO: In the future, this will be replaced with API calls to LiFE app
-        # For now, we're using the paths from the JSON files
-        data_path = selected_project
-        
-        # Add script path to params
-        params["life_app_script"] = selected_script
+        # Call the prepare_life_app_dataset internally to get the data path
+        prepared_data_response = await prepare_life_app_dataset(
+            request=request, # Pass request directly
+            project_ids=life_app_project,
+            script_id=life_app_script,
+            dataset_file=life_app_dataset_file,
+            token=token
+        )
+        data_path = prepared_data_response.body.decode('utf-8')
+        data_path = json.loads(data_path)["path"]
+
+        # Add selected LiFE App project(s) and script to params for logging/future use
+        params["life_app_project_ids"] = life_app_project
+        params["life_app_script_id"] = life_app_script
         
     elif len(training_files) > 0 and len(hub_dataset) > 0:
         raise HTTPException(

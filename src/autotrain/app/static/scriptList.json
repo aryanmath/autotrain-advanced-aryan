@@ -1,7 +1,27 @@
 [
-    "Script_0",
-    "Script_1",
-    "Script_2",
-    "Script_3",
-    "Script_4"
+    {
+        "script_id": "script_0_p0",
+        "script_name": "Script 0 (Project 0)",
+        "project_id": "project_0"
+    },
+    {
+        "script_id": "script_1_p0",
+        "script_name": "Script 1 (Project 0)",
+        "project_id": "project_0"
+    },
+    {
+        "script_id": "script_0_p1",
+        "script_name": "Script 0 (Project 1)",
+        "project_id": "project_1"
+    },
+    {
+        "script_id": "script_1_p1",
+        "script_name": "Script 1 (Project 1)",
+        "project_id": "project_1"
+    },
+    {
+        "script_id": "script_0_p2",
+        "script_name": "Script 0 (Project 2)",
+        "project_id": "project_2"
+    }
 ]
