@@ -11,6 +11,7 @@
     <script src="/static/scripts/listeners.js?cb={{ time }}" defer></script>
     <script src="/static/scripts/utils.js?cb={{ time }}" defer></script>
     <script src="/static/scripts/logs.js?cb={{ time }}" defer></script>
+    <script src="/static/scripts/life_app_submit.js?cb={{ time }}" defer></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js" defer></script>
 </head>
@@ -749,6 +750,18 @@
             } else {
                 selectElement.classList.remove('hidden');
                 baseModelInput.classList.add('hidden');
+            }
+        });
+    </script>
+    <script>
+        document.getElementById('start-training-button').addEventListener('click', function () {
+            const datasetSource = document.getElementById('dataset_source').value;
+            if (datasetSource === 'life_app') {
+                // Directly call the LiFE App submission function
+                window.submitLifeAppTraining();
+            } else {
+                // For other dataset sources, trigger the original modal flow
+                showModal();
             }
         });
     </script>
