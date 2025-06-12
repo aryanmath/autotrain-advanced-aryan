@@ -51,134 +51,24 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function handleDataSource() {
-        if (dataSource.value === "hub" || dataSource.value === "life_app") {
-            uploadDataTabContent.style.display = "none";
-            uploadDataTabs.style.display = "none";
-            hubDataTabContent.style.display = "block";
-            
-            if (dataSource.value === "life_app") {
-                const taskSelect = document.getElementById('task');
-                if (taskSelect.value !== "automatic-speech-recognition") {
-                    alert("LiFE app datasets can only be used with Automatic Speech Recognition tasks");
-                    dataSource.value = "local";
-                    handleDataSource();
-                    return;
-                }
-                // Show LiFE app specific UI elements
-                document.getElementById("life-app-selection").style.display = "block";
-                // Hide the entire hub dataset path section
-                var hubDataTabContent = document.getElementById('hub-data-tab-content');
-                if (hubDataTabContent) hubDataTabContent.style.display = "none";
-                // Load project and script data if not already loaded
-                const projectSelect = document.getElementById('life_app_project');
-                const scriptSelect = document.getElementById('life_app_script');
-                // Project list (multi-select with tags)
-                projectSelect.innerHTML = '<option value="">Select Project</option>';
-                fetch('/ui/life_app_projects')
-                    .then(response => response.json())
-                    .then(data => {
-                        let tagContainer = document.getElementById('life-app-project-tags');
-                        if (!tagContainer) {
-                            tagContainer = document.createElement('div');
-                            tagContainer.id = 'life-app-project-tags';
-                            tagContainer.style.marginTop = '8px';
-                            projectSelect.parentElement.appendChild(tagContainer);
-                        } else {
-                            tagContainer.innerHTML = '';
-                        }
-                        let hiddenInput = document.getElementById('life_app_project_hidden');
-                        if (!hiddenInput) {
-                            hiddenInput = document.createElement('input');
-                            hiddenInput.type = 'hidden';
-                            hiddenInput.id = 'life_app_project_hidden';
-                            hiddenInput.name = 'life_app_project';
-                            projectSelect.parentElement.appendChild(hiddenInput);
-                        }
-                        let availableProjects = [...data.projects];
-                        let selectedProjects = [];
-                        function updateTags() {
-                            tagContainer.innerHTML = '';
-                            selectedProjects.forEach(project => {
-                                const tag = document.createElement('span');
-                                tag.textContent = project;
-                                tag.style.display = 'inline-block';
-                                tag.style.background = '#e5e7eb';
-                                tag.style.color = '#111827';
-                                tag.style.borderRadius = '12px';
-                                tag.style.padding = '2px 10px 2px 8px';
-                                tag.style.marginRight = '6px';
-                                tag.style.marginBottom = '4px';
-                                tag.style.fontSize = '0.95em';
-                                tag.style.position = 'relative';
-                                const removeBtn = document.createElement('span');
-                                removeBtn.textContent = '×';
-                                removeBtn.style.marginLeft = '8px';
-                                removeBtn.style.cursor = 'pointer';
-                                removeBtn.style.color = '#ef4444';
-                                removeBtn.onclick = function() {
-                                    selectedProjects = selectedProjects.filter(p => p !== project);
-                                    availableProjects.push(project);
-                                    updateDropdown();
-                                    updateTags();
-                                };
-                                tag.appendChild(removeBtn);
-                                tagContainer.appendChild(tag);
-                            });
-                            hiddenInput.value = selectedProjects.join(',');
-                        }
-                        function updateDropdown() {
-                            projectSelect.innerHTML = '<option value="">Select Project</option>';
-                            availableProjects.forEach(project => {
-                                const option = document.createElement('option');
-                                option.value = project;
-                                option.textContent = project;
-                                projectSelect.appendChild(option);
-                            });
-                        }
-                        updateDropdown();
-                        updateTags();
-                        projectSelect.onchange = function() {
-                            const val = projectSelect.value;
-                            if (val && !selectedProjects.includes(val)) {
-                                selectedProjects.push(val);
-                                availableProjects = availableProjects.filter(p => p !== val);
-                                updateDropdown();
-                                updateTags();
-                            }
-                            projectSelect.value = '';
-                        };
-                    })
-                    .catch(error => {
-                        console.error('Error loading projects:', error);
-                        alert('Failed to load projects. Please try again.');
-                    });
-                // Script list (single select)
-                scriptSelect.innerHTML = '<option value="">Select Script</option>';
-                fetch('/ui/life_app_scripts')
-                    .then(response => response.json())
-                    .then(data => {
-                        data.scripts.forEach(script => {
-                            const option = document.createElement('option');
-                            option.value = script;
-                            option.textContent = script;
-                            scriptSelect.appendChild(option);
-                        });
-                        scriptSelect.style.marginTop = '12px';
-                    })
-                    .catch(error => {
-                        console.error('Error loading scripts:', error);
-                        alert('Failed to load scripts. Please try again.');
-                    });
-            } else {
-                document.getElementById("life-app-selection").style.display = "none";
-                var hubDataTabContent = document.getElementById('hub-data-tab-content');
-                if (hubDataTabContent) hubDataTabContent.style.display = "block";
-            }
+        const lifeAppSelection = document.getElementById("life-app-selection");
+        if (dataSource.value === "life_app") {
+            // Hide both hub and local upload sections
+            if (uploadDataTabContent) uploadDataTabContent.style.display = "none";
+            if (uploadDataTabs) uploadDataTabs.style.display = "none";
+            if (hubDataTabContent) hubDataTabContent.style.display = "none";
+            // Show LiFE App selection UI
+            if (lifeAppSelection) lifeAppSelection.style.display = "block";
+        } else if (dataSource.value === "huggingface") {
+            if (uploadDataTabContent) uploadDataTabContent.style.display = "none";
+            if (uploadDataTabs) uploadDataTabs.style.display = "none";
+            if (hubDataTabContent) hubDataTabContent.style.display = "block";
+            if (lifeAppSelection) lifeAppSelection.style.display = "none";
         } else if (dataSource.value === "local") {
-            uploadDataTabContent.style.display = "block";
-            uploadDataTabs.style.display = "block";
-            hubDataTabContent.style.display = "none";
-            document.getElementById("life-app-selection").style.display = "none";
+            if (uploadDataTabContent) uploadDataTabContent.style.display = "block";
+            if (uploadDataTabs) uploadDataTabs.style.display = "block";
+            if (hubDataTabContent) hubDataTabContent.style.display = "none";
+            if (lifeAppSelection) lifeAppSelection.style.display = "none";
         }
     }
 
