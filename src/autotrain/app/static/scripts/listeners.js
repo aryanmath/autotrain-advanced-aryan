@@ -427,6 +427,79 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // --- LiFE App Dataset Selection: Show/Hide and Populate ---
+    document.getElementById('dataset_source').addEventListener('change', function() {
+        const lifeAppSelection = document.getElementById('life-app-selection');
+        const projectSelect = document.getElementById('life_app_project');
+        const scriptSelect = document.getElementById('life_app_script');
+        const tagContainer = document.getElementById('life-app-project-tags');
+
+        if (this.value === 'life_app') {
+            lifeAppSelection.style.display = 'block';
+
+            // --- Project dropdown (multi-select) ---
+            if (projectSelect) {
+                fetch('/static/projectList.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        projectSelect.innerHTML = '';
+                        data.forEach(project => {
+                            const option = document.createElement('option');
+                            option.value = project;
+                            option.textContent = project;
+                            projectSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error loading projects:', error);
+                        alert('Failed to load projects. Please check console for details.');
+                    });
+            }
+
+            // --- Script dropdown (single select) ---
+            if (scriptSelect) {
+                fetch('/static/scriptList.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        scriptSelect.innerHTML = '<option value="">Select Script</option>';
+                        data.forEach(script => {
+                            const option = document.createElement('option');
+                            option.value = script;
+                            option.textContent = script;
+                            scriptSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error loading scripts:', error);
+                        alert('Failed to load scripts. Please check console for details.');
+                    });
+            }
+        } else {
+            lifeAppSelection.style.display = 'none';
+        }
+    });
+
+    // --- Project multi-select tags update ---
+    document.getElementById('life_app_project').addEventListener('change', function() {
+        const projectSelect = document.getElementById('life_app_project');
+        const tagContainer = document.getElementById('life-app-project-tags');
+        tagContainer.innerHTML = '';
+        Array.from(projectSelect.selectedOptions).forEach(option => {
+            const tag = document.createElement('span');
+            tag.className = 'bg-blue-200 text-blue-800 text-sm font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-900';
+            tag.textContent = option.textContent;
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'ml-1 text-blue-800 hover:text-blue-600 focus:outline-none';
+            removeBtn.innerHTML = '&times;';
+            removeBtn.onclick = () => {
+                option.selected = false;
+                tag.remove();
+            };
+            tag.appendChild(removeBtn);
+            tagContainer.appendChild(tag);
+        });
+    });
+
     // Function to load projects
     async function loadLifeAppProjects() {
         const projectSelect = document.getElementById('life-app-project');
