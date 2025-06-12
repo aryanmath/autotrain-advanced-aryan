@@ -1,26 +1,8 @@
 [
-    {
-        "project_id": "project_0",
-        "project_name": "Project 0"
-    },
-    {
-        "project_id": "project_1",
-        "project_name": "Project 1"
-    },
-    {
-        "project_id": "project_2",
-        "project_name": "Project 2"
-    },
-    {
-        "project_id": "project_3",
-        "project_name": "Project 3"
-    },
-    {
-        "project_id": "project_4",
-        "project_name": "Project 4"
-    },
-    {
-        "project_id": "project_5",
-        "project_name": "Project 5"
-    }
+    "Project_0",
+    "Project_1",
+    "Project_2",
+    "Project_3",
+    "Project_4",
+    "Project_5"
 ]
