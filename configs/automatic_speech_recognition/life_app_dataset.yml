@@ -1,0 +1,35 @@
+task: automatic-speech-recognition
+base_model: facebook/wav2vec2-base-960h
+project_name: autotrain-asr-life-app
+log: tensorboard
+backend: local
+
+data:
+  path: data/  # Path to your dataset directory
+  train_split: train  # Will be train.csv
+  valid_split: valid  # Will be valid.csv
+  column_mapping:
+    audio_column: audio  # Column containing audio file paths
+    text_column: transcription  # Column containing transcriptions
+  using_hub_dataset: false
+
+params:
+  max_duration: 30.0  # Maximum audio duration in seconds
+  sampling_rate: 16000  # Target sampling rate
+  max_seq_length: 128  # Maximum sequence length for text
+  epochs: 5  # Increased epochs for better learning
+  batch_size: 8
+  lr: 3e-4
+  optimizer: adamw_torch
+  scheduler: linear
+  gradient_accumulation: 1
+  mixed_precision: fp16
+  weight_decay: 0.01
+  warmup_ratio: 0.1
+  early_stopping_patience: 5  # Increased patience
+  early_stopping_threshold: 0.01
+
+hub:
+  username: ${HF_USERNAME}
+  token: ${HF_TOKEN}
+  push_to_hub: false  # Set to true if you want to push to Hugging Face Hub 
