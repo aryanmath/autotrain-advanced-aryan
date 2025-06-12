@@ -53,19 +53,18 @@ document.addEventListener('DOMContentLoaded', function () {
     function handleDataSource() {
         const lifeAppSelection = document.getElementById("life-app-selection");
         if (dataSource.value === "life_app") {
-            // Show LiFE App selection UI
+            // Show only LiFE App selection UI
             if (lifeAppSelection) lifeAppSelection.style.display = "block";
-            // Hide only hub dataset fields
             if (hubDataTabContent) hubDataTabContent.style.display = "none";
-            // Show local upload UI
-            if (uploadDataTabContent) uploadDataTabContent.style.display = "block";
-            if (uploadDataTabs) uploadDataTabs.style.display = "block";
+            if (uploadDataTabContent) uploadDataTabContent.style.display = "none";
+            if (uploadDataTabs) uploadDataTabs.style.display = "none";
         } else if (dataSource.value === "huggingface") {
             if (uploadDataTabContent) uploadDataTabContent.style.display = "none";
             if (uploadDataTabs) uploadDataTabs.style.display = "none";
             if (hubDataTabContent) hubDataTabContent.style.display = "block";
             if (lifeAppSelection) lifeAppSelection.style.display = "none";
         } else if (dataSource.value === "local") {
+            // Show local upload UI
             if (uploadDataTabContent) uploadDataTabContent.style.display = "block";
             if (uploadDataTabs) uploadDataTabs.style.display = "block";
             if (hubDataTabContent) hubDataTabContent.style.display = "none";
