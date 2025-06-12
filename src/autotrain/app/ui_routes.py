@@ -919,7 +919,11 @@ async def get_life_app_projects(token: str = Depends(token_verification)):
     try:
         with open("src/autotrain/app/static/projectList.json", "r") as f:
             projects = json.load(f)
-        return JSONResponse(projects)
+        # Transform the list of strings into a list of dictionaries
+        transformed_projects = []
+        for p in projects:
+            transformed_projects.append({"id": p, "name": p})
+        return JSONResponse(transformed_projects)
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="projectList.json not found.")
     except Exception as e:
@@ -936,6 +940,25 @@ async def get_life_app_scripts(token: str = Depends(token_verification)):
         raise HTTPException(status_code=404, detail="scriptList.json not found.")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error loading scripts: {e}")
+
+
+@ui_router.get("/life_app_dataset_files", response_class=JSONResponse)
+async def get_life_app_dataset_files(token: str = Depends(token_verification)):
+    """
+    This function is used to fetch the list of dataset files from src/autotrain/app/static/.
+    """
+    dataset_files_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
+    if not os.path.exists(dataset_files_dir):
+        return []
+    
+    json_files = [f for f in os.listdir(dataset_files_dir) if f.endswith('.json')]
+    
+    # Transform the list of strings into a list of dictionaries with 'id' and 'name' keys
+    transformed_files = []
+    for f in json_files:
+        transformed_files.append({"id": f, "name": f})
+    
+    return JSONResponse(transformed_files)
 
 
 @ui_router.post("/life_app_dataset/prepare", response_class=JSONResponse)

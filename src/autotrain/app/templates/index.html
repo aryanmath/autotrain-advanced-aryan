@@ -447,8 +447,8 @@
                             </select>
                         </div>
                         <div class="mb-4">
-                            <label for="life_app_dataset" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Dataset</label>
-                            <select id="life_app_dataset" name="life_app_dataset"
+                            <label for="life_app_dataset_file" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Dataset</label>
+                            <select id="life_app_dataset_file" name="life_app_dataset_file"
                                 class="mt-1 block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                                 <option value="">Select Dataset</option>
                             </select>
@@ -759,10 +759,11 @@
             .then(data => {
                 console.log("Data from life_app_dataset_files:", data);
                 const select = document.getElementById('life_app_dataset_file');
-                data.forEach(filename => {
+                select.innerHTML = '<option value="">--Select a file--</option>'; // Clear existing options
+                data.forEach(item => {
                     const option = document.createElement('option');
-                    option.value = filename;
-                    option.textContent = filename;
+                    option.value = item.id;
+                    option.textContent = item.name;
                     select.appendChild(option);
                 });
             })
