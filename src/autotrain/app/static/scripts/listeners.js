@@ -392,7 +392,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Function to load projects
     async function loadLifeAppProjects() {
-        const projectSelect = document.getElementById('life-app-project');
+        const projectSelect = document.getElementById('life_app_project'); // <-- fixed ID
         const projectTagsContainer = document.getElementById('life-app-project-tags');
         projectSelect.innerHTML = ''; // Clear existing options
         projectTagsContainer.innerHTML = ''; // Clear existing tags
@@ -415,8 +415,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Function to load scripts based on selected projects
     async function loadLifeAppScripts() {
-        const projectSelect = document.getElementById('life-app-project');
-        const scriptSelect = document.getElementById('life-app-script');
+        const projectSelect = document.getElementById('life_app_project'); // <-- fixed ID
+        const scriptSelect = document.getElementById('life_app_script');   // <-- fixed ID
         scriptSelect.innerHTML = '<option value="">Select Script</option>'; // Clear and reset
 
         const selectedProjectIds = Array.from(projectSelect.selectedOptions).map(option => option.value);
