@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
         modal.classList.add('hidden');
     }
 
-    function showModal() {
+    window.showModal = function() {
         const modal = document.getElementById('confirmation-modal');
         modal.classList.add('flex');
         modal.classList.remove('hidden');
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
         modal.classList.add('hidden');
     }
 
-    function hideModal() {
+    window.hideModal = function() {
         const modal = document.getElementById('confirmation-modal');
         modal.classList.remove('flex');
         modal.classList.add('hidden');
