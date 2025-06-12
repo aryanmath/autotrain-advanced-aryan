@@ -129,4 +129,4 @@ class AutomaticSpeechRecognitionParams(BaseModel):
             
         # Validate optimizer
         if self.optimizer not in ["adamw_hf", "adamw_torch", "adamw_torch_fused", "adamw_apex_fused", "adafactor", "adamw_anyprecision", "sgd", "adagrad"]:
-            raise ValueError("optimizer must be one of: adamw_hf, adamw_torch, adamw_torch_fused, adamw_apex_fused, adafactor, adamw_anyprecision, sgd, adagrad") 
+            raise ValueError("optimizer must be one of: adamw_hf, adamw_torch, adamw_torch_fused, adamw_apex_fused, adafactor, adamw_anyprecision, sgd, adagrad")

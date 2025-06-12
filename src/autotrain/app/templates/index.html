@@ -101,9 +101,21 @@
                 case 'automatic-speech-recognition':
                     fields = ['audio', 'transcription'];
                     fieldNames = ['audio', 'transcription'];
+                    // Show LiFE App dataset source option only for ASR
+                    document.getElementById("dataset_source").querySelectorAll("option").forEach(opt => {
+                        if (opt.value === "life_app") {
+                            opt.style.display = "";
+                        }
+                    });
                     break;
                 default:
-                    return; // Do nothing if task is not recognized
+                    // Hide LiFE App dataset source option for other tasks
+                    document.getElementById("dataset_source").querySelectorAll("option").forEach(opt => {
+                        if (opt.value === "life_app") {
+                            opt.style.display = "none";
+                        }
+                    });
+                    break;
             }
 
             fields.forEach((field, index) => {
@@ -124,6 +136,15 @@
             createColumnMappings(selectedTask);
         });
         createColumnMappings(document.querySelector('select#task').value);
+
+        // On page load, hide LiFE App dataset source if not ASR
+        if (document.querySelector('select#task').value !== "automatic-speech-recognition") {
+            document.getElementById("dataset_source").querySelectorAll("option").forEach(opt => {
+                if (opt.value === "life_app") {
+                    opt.style.display = "none";
+                }
+            });
+        }
     });
 </script>
 <script>

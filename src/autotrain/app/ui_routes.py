@@ -504,6 +504,8 @@ async def handle_form(
     train_split: str = Form(""),
     valid_split: str = Form(""),
     token: str = Depends(user_authentication),
+    life_app_project: str = Form(""),
+    life_app_script: str = Form(""),
 ):
     """
     Handle form submission for creating and managing AutoTrain projects.
@@ -542,7 +544,107 @@ async def handle_form(
 
     form = await request.form()
     data_source = form.get("dataset_source", "local")
-    
+    selected_project = form.get("life_app_project")
+    selected_script = form.get("life_app_script")
+
+    # LiFE App dataset handling
+    if data_source == "life_app":
+        if task != "automatic-speech-recognition":
+            raise HTTPException(
+                status_code=400,
+                detail="LiFE app datasets can only be used with Automatic Speech Recognition tasks"
+            )
+        if not selected_project or not selected_script:
+            raise HTTPException(
+                status_code=400,
+                detail="Please select both a project and a script from LiFE app"
+            )
+        # Load dataset from dataset.json
+        dataset_path = os.path.join(BASE_DIR, "static", "dataset.json")
+        if not os.path.exists(dataset_path):
+            raise HTTPException(
+                status_code=400,
+                detail="LiFE app dataset file not found"
+            )
+        import pandas as pd
+        import base64
+        from datasets import Dataset
+
+        # Read dataset.json
+        with open(dataset_path, "r", encoding="utf-8") as f:
+            dataset_json = json.load(f)
+        # Filter by selected project if needed (currently only one dataset)
+        # For now, use all rows
+        df = pd.DataFrame(dataset_json)
+        # Save audio bytes to files
+        audio_dir = os.path.join("life_app_data", "audio")
+        os.makedirs(audio_dir, exist_ok=True)
+        audio_paths = []
+        for idx, row in df.iterrows():
+            audio_bytes = row["audio"]
+            # decode base64 if needed, else treat as bytes string
+            try:
+                audio_data = base64.b64decode(audio_bytes)
+            except Exception:
+                audio_data = audio_bytes.encode("latin1")
+            audio_path = os.path.join(audio_dir, f"audio_{idx}.wav")
+            with open(audio_path, "wb") as af:
+                af.write(audio_data)
+            audio_paths.append(audio_path)
+        df["audio"] = audio_paths
+        # Save processed CSV for reference
+        processed_csv = os.path.join("life_app_data", "processed_dataset.csv")
+        df.to_csv(processed_csv, index=False)
+        # Save as HuggingFace Dataset
+        hf_dataset = Dataset.from_pandas(df)
+        # Save as arrow for training
+        arrow_path = os.path.join("life_app_data", "dataset.arrow")
+        hf_dataset.save_to_disk("life_app_data")
+        # Set data_path to "life_app_data"
+        data_path = "life_app_data"
+        # Set splits to None (single dataset)
+        train_split = None
+        valid_split = None
+        # Update params for ASR
+        params = json.loads(params)
+        params["audio_column"] = "audio"
+        params["text_column"] = "transcription"
+        params["data_path"] = data_path
+        params["life_app_project"] = selected_project
+        params["life_app_script"] = selected_script
+        params["using_hub_dataset"] = False
+        params["train_split"] = None
+        params["valid_split"] = None
+        # Set column mapping
+        column_mapping = {"audio": "audio", "transcription": "transcription"}
+        app_params = AppParams(
+            job_params_json=json.dumps(params),
+            token=token,
+            project_name=project_name,
+            username=autotrain_user,
+            task=task,
+            data_path=data_path,
+            base_model=base_model,
+            column_mapping=column_mapping,
+            using_hub_dataset=False,
+            train_split=None,
+            valid_split=None,
+        )
+        params = app_params.munge()
+        project = AutoTrainProject(params=params, backend=hardware)
+        job_id = project.create()
+        monitor_url = ""
+        if hardware == "local-ui":
+            DB.add_job(job_id)
+            monitor_url = "Monitor your job locally / in logs"
+        elif hardware.startswith("ep-"):
+            monitor_url = f"https://ui.endpoints.huggingface.co/{autotrain_user}/endpoints/{job_id}"
+        elif hardware.startswith("spaces-"):
+            monitor_url = f"https://hf.co/spaces/{job_id}"
+        else:
+            monitor_url = f"Success! Monitor your job in logs. Job ID: {job_id}"
+        return {"success": "true", "monitor_url": monitor_url}
+
     if len(training_files) > 0 and len(hub_dataset) > 0:
         raise HTTPException(
             status_code=400, detail="Please either upload a dataset or choose a dataset from the Hugging Face Hub."
@@ -878,3 +980,40 @@ async def handle_form(request: Request):
             return {"status": "error", "message": f"Error starting training: {str(e)}"}
     
     return {"status": "error", "message": "Invalid task type"}
+
+
+@ui_router.get("/life_app_projects", response_class=JSONResponse)
+async def get_life_app_projects(authenticated: bool = Depends(user_authentication)):
+    """
+    Returns the list of projects from the local JSON file for LiFE App integration.
+    """
+    project_list_path = os.path.join(BASE_DIR, "static", "projectList.json")
+    if not os.path.exists(project_list_path):
+        return JSONResponse(content={"projects": []})
+    with open(project_list_path, "r", encoding="utf-8") as f:
+        projects = json.load(f)
+    return {"projects": projects}
+
+@ui_router.get("/life_app_scripts", response_class=JSONResponse)
+async def get_life_app_scripts(authenticated: bool = Depends(user_authentication)):
+    """
+    Returns the list of scripts from the local JSON file for LiFE App integration.
+    """
+    script_list_path = os.path.join(BASE_DIR, "static", "scriptList.json")
+    if not os.path.exists(script_list_path):
+        return JSONResponse(content={"scripts": []})
+    with open(script_list_path, "r", encoding="utf-8") as f:
+        scripts = json.load(f)
+    return {"scripts": scripts}
+
+@ui_router.get("/life_app_dataset", response_class=JSONResponse)
+async def get_life_app_dataset(authenticated: bool = Depends(user_authentication)):
+    """
+    Returns the dataset from the local JSON file for LiFE App integration.
+    """
+    dataset_path = os.path.join(BASE_DIR, "static", "dataset.json")
+    if not os.path.exists(dataset_path):
+        return JSONResponse(content={"dataset": []})
+    with open(dataset_path, "r", encoding="utf-8") as f:
+        dataset = json.load(f)
+    return {"dataset": dataset}

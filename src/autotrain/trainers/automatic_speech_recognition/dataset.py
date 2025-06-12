@@ -214,4 +214,9 @@ class AutomaticSpeechRecognitionDataset:
 
         except Exception as e:
             logger.error(f"Error processing item {idx}: {str(e)}")
-            raise 
+            raise
+
+# Add a utility to load LiFE App dataset from disk for training if needed
+def load_life_app_dataset(data_path):
+    from datasets import load_from_disk
+    return load_from_disk(data_path)

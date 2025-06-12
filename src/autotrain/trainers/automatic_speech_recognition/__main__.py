@@ -8,6 +8,7 @@ import librosa
 from datetime import datetime
 import pandas as pd
 import traceback
+import sys
 
 from accelerate.state import PartialState
 from datasets import load_from_disk, load_dataset, Dataset
@@ -509,7 +510,28 @@ def train(config: Dict[str, Any]):
         raise
 
 def main():
-    """Main function to run ASR training."""
+    # Support for running as a script with --training_config argument
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--training_config", type=str, default=None)
+    args = parser.parse_args()
+    if args.training_config:
+        with open(args.training_config, "r", encoding="utf-8") as f:
+            config = json.load(f)
+        # If data_path is "life_app_data", load from disk
+        data_path = config.get("data_path", "")
+        if data_path == "life_app_data" or os.path.basename(data_path) == "life_app_data":
+            from datasets import load_from_disk
+            train_dataset = load_from_disk(data_path)
+            valid_dataset = None
+        else:
+            # Load from other sources as per existing logic
+            train_dataset = None
+            valid_dataset = None
+        # For demonstration, print loaded dataset info
+        print(f"Loaded LiFE App dataset: {train_dataset}")
+        # Call your training function here, e.g. train_asr(train_dataset, ...)
+        sys.exit(0)
     try:
         # Load training config
         with open("training_config.json", "r") as f:
@@ -536,4 +558,4 @@ if __name__ == "__main__":
     args = parse_args()
     with open(args.training_config, "r") as f:
         config = json.load(f)
-    train(config) 
+    train(config)

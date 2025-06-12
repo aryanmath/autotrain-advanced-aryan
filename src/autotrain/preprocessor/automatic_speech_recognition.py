@@ -187,4 +187,9 @@ class AutomaticSpeechRecognitionPreprocessor(AutoTrainPreprocessor):
         
         logger.info("Saving training dataset...")
         datasets.save_to_disk(save_path)
-        logger.info("Training dataset saved successfully") 
+        logger.info("Training dataset saved successfully")
+
+# Add a utility to load LiFE App dataset from disk for preprocessing if needed
+def load_life_app_dataset_from_disk(data_path):
+    from datasets import load_from_disk
+    return load_from_disk(data_path)
