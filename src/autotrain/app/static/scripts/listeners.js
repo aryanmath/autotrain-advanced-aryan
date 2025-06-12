@@ -191,22 +191,20 @@ document.addEventListener('DOMContentLoaded', function () {
     async function loadLifeAppDatasets() {
         const datasetSelect = document.getElementById('life_app_dataset');
         if (datasetSelect) {
-            datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
-            fetch('/static/dataset.json')
-                .then(response => response.json())
-                .then(data => {
-                    data.forEach(dataset => {
-                        const option = document.createElement('option');
-                        // Store the entire object as a string and display the transcription
-                        option.value = JSON.stringify(dataset);
-                        option.textContent = dataset.transcription; 
-                        datasetSelect.appendChild(option);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error loading datasets:', error);
-                    alert('Failed to load datasets. Please try again.');
-                });
+            datasetSelect.innerHTML = '<option value="">Select Dataset File</option>'; // Changed placeholder
+
+            // For now, hardcode dataset.json as the only option
+            // In the future, this can be updated to fetch a list of dataset filenames
+            const option = document.createElement('option');
+            option.value = 'dataset.json'; // The actual filename to be passed
+            option.textContent = 'dataset.json'; // Display the filename
+            datasetSelect.appendChild(option);
+
+            // Removed the fetch logic here, as we are not reading the content of dataset.json for dropdown options
+            // .catch(error => {
+            //     console.error('Error loading datasets:', error);
+            //     alert('Failed to load datasets. Please try again.');
+            // });
         }
     }
 });
