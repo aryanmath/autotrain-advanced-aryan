@@ -65,8 +65,8 @@ document.addEventListener('DOMContentLoaded', function () {
             if (lifeAppSelection) lifeAppSelection.style.display = "none";
         } else if (dataSource.value === "local") {
             // Show local upload UI
-            if (uploadDataTabContent) uploadDataTabContent.style.display = "block";
-            if (uploadDataTabs) uploadDataTabs.style.display = "block";
+            if (uploadDataTabContent) uploadDataTabContent.style.display = "none";
+            if (uploadDataTabs) uploadDataTabs.style.display = "none";
             if (hubDataTabContent) hubDataTabContent.style.display = "none";
             if (lifeAppSelection) lifeAppSelection.style.display = "none";
         }
