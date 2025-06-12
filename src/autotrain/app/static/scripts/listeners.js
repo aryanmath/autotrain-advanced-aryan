@@ -392,7 +392,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Function to load projects
     async function loadLifeAppProjects() {
-        const projectSelect = document.getElementById('life_app_project'); // <-- fixed ID
+        const projectSelect = document.getElementById('life_app_project');
         const projectTagsContainer = document.getElementById('life-app-project-tags');
         projectSelect.innerHTML = ''; // Clear existing options
         projectTagsContainer.innerHTML = ''; // Clear existing tags
@@ -402,8 +402,8 @@ document.addEventListener('DOMContentLoaded', function () {
             const projects = await response.json();
             projects.forEach(project => {
                 const option = document.createElement('option');
-                option.value = project.project_id;
-                option.textContent = project.project_name;
+                option.value = project;
+                option.textContent = project;
                 projectSelect.appendChild(option);
             });
             updateProjectTags(); // Update tags after loading projects
@@ -415,29 +415,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Function to load scripts based on selected projects
     async function loadLifeAppScripts() {
-        const projectSelect = document.getElementById('life_app_project'); // <-- fixed ID
-        const scriptSelect = document.getElementById('life_app_script');   // <-- fixed ID
+        const projectSelect = document.getElementById('life_app_project');
+        const scriptSelect = document.getElementById('life_app_script');
         scriptSelect.innerHTML = '<option value="">Select Script</option>'; // Clear and reset
 
-        const selectedProjectIds = Array.from(projectSelect.selectedOptions).map(option => option.value);
-
-        if (selectedProjectIds.length === 0) {
-            return; // No projects selected, so no scripts to load
-        }
-
+        // No filtering by project, just load all scripts (since scripts are just strings)
         try {
             const response = await fetch('/static/scriptList.json');
-            const allScripts = await response.json();
-
-            // Filter scripts based on selected projects
-            const filteredScripts = allScripts.filter(script => 
-                selectedProjectIds.includes(script.project_id)
-            );
-
-            filteredScripts.forEach(script => {
+            const scripts = await response.json();
+            scripts.forEach(script => {
                 const option = document.createElement('option');
-                option.value = script.script_id;
-                option.textContent = script.script_name;
+                option.value = script;
+                option.textContent = script;
                 scriptSelect.appendChild(option);
             });
         } catch (error) {
