@@ -98,7 +98,7 @@ class LifeAppDataFetcher:
                 
             # Transform data if needed
             transformed_item = {
-                'audio': item['audio'],
+                'audio': item['audio'],  # Keep audio bytes as is
                 'transcription': item['transcription']
             }
             

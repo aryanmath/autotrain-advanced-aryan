@@ -171,6 +171,7 @@ class AppParams:
         train_split (Optional[str]): Name of the training split. Default is None.
         valid_split (Optional[str]): Name of the validation split. Default is None.
         using_hub_dataset (Optional[bool]): Flag indicating if a hub dataset is used. Default is False.
+        using_life_app_dataset: Optional[bool] = False
         api (Optional[bool]): Flag indicating if API is used. Default is False.
 
     Methods:
@@ -203,11 +204,14 @@ class AppParams:
     train_split: Optional[str] = None
     valid_split: Optional[str] = None
     using_hub_dataset: Optional[bool] = False
+    using_life_app_dataset: Optional[bool] = False
     api: Optional[bool] = False
 
     def __post_init__(self):
         if self.using_hub_dataset and not self.train_split:
             raise ValueError("train_split is required when using a hub dataset")
+        if self.using_life_app_dataset and not self.data_path:
+            raise ValueError("data_path (life_app_dataset_name) is required when using a LiFE App dataset")
 
     def munge(self):
         if self.task == "text-classification":
@@ -247,6 +251,10 @@ class AppParams:
             _params["push_to_hub"] = True
         _params["data_path"] = self.data_path
         _params["username"] = self.username
+        if self.using_life_app_dataset:
+            _params["using_life_app_dataset"] = True
+            _params["life_app_dataset_name"] = self.data_path # data_path will contain "dataset.json"
+
         return _params
 
     def _munge_params_sent_transformers(self):
@@ -513,7 +521,10 @@ class AppParams:
         _params["model"] = self.base_model
         if "log" not in _params:
             _params["log"] = "tensorboard"
-        if not self.using_hub_dataset:
+        if self.using_life_app_dataset:
+            _params["using_life_app_dataset"] = True
+            _params["life_app_dataset_name"] = self.data_path
+        elif not self.using_hub_dataset:
             _params["audio_column"] = "autotrain_audio"
             _params["text_column"] = "autotrain_transcription"
             _params["valid_split"] = "validation"
