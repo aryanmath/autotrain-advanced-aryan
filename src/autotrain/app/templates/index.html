@@ -748,6 +748,26 @@
         });
     </script>
 
+    <script>
+        // Show/hide LiFE App selection UI based on dataset source
+        document.addEventListener('DOMContentLoaded', function () {
+            const datasetSource = document.getElementById('dataset_source');
+            const lifeAppSelection = document.getElementById('life-app-selection');
+
+            function toggleLifeAppSelection() {
+                if (datasetSource.value === 'life_app') {
+                    lifeAppSelection.style.display = '';
+                } else {
+                    lifeAppSelection.style.display = 'none';
+                }
+            }
+
+            datasetSource.addEventListener('change', toggleLifeAppSelection);
+            // Initialize on page load
+            toggleLifeAppSelection();
+        });
+    </script>
+
     <!-- Add this block for LiFE App selection UI -->
     <div id="life-app-selection" style="display:none;" class="w-full px-4 mb-4">
         <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">LiFE App Project(s)</label>
