@@ -266,26 +266,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Update dataset source change handler
     document.getElementById('dataset_source').addEventListener('change', function() {
-        console.log('Dataset source changed to:', this.value); // Debug log
+        console.log('Dataset source changed to:', this.value);
         const lifeAppSelection = document.getElementById('life-app-selection');
         const projectSelect = document.getElementById('life_app_project');
         const scriptSelect = document.getElementById('life_app_script');
         const tagContainer = document.getElementById('life-app-project-tags');
 
         if (this.value === 'life_app') {
-            console.log('Showing LiFE App selection'); // Debug log
+            console.log('Showing LiFE App selection');
             lifeAppSelection.style.display = 'block';
 
             // --- Project dropdown (multi-select) ---
             if (projectSelect) {
-                console.log('Loading projects...'); // Debug log
+                console.log('Loading projects...');
                 fetch('/static/projectList.json')
                     .then(response => {
-                        console.log('Project list response:', response.status); // Debug log
+                        console.log('Project list response:', response.status);
                         return response.json();
                     })
                     .then(data => {
-                        console.log('Projects loaded:', data); // Debug log
+                        console.log('Projects loaded:', data);
                         projectSelect.innerHTML = '<option value="">Select Project</option>';
                         data.forEach(project => {
                             const option = document.createElement('option');
@@ -302,14 +302,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // --- Script dropdown (single select) ---
             if (scriptSelect) {
-                console.log('Loading scripts...'); // Debug log
+                console.log('Loading scripts...');
                 fetch('/static/scriptList.json')
                     .then(response => {
-                        console.log('Script list response:', response.status); // Debug log
+                        console.log('Script list response:', response.status);
                         return response.json();
                     })
                     .then(data => {
-                        console.log('Scripts loaded:', data); // Debug log
+                        console.log('Scripts loaded:', data);
                         scriptSelect.innerHTML = '<option value="">Select Script</option>';
                         data.forEach(script => {
                             const option = document.createElement('option');
