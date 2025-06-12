@@ -421,29 +421,45 @@
                             </p>
                             <select id="dataset_source" name="dataset_source"
                                 class="mt-1 block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                                <option value="local">Local</option>
+                                <option value="local">Local Dataset</option>
                                 <option value="hub">Hugging Face Hub</option>
                                 <option value="life_app">LiFE App Dataset</option>
                             </select>
                         </div>
                     </div>
 
-                    <!-- LiFE App Project and Script Selection -->
-                    <div id="life-app-selection" class="items-center justify-center h-48" style="display: none;">
-                        <div class="w-full px-4">
-                            <p class="text-xl text-gray-800 dark:text-gray-200 mb-2 mt-2">LiFE App Project</p>
-                            <select id="life_app_project" name="life_app_project" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                                <option value="">Select Project</option>
+                    <!-- Add LiFE App dataset selection UI -->
+                    <div id="life-app-selection" style="display: none;">
+                        <div class="form-group">
+                            <label for="life-app-source">Select Data Source:</label>
+                            <select id="life-app-source" class="form-control">
+                                <option value="">Select source</option>
+                                <option value="api">LiFE App API</option>
+                                <option value="json">JSON File</option>
                             </select>
-                            <div id="life-app-project-tags" style="margin-top: 8px;"></div>
-                            <input type="hidden" id="life_app_project_hidden" name="life_app_project" />
                         </div>
-                        <div class="w-full px-4 mt-4">
-                            <p class="text-xl text-gray-800 dark:text-gray-200 mb-2 mt-2">LiFE App Script</p>
-                            <select id="life_app_script" name="life_app_script"
-                                class="mt-1 block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                                <option value="">Select Script</option>
-                            </select>
+
+                        <!-- API Input Container -->
+                        <div id="life-app-api-container" class="input-container" style="display: none;">
+                            <div class="form-group">
+                                <label for="life-app-api-url">API URL:</label>
+                                <input type="url" id="life-app-api-url" class="form-control" placeholder="Enter LiFE App API URL">
+                            </div>
+                            <div class="form-group">
+                                <label for="life-app-api-token">API Token:</label>
+                                <input type="password" id="life-app-api-token" class="form-control" placeholder="Enter API token">
+                            </div>
+                        </div>
+
+                        <!-- JSON File Input Container -->
+                        <div id="life-app-json-container" class="input-container" style="display: none;">
+                            <div class="form-group">
+                                <label for="life-app-json-file">JSON File:</label>
+                                <input type="file" id="life-app-json-file" class="form-control" accept=".json">
+                                <small class="form-text text-muted">
+                                    File should contain an array of objects with 'audio' and 'transcription' fields
+                                </small>
+                            </div>
                         </div>
                     </div>
 

@@ -311,4 +311,60 @@ document.addEventListener('DOMContentLoaded', function () {
             handleDataSource();
         }
     });
+
+    // LiFE App Dataset Selection
+    document.getElementById('life-app-source').addEventListener('change', function() {
+        const apiContainer = document.getElementById('life-app-api-container');
+        const jsonContainer = document.getElementById('life-app-json-container');
+        
+        if (this.value === 'api') {
+            apiContainer.style.display = 'block';
+            jsonContainer.style.display = 'none';
+        } else if (this.value === 'json') {
+            apiContainer.style.display = 'none';
+            jsonContainer.style.display = 'block';
+        } else {
+            apiContainer.style.display = 'none';
+            jsonContainer.style.display = 'none';
+        }
+    });
+
+    // Handle JSON file selection
+    document.getElementById('life-app-json-file').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (!Array.isArray(data)) {
+                        throw new Error('JSON must be an array');
+                    }
+                    if (data.length === 0) {
+                        throw new Error('JSON array is empty');
+                    }
+                    const firstItem = data[0];
+                    if (!firstItem.audio || !firstItem.transcription) {
+                        throw new Error('Each item must have audio and transcription fields');
+                    }
+                    // Store the validated data
+                    window.lifeAppData = data;
+                } catch (error) {
+                    alert('Invalid JSON file: ' + error.message);
+                    e.target.value = '';
+                }
+            };
+            reader.readAsText(file);
+        }
+    });
+
+    // Update dataset source change handler
+    document.getElementById('dataset_source').addEventListener('change', function() {
+        const lifeAppSelection = document.getElementById('life-app-selection');
+        if (this.value === 'life_app') {
+            lifeAppSelection.style.display = 'block';
+        } else {
+            lifeAppSelection.style.display = 'none';
+        }
+    });
 });
