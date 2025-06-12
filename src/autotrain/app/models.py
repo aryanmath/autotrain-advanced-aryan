@@ -431,6 +431,6 @@ class LifeAppDatasetValidationRequest(BaseModel):
 
 
 class LifeAppDatasetPrepareRequest(BaseModel):
-    source_type: str  # "api" or "json"
-    api_data: Optional[LifeAppApiSource] = None
-    json_data: Optional[List[Dict[str, Any]]] = None # This will be populated from the uploaded JSON in the frontend
+    project_ids: List[str]
+    script_id: str
+    dataset_file: str # Expected to be "dataset.json"

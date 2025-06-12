@@ -428,38 +428,28 @@
                         </div>
                     </div>
 
-                    <!-- Add LiFE App dataset selection UI -->
+                    <!-- LiFE App dataset selection UI - Project, Script, Dataset.json -->
                     <div id="life-app-selection" style="display: none;">
                         <div class="form-group">
-                            <label for="life-app-source">Select Data Source:</label>
-                            <select id="life-app-source" class="form-control">
-                                <option value="">Select source</option>
-                                <option value="api">LiFE App API</option>
-                                <option value="json">JSON File</option>
+                            <label for="life-app-project">Select Project(s):</label>
+                            <select id="life-app-project" class="form-control" multiple>
+                                <!-- Options will be dynamically loaded by JavaScript -->
                             </select>
                         </div>
 
-                        <!-- API Input Container -->
-                        <div id="life-app-api-container" class="input-container" style="display: none;">
-                            <div class="form-group">
-                                <label for="life-app-api-url">API URL:</label>
-                                <input type="url" id="life-app-api-url" class="form-control" placeholder="Enter LiFE App API URL">
-                            </div>
-                            <div class="form-group">
-                                <label for="life-app-api-token">API Token:</label>
-                                <input type="password" id="life-app-api-token" class="form-control" placeholder="Enter API token">
-                            </div>
+                        <div class="form-group mt-2">
+                            <label for="life-app-script">Select Script:</label>
+                            <select id="life-app-script" class="form-control">
+                                <option value="">Select Script</option>
+                                <!-- Options will be dynamically loaded by JavaScript -->
+                            </select>
                         </div>
 
-                        <!-- JSON File Input Container -->
-                        <div id="life-app-json-container" class="input-container" style="display: none;">
-                            <div class="form-group">
-                                <label for="life-app-json-file">JSON File:</label>
-                                <input type="file" id="life-app-json-file" class="form-control" accept=".json">
-                                <small class="form-text text-muted">
-                                    File should contain an array of objects with 'audio' and 'transcription' fields
-                                </small>
-                            </div>
+                        <div class="form-group mt-2">
+                            <label for="life-app-dataset-file">Select Dataset File:</label>
+                            <select id="life-app-dataset-file" class="form-control">
+                                <option value="dataset.json">dataset.json</option>
+                            </select>
                         </div>
                     </div>
 

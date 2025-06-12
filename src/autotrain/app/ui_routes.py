@@ -907,96 +907,58 @@ async def handle_form(request: Request):
     return {"status": "error", "message": "Invalid task type"}
 
 
-@ui_router.post("/life_app_dataset/validate", response_class=JSONResponse)
-async def validate_life_app_dataset(
-    request: Request,
-    source_type: str = Form(...),
-    api_url: Optional[str] = Form(None),
-    api_token: Optional[str] = Form(None),
-    json_file: Optional[UploadFile] = File(None),
-    token: str = Depends(token_verification),
-):
-    if source_type == "api":
-        if not api_url or not api_token:
-            raise HTTPException(status_code=400, detail="API URL and token are required for API source.")
-        try:
-            import requests
-            response = requests.get(api_url, headers={"Authorization": f"Bearer {api_token}"}, timeout=10)
-            response.raise_for_status()
-            # Optionally, perform more specific validation of the API response if needed
-            return JSONResponse({"status": "success", "message": "API connection successful!"})
-        except requests.exceptions.RequestException as e:
-            raise HTTPException(status_code=400, detail=f"API connection failed: {e}")
-    elif source_type == "json":
-        if not json_file:
-            raise HTTPException(status_code=400, detail="JSON file is required for JSON source.")
-        try:
-            content = await json_file.read()
-            data = json.loads(content)
-            if not isinstance(data, list):
-                raise ValueError("JSON content must be an array.")
-            if not data:
-                raise ValueError("JSON array cannot be empty.")
-            for item in data:
-                if not isinstance(item, dict) or "audio" not in item or "transcription" not in item:
-                    raise ValueError("Each item in JSON array must be an object with 'audio' and 'transcription' fields.")
-            return JSONResponse({"status": "success", "message": "JSON file validated successfully!"})
-        except json.JSONDecodeError:
-            raise HTTPException(status_code=400, detail="Invalid JSON file format.")
-        except ValueError as e:
-            raise HTTPException(status_code=400, detail=f"Invalid JSON file content: {e}")
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"An error occurred during JSON file validation: {e}")
-    else:
-        raise HTTPException(status_code=400, detail="Invalid source type.")
+@ui_router.get("/life_app_projects", response_class=JSONResponse)
+async def get_life_app_projects(token: str = Depends(token_verification)):
+    try:
+        with open("src/autotrain/app/static/projectList.json", "r") as f:
+            projects = json.load(f)
+        return JSONResponse(projects)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="projectList.json not found.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error loading projects: {e}")
+
+
+@ui_router.get("/life_app_scripts", response_class=JSONResponse)
+async def get_life_app_scripts(token: str = Depends(token_verification)):
+    try:
+        with open("src/autotrain/app/static/scriptList.json", "r") as f:
+            scripts = json.load(f)
+        return JSONResponse(scripts)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="scriptList.json not found.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error loading scripts: {e}")
 
 
 @ui_router.post("/life_app_dataset/prepare", response_class=JSONResponse)
 async def prepare_life_app_dataset(
     request: Request,
-    source_type: str = Form(...),
-    api_url: Optional[str] = Form(None),
-    api_token: Optional[str] = Form(None),
-    json_file: Optional[UploadFile] = File(None),
+    project_ids: List[str] = Form(...),
+    script_id: str = Form(...),
+    dataset_file: str = Form(...),
     token: str = Depends(token_verification),
 ):
-    TEMP_DATA_PATH = "/tmp/autotrain_life_app_data.json"
+    if dataset_file != "dataset.json":
+        raise HTTPException(status_code=400, detail="Only 'dataset.json' is supported for now.")
 
-    if source_type == "api":
-        if not api_url or not api_token:
-            raise HTTPException(status_code=400, detail="API URL and token are required for API source.")
-        try:
-            import requests
-            response = requests.get(api_url, headers={"Authorization": f"Bearer {api_token}"}, timeout=30)
-            response.raise_for_status()
-            data = response.json()
-            if not isinstance(data, list) or not all("audio" in item and "transcription" in item for item in data):
-                raise ValueError("API response is not a valid dataset format.")
+    try:
+        # Construct the path to dataset.json. Assuming it's always the same for now.
+        dataset_path = "src/autotrain/app/static/dataset.json"
+        with open(dataset_path, "r") as f:
+            dataset = json.load(f)
+        
+        # Add validation if needed, e.g., check for 'audio' and 'transcription' fields
+        if not isinstance(dataset, list) or not all("audio" in item and "transcription" in item for item in dataset):
+            raise ValueError("Invalid dataset.json format: must be an array of objects with 'audio' and 'transcription' fields.")
 
-            with open(TEMP_DATA_PATH, "w") as f:
-                json.dump(data, f)
-            return JSONResponse({"status": "success", "path": TEMP_DATA_PATH})
-        except requests.exceptions.RequestException as e:
-            raise HTTPException(status_code=400, detail=f"Failed to fetch data from API: {e}")
-        except ValueError as e:
-            raise HTTPException(status_code=400, detail=f"API data content error: {e}")
-    elif source_type == "json":
-        if not json_file:
-            raise HTTPException(status_code=400, detail="JSON file is required for JSON source.")
-        try:
-            content = await json_file.read()
-            data = json.loads(content)
-            if not isinstance(data, list) or not all("audio" in item and "transcription" in item for item in data):
-                raise ValueError("JSON file content is not a valid dataset format.")
-
-            with open(TEMP_DATA_PATH, "wb") as f:
-                f.write(content)
-            return JSONResponse({"status": "success", "path": TEMP_DATA_PATH})
-        except json.JSONDecodeError:
-            raise HTTPException(status_code=400, detail="Invalid JSON file format.")
-        except ValueError as e:
-            raise HTTPException(status_code=400, detail=f"JSON file content error: {e}")
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"An error occurred during JSON file preparation: {e}")
-    else:
-        raise HTTPException(status_code=400, detail="Invalid source type.")
+        # For now, we return the path to the dataset. In a real scenario, you might want to process it further.
+        return JSONResponse({"status": "success", "path": dataset_path})
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail=f"Dataset file {dataset_path} not found.")
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid JSON format in dataset.json.")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Dataset content error: {e}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred during dataset preparation: {e}")

@@ -363,8 +363,70 @@ document.addEventListener('DOMContentLoaded', function () {
         const lifeAppSelection = document.getElementById('life-app-selection');
         if (this.value === 'life_app') {
             lifeAppSelection.style.display = 'block';
+            // Dynamically load projects when LiFE App is selected
+            loadLifeAppProjects();
         } else {
             lifeAppSelection.style.display = 'none';
         }
     });
+
+    // Function to load projects
+    async function loadLifeAppProjects() {
+        const projectSelect = document.getElementById('life-app-project');
+        projectSelect.innerHTML = ''; // Clear existing options
+        try {
+            const response = await fetch('/static/projectList.json');
+            const projects = await response.json();
+            projects.forEach(project => {
+                const option = document.createElement('option');
+                option.value = project.project_id;
+                option.textContent = project.project_name;
+                projectSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error loading projects:', error);
+            alert('Failed to load projects. Please check console for details.');
+        }
+    }
+
+    // Function to load scripts based on selected projects
+    async function loadLifeAppScripts() {
+        const projectSelect = document.getElementById('life-app-project');
+        const scriptSelect = document.getElementById('life-app-script');
+        scriptSelect.innerHTML = '<option value="">Select Script</option>'; // Clear and reset
+
+        const selectedProjectIds = Array.from(projectSelect.selectedOptions).map(option => option.value);
+
+        if (selectedProjectIds.length === 0) {
+            return; // No projects selected, so no scripts to load
+        }
+
+        try {
+            const response = await fetch('/static/scriptList.json');
+            const allScripts = await response.json();
+
+            // Filter scripts based on selected projects
+            const filteredScripts = allScripts.filter(script => 
+                selectedProjectIds.includes(script.project_id)
+            );
+
+            filteredScripts.forEach(script => {
+                const option = document.createElement('option');
+                option.value = script.script_id;
+                option.textContent = script.script_name;
+                scriptSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error loading scripts:', error);
+            alert('Failed to load scripts. Please check console for details.');
+        }
+    }
+
+    // Event listener for project selection change
+    document.getElementById('life-app-project').addEventListener('change', loadLifeAppScripts);
+
+    // Initial call to load projects if already on LiFE App selection (e.g., after a refresh)
+    if (document.getElementById('dataset_source').value === 'life_app') {
+        loadLifeAppProjects();
+    }
 });
