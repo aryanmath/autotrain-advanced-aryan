@@ -285,6 +285,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     tagContainer.innerHTML = '';
                 }
+
+                // Create hidden input for selected projects
                 let hiddenInput = document.getElementById('life_app_project_hidden');
                 if (!hiddenInput) {
                     hiddenInput = document.createElement('input');
@@ -300,6 +302,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     .then(data => {
                         let availableProjects = [...data];
                         let selectedProjects = [];
+
                         function updateTags() {
                             tagContainer.innerHTML = '';
                             selectedProjects.forEach(project => {
@@ -314,6 +317,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 tag.style.marginBottom = '4px';
                                 tag.style.fontSize = '0.95em';
                                 tag.style.position = 'relative';
+
                                 // Remove button
                                 const removeBtn = document.createElement('span');
                                 removeBtn.textContent = '×';
@@ -331,6 +335,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             });
                             hiddenInput.value = selectedProjects.join(',');
                         }
+
                         function updateDropdown() {
                             projectSelect.innerHTML = '<option value="">Select Project</option>';
                             availableProjects.forEach(project => {
@@ -340,8 +345,10 @@ document.addEventListener('DOMContentLoaded', function () {
                                 projectSelect.appendChild(option);
                             });
                         }
+
                         updateDropdown();
                         updateTags();
+
                         projectSelect.onchange = function() {
                             const val = projectSelect.value;
                             if (val && !selectedProjects.includes(val)) {
@@ -371,10 +378,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     })
                     .catch(error => console.error('Error fetching script list:', error));
             }
-
-            // --- Dataset dropdown (dataset.json) ---
-            // The dataset dropdown will only have dataset.json as an option initially
-            // No dynamic fetching needed for this for now.
         } else {
             lifeAppSelection.style.display = 'none';
         }
