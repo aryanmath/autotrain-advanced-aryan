@@ -19,10 +19,6 @@ from autotrain import __version__, logger
 from autotrain.app.db import AutoTrainDB
 from autotrain.app.models import (
     fetch_models,
-    LifeAppApiSource,
-    LifeAppJsonSource,
-    LifeAppDatasetValidationRequest,
-    LifeAppDatasetPrepareRequest,
 )
 from autotrain.app.params import AppParams, get_task_params
 from autotrain.app.utils import get_running_jobs, get_user_and_orgs, kill_process_by_pid, token_verification

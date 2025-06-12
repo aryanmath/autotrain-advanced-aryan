@@ -428,27 +428,27 @@
                         </div>
                     </div>
 
-                    <!-- LiFE App dataset selection UI - Project, Script, Dataset.json -->
-                    <div id="life-app-selection" style="display: none;">
-                        <div class="form-group">
-                            <label for="life-app-project">Select Project(s):</label>
-                            <select id="life-app-project" class="form-control" multiple>
-                                <!-- Options will be dynamically loaded by JavaScript -->
+                    <!-- LiFE App Project and Script Selection -->
+                    <div id="life-app-selection" class="items-center justify-center h-48" style="display: none;">
+                        <div class="w-full px-4">
+                            <p class="text-xl text-gray-800 dark:text-gray-200 mb-2 mt-2">LiFE App Project</p>
+                            <select id="life_app_project" name="life_app_project" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="">Select Project</option>
                             </select>
-                            <div id="life-app-project-tags" class="mt-2 flex flex-wrap gap-2"></div>
+                            <div id="life-app-project-tags" style="margin-top: 8px;"></div>
+                            <input type="hidden" id="life_app_project_hidden" name="life_app_project" />
                         </div>
-
-                        <div class="form-group mt-2">
-                            <label for="life-app-script">Select Script:</label>
-                            <select id="life-app-script" class="form-control">
+                        <div class="w-full px-4 mt-4">
+                            <p class="text-xl text-gray-800 dark:text-gray-200 mb-2 mt-2">LiFE App Script</p>
+                            <select id="life_app_script" name="life_app_script"
+                                class="mt-1 block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                                 <option value="">Select Script</option>
-                                <!-- Options will be dynamically loaded by JavaScript -->
                             </select>
                         </div>
-
-                        <div class="form-group mt-2">
-                            <label for="life-app-dataset-file">Select Dataset File:</label>
-                            <select id="life-app-dataset-file" class="form-control">
+                        <div class="w-full px-4 mt-4">
+                            <p class="text-xl text-gray-800 dark:text-gray-200 mb-2 mt-2">LiFE App Dataset</p>
+                            <select id="life_app_dataset_file" name="life_app_dataset_file"
+                                class="mt-1 block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                                 <option value="dataset.json">dataset.json</option>
                             </select>
                         </div>

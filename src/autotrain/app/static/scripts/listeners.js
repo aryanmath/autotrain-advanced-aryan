@@ -267,9 +267,114 @@ document.addEventListener('DOMContentLoaded', function () {
     // Update dataset source change handler
     document.getElementById('dataset_source').addEventListener('change', function() {
         const lifeAppSelection = document.getElementById('life-app-selection');
+        const projectSelect = document.getElementById('life_app_project');
+        const scriptSelect = document.getElementById('life_app_script');
+        const tagContainer = document.getElementById('life-app-project-tags');
+
         if (this.value === 'life_app') {
             lifeAppSelection.style.display = 'block';
-            loadLifeAppProjects();
+
+            // --- Project dropdown (multi-select) ---
+            if (projectSelect) {
+                if (!tagContainer) {
+                    // Create tag container if it doesn't exist
+                    const newTagContainer = document.createElement('div');
+                    newTagContainer.id = 'life-app-project-tags';
+                    newTagContainer.style.marginTop = '8px';
+                    projectSelect.parentElement.appendChild(newTagContainer);
+                } else {
+                    tagContainer.innerHTML = '';
+                }
+                let hiddenInput = document.getElementById('life_app_project_hidden');
+                if (!hiddenInput) {
+                    hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.id = 'life_app_project_hidden';
+                    hiddenInput.name = 'life_app_project';
+                    projectSelect.parentElement.appendChild(hiddenInput);
+                }
+
+                // Fetch and populate projects
+                fetch('/static/projectList.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        let availableProjects = [...data];
+                        let selectedProjects = [];
+                        function updateTags() {
+                            tagContainer.innerHTML = '';
+                            selectedProjects.forEach(project => {
+                                const tag = document.createElement('span');
+                                tag.textContent = project;
+                                tag.style.display = 'inline-block';
+                                tag.style.background = '#e5e7eb';
+                                tag.style.color = '#111827';
+                                tag.style.borderRadius = '12px';
+                                tag.style.padding = '2px 10px 2px 8px';
+                                tag.style.marginRight = '6px';
+                                tag.style.marginBottom = '4px';
+                                tag.style.fontSize = '0.95em';
+                                tag.style.position = 'relative';
+                                // Remove button
+                                const removeBtn = document.createElement('span');
+                                removeBtn.textContent = '×';
+                                removeBtn.style.marginLeft = '8px';
+                                removeBtn.style.cursor = 'pointer';
+                                removeBtn.style.color = '#ef4444';
+                                removeBtn.onclick = function() {
+                                    selectedProjects = selectedProjects.filter(p => p !== project);
+                                    availableProjects.push(project);
+                                    updateDropdown();
+                                    updateTags();
+                                };
+                                tag.appendChild(removeBtn);
+                                tagContainer.appendChild(tag);
+                            });
+                            hiddenInput.value = selectedProjects.join(',');
+                        }
+                        function updateDropdown() {
+                            projectSelect.innerHTML = '<option value="">Select Project</option>';
+                            availableProjects.forEach(project => {
+                                const option = document.createElement('option');
+                                option.value = project;
+                                option.textContent = project;
+                                projectSelect.appendChild(option);
+                            });
+                        }
+                        updateDropdown();
+                        updateTags();
+                        projectSelect.onchange = function() {
+                            const val = projectSelect.value;
+                            if (val && !selectedProjects.includes(val)) {
+                                selectedProjects.push(val);
+                                availableProjects = availableProjects.filter(p => p !== val);
+                                updateDropdown();
+                                updateTags();
+                            }
+                            projectSelect.value = '';
+                        };
+                    })
+                    .catch(error => console.error('Error fetching project list:', error));
+            }
+
+            // --- Script dropdown (single select) ---
+            if (scriptSelect) {
+                scriptSelect.innerHTML = '<option value="">Select Script</option>';
+                fetch('/static/scriptList.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(script => {
+                            const option = document.createElement('option');
+                            option.value = script;
+                            option.textContent = script;
+                            scriptSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Error fetching script list:', error));
+            }
+
+            // --- Dataset dropdown (dataset.json) ---
+            // The dataset dropdown will only have dataset.json as an option initially
+            // No dynamic fetching needed for this for now.
         } else {
             lifeAppSelection.style.display = 'none';
         }
