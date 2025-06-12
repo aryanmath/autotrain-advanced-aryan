@@ -11,6 +11,7 @@ import traceback
 import base64
 import io
 import soundfile as sf
+from functools import partial
 
 from accelerate.state import PartialState
 from datasets import load_from_disk, load_dataset, Dataset, DatasetDict, Audio
@@ -77,23 +78,23 @@ def load_data(params, is_validation=False):
             with open(dataset_path, 'r') as f:
                 life_app_data = json.load(f)
 
-            # Create a list of dictionaries suitable for Dataset.from_dict
-            # Save audio bytes to temporary files for Dataset.from_dict to handle
             dataset_rows = []
             temp_audio_dir = "./temp_audio_files"
             os.makedirs(temp_audio_dir, exist_ok=True)
 
             for i, item in enumerate(life_app_data):
-                # Get audio bytes directly from audio field
                 audio_bytes = item["audio"]
                 audio_filename = os.path.join(temp_audio_dir, f"audio_{i}.wav")
+                
+                # Convert audio bytes to NumPy array using librosa before writing
+                audio_array, _ = librosa.load(io.BytesIO(audio_bytes), sr=params.sampling_rate)
+
                 with sf.SoundFile(audio_filename, mode='w', samplerate=params.sampling_rate, 
                                   channels=1, format='WAV', subtype='PCM_16') as file:
-                    file.write(io.BytesIO(audio_bytes).read())
+                    file.write(audio_array) # Write the NumPy array
 
                 dataset_rows.append({"audio": audio_filename, "transcription": item["transcription"]})
             
-            # Create a Hugging Face Dataset from the prepared data
             dataset = Dataset.from_list(dataset_rows)
             dataset = dataset.cast_column("audio", Audio(sampling_rate=params.sampling_rate))
 
@@ -107,7 +108,7 @@ def load_data(params, is_validation=False):
             # Log first example for verification
             if len(dataset) > 0:
                 logger.info("First example in dataset:")
-                logger.info(f"Audio path: {dataset[0]['audio']}")
+                logger.info(f"Audio path: {dataset[0]['audio']['path']}") # Accessing path from Audio feature
                 logger.info(f"Transcription: {dataset[0]['transcription']}")
 
             return dataset
