@@ -298,8 +298,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 // Fetch and populate projects
                 fetch('/static/projectList.json')
-                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
                     .then(data => {
+                        console.log('Projects loaded:', data); // Debug log
                         let availableProjects = [...data];
                         let selectedProjects = [];
 
@@ -367,8 +373,14 @@ document.addEventListener('DOMContentLoaded', function () {
             if (scriptSelect) {
                 scriptSelect.innerHTML = '<option value="">Select Script</option>';
                 fetch('/static/scriptList.json')
-                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
                     .then(data => {
+                        console.log('Scripts loaded:', data); // Debug log
                         data.forEach(script => {
                             const option = document.createElement('option');
                             option.value = script;
