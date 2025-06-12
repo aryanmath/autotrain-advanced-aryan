@@ -393,10 +393,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Function to load projects
     async function loadLifeAppProjects() {
         const projectSelect = document.getElementById('life_app_project');
-        const projectTagsContainer = document.getElementById('life-app-project-tags');
-        projectSelect.innerHTML = ''; // Clear existing options
-        projectTagsContainer.innerHTML = ''; // Clear existing tags
-
+        if (!projectSelect) return;
+        projectSelect.innerHTML = '';
         try {
             const response = await fetch('/static/projectList.json');
             const projects = await response.json();
@@ -406,20 +404,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 option.textContent = project;
                 projectSelect.appendChild(option);
             });
-            updateProjectTags(); // Update tags after loading projects
         } catch (error) {
             console.error('Error loading projects:', error);
-            alert('Failed to load projects. Please check console for details.');
         }
     }
 
-    // Function to load scripts based on selected projects
+    // Function to load scripts
     async function loadLifeAppScripts() {
-        const projectSelect = document.getElementById('life_app_project');
         const scriptSelect = document.getElementById('life_app_script');
-        scriptSelect.innerHTML = '<option value="">Select Script</option>'; // Clear and reset
-
-        // No filtering by project, just load all scripts (since scripts are just strings)
+        if (!scriptSelect) return;
+        scriptSelect.innerHTML = '<option value="">Select Script</option>';
         try {
             const response = await fetch('/static/scriptList.json');
             const scripts = await response.json();
@@ -431,50 +425,16 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         } catch (error) {
             console.error('Error loading scripts:', error);
-            alert('Failed to load scripts. Please check console for details.');
         }
     }
 
-    // Function to update project tags
-    function updateProjectTags() {
-        const projectSelect = document.getElementById('life-app-project');
-        const projectTagsContainer = document.getElementById('life-app-project-tags');
-        projectTagsContainer.innerHTML = ''; // Clear existing tags
-
-        Array.from(projectSelect.selectedOptions).forEach(option => {
-            const tag = document.createElement('span');
-            tag.className = 'bg-blue-200 text-blue-800 text-sm font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-900';
-            tag.textContent = option.textContent;
-
-            const removeBtn = document.createElement('button');
-            removeBtn.className = 'ml-1 text-blue-800 hover:text-blue-600 focus:outline-none';
-            removeBtn.innerHTML = '&times;';
-            removeBtn.onclick = () => {
-                // Deselect the option in the dropdown
-                for (let i = 0; i < projectSelect.options.length; i++) {
-                    if (projectSelect.options[i].value === option.value) {
-                        projectSelect.options[i].selected = false;
-                        break;
-                    }
-                }
-                updateProjectTags(); // Refresh tags
-                loadLifeAppScripts(); // Re-filter scripts
-            };
-            tag.appendChild(removeBtn);
-            projectTagsContainer.appendChild(tag);
-        });
-    }
-
-    // Event listener for project selection change
-    document.getElementById('life-app-project').addEventListener('change', () => {
-        loadLifeAppScripts();
-        updateProjectTags();
+    // When LiFE App is selected, load projects/scripts
+    document.getElementById('dataset_source').addEventListener('change', function() {
+        if (this.value === 'life_app') {
+            loadLifeAppProjects();
+            loadLifeAppScripts();
+        }
     });
-
-    // Initial call to load projects if already on LiFE App selection (e.g., after a refresh)
-    if (document.getElementById('dataset_source').value === 'life_app') {
-        loadLifeAppProjects();
-    }
 
     // On page load, hide LiFE App dataset source if not ASR
     document.getElementById('task').addEventListener('change', function() {

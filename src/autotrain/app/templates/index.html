@@ -481,7 +481,7 @@
                                     class="mt-1 block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                             </div>
                         </div>
-                        <!-- Move LiFE App selection here, just after hub-data-tab-content -->
+                        <!-- Place LiFE App selection here, but do NOT remove or hide other upload UIs -->
                         <div id="life-app-selection" style="display:none;" class="w-full px-4 mb-4">
                             <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">LiFE App Project(s)</label>
                             <select id="life_app_project" name="life_app_project" multiple
@@ -494,7 +494,6 @@
                                 class="block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 mb-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                                 <!-- Options will be populated by JS -->
                             </select>
-                            <!-- Add more fields here if needed -->
                         </div>
                     </div>
                     <div class="items-center justify-center h-24">
@@ -697,21 +696,37 @@
     </script>
 
     <script>
-        // Show/hide LiFE App selection UI based on dataset source
+        // Show/hide LiFE App selection UI based on dataset source, but do NOT hide other upload UIs
         document.addEventListener('DOMContentLoaded', function () {
             const datasetSource = document.getElementById('dataset_source');
             const lifeAppSelection = document.getElementById('life-app-selection');
+            const hubDataTabContent = document.getElementById('hub-data-tab-content');
+            const uploadDataTabContent = document.getElementById('upload-data-tab-content');
+            const uploadDataTabs = document.getElementById('upload-data-tabs');
 
             function toggleLifeAppSelection() {
                 if (datasetSource.value === 'life_app') {
                     lifeAppSelection.style.display = '';
+                    hubDataTabContent.style.display = 'none';
+                    if (uploadDataTabContent) uploadDataTabContent.style.display = "none";
+                    if (uploadDataTabs) uploadDataTabs.style.display = "none";
+                    // Trigger project/script loading
+                    if (typeof loadLifeAppProjects === "function") loadLifeAppProjects();
+                    if (typeof loadLifeAppScripts === "function") loadLifeAppScripts();
+                } else if (datasetSource.value === 'huggingface') {
+                    lifeAppSelection.style.display = 'none';
+                    hubDataTabContent.style.display = '';
+                    if (uploadDataTabContent) uploadDataTabContent.style.display = "none";
+                    if (uploadDataTabs) uploadDataTabs.style.display = "none";
                 } else {
                     lifeAppSelection.style.display = 'none';
+                    hubDataTabContent.style.display = 'none';
+                    if (uploadDataTabContent) uploadDataTabContent.style.display = "";
+                    if (uploadDataTabs) uploadDataTabs.style.display = "";
                 }
             }
 
             datasetSource.addEventListener('change', toggleLifeAppSelection);
-            // Initialize on page load
             toggleLifeAppSelection();
         });
     </script>
