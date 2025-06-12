@@ -266,121 +266,51 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Update dataset source change handler
     document.getElementById('dataset_source').addEventListener('change', function() {
+        console.log('Dataset source changed to:', this.value); // Debug log
         const lifeAppSelection = document.getElementById('life-app-selection');
         const projectSelect = document.getElementById('life_app_project');
         const scriptSelect = document.getElementById('life_app_script');
         const tagContainer = document.getElementById('life-app-project-tags');
 
         if (this.value === 'life_app') {
+            console.log('Showing LiFE App selection'); // Debug log
             lifeAppSelection.style.display = 'block';
 
             // --- Project dropdown (multi-select) ---
             if (projectSelect) {
-                if (!tagContainer) {
-                    // Create tag container if it doesn't exist
-                    const newTagContainer = document.createElement('div');
-                    newTagContainer.id = 'life-app-project-tags';
-                    newTagContainer.style.marginTop = '8px';
-                    projectSelect.parentElement.appendChild(newTagContainer);
-                } else {
-                    tagContainer.innerHTML = '';
-                }
-
-                // Create hidden input for selected projects
-                let hiddenInput = document.getElementById('life_app_project_hidden');
-                if (!hiddenInput) {
-                    hiddenInput = document.createElement('input');
-                    hiddenInput.type = 'hidden';
-                    hiddenInput.id = 'life_app_project_hidden';
-                    hiddenInput.name = 'life_app_project';
-                    projectSelect.parentElement.appendChild(hiddenInput);
-                }
-
-                // Fetch and populate projects
+                console.log('Loading projects...'); // Debug log
                 fetch('/static/projectList.json')
                     .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
+                        console.log('Project list response:', response.status); // Debug log
                         return response.json();
                     })
                     .then(data => {
                         console.log('Projects loaded:', data); // Debug log
-                        let availableProjects = [...data];
-                        let selectedProjects = [];
-
-                        function updateTags() {
-                            tagContainer.innerHTML = '';
-                            selectedProjects.forEach(project => {
-                                const tag = document.createElement('span');
-                                tag.textContent = project;
-                                tag.style.display = 'inline-block';
-                                tag.style.background = '#e5e7eb';
-                                tag.style.color = '#111827';
-                                tag.style.borderRadius = '12px';
-                                tag.style.padding = '2px 10px 2px 8px';
-                                tag.style.marginRight = '6px';
-                                tag.style.marginBottom = '4px';
-                                tag.style.fontSize = '0.95em';
-                                tag.style.position = 'relative';
-
-                                // Remove button
-                                const removeBtn = document.createElement('span');
-                                removeBtn.textContent = '×';
-                                removeBtn.style.marginLeft = '8px';
-                                removeBtn.style.cursor = 'pointer';
-                                removeBtn.style.color = '#ef4444';
-                                removeBtn.onclick = function() {
-                                    selectedProjects = selectedProjects.filter(p => p !== project);
-                                    availableProjects.push(project);
-                                    updateDropdown();
-                                    updateTags();
-                                };
-                                tag.appendChild(removeBtn);
-                                tagContainer.appendChild(tag);
-                            });
-                            hiddenInput.value = selectedProjects.join(',');
-                        }
-
-                        function updateDropdown() {
-                            projectSelect.innerHTML = '<option value="">Select Project</option>';
-                            availableProjects.forEach(project => {
-                                const option = document.createElement('option');
-                                option.value = project;
-                                option.textContent = project;
-                                projectSelect.appendChild(option);
-                            });
-                        }
-
-                        updateDropdown();
-                        updateTags();
-
-                        projectSelect.onchange = function() {
-                            const val = projectSelect.value;
-                            if (val && !selectedProjects.includes(val)) {
-                                selectedProjects.push(val);
-                                availableProjects = availableProjects.filter(p => p !== val);
-                                updateDropdown();
-                                updateTags();
-                            }
-                            projectSelect.value = '';
-                        };
+                        projectSelect.innerHTML = '<option value="">Select Project</option>';
+                        data.forEach(project => {
+                            const option = document.createElement('option');
+                            option.value = project;
+                            option.textContent = project;
+                            projectSelect.appendChild(option);
+                        });
                     })
-                    .catch(error => console.error('Error fetching project list:', error));
+                    .catch(error => {
+                        console.error('Error loading projects:', error);
+                        alert('Failed to load projects. Please check console for details.');
+                    });
             }
 
             // --- Script dropdown (single select) ---
             if (scriptSelect) {
-                scriptSelect.innerHTML = '<option value="">Select Script</option>';
+                console.log('Loading scripts...'); // Debug log
                 fetch('/static/scriptList.json')
                     .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
+                        console.log('Script list response:', response.status); // Debug log
                         return response.json();
                     })
                     .then(data => {
                         console.log('Scripts loaded:', data); // Debug log
+                        scriptSelect.innerHTML = '<option value="">Select Script</option>';
                         data.forEach(script => {
                             const option = document.createElement('option');
                             option.value = script;
@@ -388,7 +318,10 @@ document.addEventListener('DOMContentLoaded', function () {
                             scriptSelect.appendChild(option);
                         });
                     })
-                    .catch(error => console.error('Error fetching script list:', error));
+                    .catch(error => {
+                        console.error('Error loading scripts:', error);
+                        alert('Failed to load scripts. Please check console for details.');
+                    });
             }
         } else {
             lifeAppSelection.style.display = 'none';
