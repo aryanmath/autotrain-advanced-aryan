@@ -77,15 +77,18 @@ document.addEventListener('DOMContentLoaded', function () {
             // --- Multi-select with tags for Project ---
             const projectSelect = document.getElementById('life_app_project');
             const scriptSelect = document.getElementById('life_app_script');
+            const datasetSelect = document.getElementById('life_app_dataset');
             let tagContainer = document.getElementById('life-app-project-tags');
+            
             if (!tagContainer) {
                 tagContainer = document.createElement('div');
                 tagContainer.id = 'life-app-project-tags';
-                tagContainer.style.marginTop = '8px';
+                tagContainer.className = 'mt-2 flex flex-wrap gap-2';
                 projectSelect.parentElement.appendChild(tagContainer);
             } else {
                 tagContainer.innerHTML = '';
             }
+
             let hiddenInput = document.getElementById('life_app_project_hidden');
             if (!hiddenInput) {
                 hiddenInput = document.createElement('input');
@@ -101,39 +104,44 @@ document.addEventListener('DOMContentLoaded', function () {
                 .then(data => {
                     let availableProjects = [...data];
                     let selectedProjects = [];
+
                     function updateTags() {
                         tagContainer.innerHTML = '';
                         selectedProjects.forEach(project => {
                             const tag = document.createElement('span');
-                            tag.textContent = project;
-                            tag.style.display = 'inline-block';
-                            tag.style.background = '#e5e7eb';
-                            tag.style.color = '#111827';
-                            tag.style.borderRadius = '12px';
-                            tag.style.padding = '2px 10px 2px 8px';
-                            tag.style.marginRight = '6px';
-                            tag.style.marginBottom = '4px';
-                            tag.style.fontSize = '0.95em';
-                            tag.style.position = 'relative';
-                            // Remove button
-                            const removeBtn = document.createElement('span');
-                            removeBtn.textContent = '×';
-                            removeBtn.style.marginLeft = '8px';
-                            removeBtn.style.cursor = 'pointer';
-                            removeBtn.style.color = '#ef4444';
+                            tag.className = 'inline-flex items-center px-2 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800';
+                            tag.innerHTML = `
+                                ${project}
+                                <button type="button" class="ml-1 text-gray-500 hover:text-red-500 focus:outline-none">
+                                    <span class="sr-only">Remove</span>
+                                    <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                    </svg>
+                                </button>
+                            `;
+                            
+                            const removeBtn = tag.querySelector('button');
                             removeBtn.onclick = function() {
+                                // Remove from selected projects
                                 selectedProjects = selectedProjects.filter(p => p !== project);
+                                // Add back to available projects
                                 availableProjects.push(project);
+                                // Sort available projects alphabetically
+                                availableProjects.sort();
+                                // Update both dropdown and tags
                                 updateDropdown();
                                 updateTags();
                             };
-                            tag.appendChild(removeBtn);
+                            
                             tagContainer.appendChild(tag);
                         });
                         hiddenInput.value = selectedProjects.join(',');
                     }
+
                     function updateDropdown() {
-                        projectSelect.innerHTML = '<option value=\"\">Select Project</option>';
+                        projectSelect.innerHTML = '<option value="">Select Project</option>';
+                        // Sort available projects alphabetically
+                        availableProjects.sort();
                         availableProjects.forEach(project => {
                             const option = document.createElement('option');
                             option.value = project;
@@ -141,23 +149,31 @@ document.addEventListener('DOMContentLoaded', function () {
                             projectSelect.appendChild(option);
                         });
                     }
+
+                    // Initial setup
                     updateDropdown();
                     updateTags();
+
+                    // Handle project selection
                     projectSelect.onchange = function() {
-                        const val = projectSelect.value;
-                        if (val && !selectedProjects.includes(val)) {
-                            selectedProjects.push(val);
-                            availableProjects = availableProjects.filter(p => p !== val);
+                        const selectedValue = projectSelect.value;
+                        if (selectedValue && !selectedProjects.includes(selectedValue)) {
+                            // Add to selected projects
+                            selectedProjects.push(selectedValue);
+                            // Remove from available projects
+                            availableProjects = availableProjects.filter(p => p !== selectedValue);
+                            // Update both dropdown and tags
                             updateDropdown();
                             updateTags();
                         }
+                        // Reset dropdown selection
                         projectSelect.value = '';
                     };
                 });
 
             // --- Script dropdown (single select) ---
             if (scriptSelect) {
-                scriptSelect.innerHTML = '<option value=\"\">Select Script</option>';
+                scriptSelect.innerHTML = '<option value="">Select Script</option>';
                 fetch('/static/scriptList.json')
                     .then(response => response.json())
                     .then(data => {
@@ -169,7 +185,22 @@ document.addEventListener('DOMContentLoaded', function () {
                         });
                     });
             }
-        } else if (dataSource.value === "hub") {
+
+            // --- Dataset dropdown (single select) ---
+            if (datasetSelect) {
+                datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
+                fetch('/static/datasetList.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(dataset => {
+                            const option = document.createElement('option');
+                            option.value = dataset;
+                            option.textContent = dataset;
+                            datasetSelect.appendChild(option);
+                        });
+                    });
+            }
+        } else if (dataSource.value === "huggingface") {
             if (hubDataTabContent) hubDataTabContent.style.display = "block";
         } else if (dataSource.value === "local") {
             if (uploadDataTabContent) uploadDataTabContent.style.display = "block";
