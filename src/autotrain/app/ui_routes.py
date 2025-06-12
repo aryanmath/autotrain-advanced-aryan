@@ -17,7 +17,13 @@ from nvitop import Device
 
 from autotrain import __version__, logger
 from autotrain.app.db import AutoTrainDB
-from autotrain.app.models import fetch_models
+from autotrain.app.models import (
+    fetch_models,
+    LifeAppApiSource,
+    LifeAppJsonSource,
+    LifeAppDatasetValidationRequest,
+    LifeAppDatasetPrepareRequest,
+)
 from autotrain.app.params import AppParams, get_task_params
 from autotrain.app.utils import get_running_jobs, get_user_and_orgs, kill_process_by_pid, token_verification
 from autotrain.dataset import (
@@ -899,3 +905,98 @@ async def handle_form(request: Request):
             return {"status": "error", "message": f"Error starting training: {str(e)}"}
     
     return {"status": "error", "message": "Invalid task type"}
+
+
+@ui_router.post("/life_app_dataset/validate", response_class=JSONResponse)
+async def validate_life_app_dataset(
+    request: Request,
+    source_type: str = Form(...),
+    api_url: Optional[str] = Form(None),
+    api_token: Optional[str] = Form(None),
+    json_file: Optional[UploadFile] = File(None),
+    token: str = Depends(token_verification),
+):
+    if source_type == "api":
+        if not api_url or not api_token:
+            raise HTTPException(status_code=400, detail="API URL and token are required for API source.")
+        try:
+            import requests
+            response = requests.get(api_url, headers={"Authorization": f"Bearer {api_token}"}, timeout=10)
+            response.raise_for_status()
+            # Optionally, perform more specific validation of the API response if needed
+            return JSONResponse({"status": "success", "message": "API connection successful!"})
+        except requests.exceptions.RequestException as e:
+            raise HTTPException(status_code=400, detail=f"API connection failed: {e}")
+    elif source_type == "json":
+        if not json_file:
+            raise HTTPException(status_code=400, detail="JSON file is required for JSON source.")
+        try:
+            content = await json_file.read()
+            data = json.loads(content)
+            if not isinstance(data, list):
+                raise ValueError("JSON content must be an array.")
+            if not data:
+                raise ValueError("JSON array cannot be empty.")
+            for item in data:
+                if not isinstance(item, dict) or "audio" not in item or "transcription" not in item:
+                    raise ValueError("Each item in JSON array must be an object with 'audio' and 'transcription' fields.")
+            return JSONResponse({"status": "success", "message": "JSON file validated successfully!"})
+        except json.JSONDecodeError:
+            raise HTTPException(status_code=400, detail="Invalid JSON file format.")
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=f"Invalid JSON file content: {e}")
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"An error occurred during JSON file validation: {e}")
+    else:
+        raise HTTPException(status_code=400, detail="Invalid source type.")
+
+
+@ui_router.post("/life_app_dataset/prepare", response_class=JSONResponse)
+async def prepare_life_app_dataset(
+    request: Request,
+    source_type: str = Form(...),
+    api_url: Optional[str] = Form(None),
+    api_token: Optional[str] = Form(None),
+    json_file: Optional[UploadFile] = File(None),
+    token: str = Depends(token_verification),
+):
+    TEMP_DATA_PATH = "/tmp/autotrain_life_app_data.json"
+
+    if source_type == "api":
+        if not api_url or not api_token:
+            raise HTTPException(status_code=400, detail="API URL and token are required for API source.")
+        try:
+            import requests
+            response = requests.get(api_url, headers={"Authorization": f"Bearer {api_token}"}, timeout=30)
+            response.raise_for_status()
+            data = response.json()
+            if not isinstance(data, list) or not all("audio" in item and "transcription" in item for item in data):
+                raise ValueError("API response is not a valid dataset format.")
+
+            with open(TEMP_DATA_PATH, "w") as f:
+                json.dump(data, f)
+            return JSONResponse({"status": "success", "path": TEMP_DATA_PATH})
+        except requests.exceptions.RequestException as e:
+            raise HTTPException(status_code=400, detail=f"Failed to fetch data from API: {e}")
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=f"API data content error: {e}")
+    elif source_type == "json":
+        if not json_file:
+            raise HTTPException(status_code=400, detail="JSON file is required for JSON source.")
+        try:
+            content = await json_file.read()
+            data = json.loads(content)
+            if not isinstance(data, list) or not all("audio" in item and "transcription" in item for item in data):
+                raise ValueError("JSON file content is not a valid dataset format.")
+
+            with open(TEMP_DATA_PATH, "wb") as f:
+                f.write(content)
+            return JSONResponse({"status": "success", "path": TEMP_DATA_PATH})
+        except json.JSONDecodeError:
+            raise HTTPException(status_code=400, detail="Invalid JSON file format.")
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=f"JSON file content error: {e}")
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"An error occurred during JSON file preparation: {e}")
+    else:
+        raise HTTPException(status_code=400, detail="Invalid source type.")

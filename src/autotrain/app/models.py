@@ -1,6 +1,8 @@
 import collections
 
 from huggingface_hub import list_models, HfApi
+from pydantic import BaseModel
+from typing import Optional, List, Dict, Any
 
 
 def get_sorted_models(hub_models):
@@ -411,3 +413,24 @@ def fetch_models():
     ]
 
     return _mc
+
+
+class LifeAppApiSource(BaseModel):
+    api_url: str
+    api_token: str
+
+
+class LifeAppJsonSource(BaseModel):
+    # For JSON file, the content will be handled via UploadFile in the endpoint
+    pass
+
+
+class LifeAppDatasetValidationRequest(BaseModel):
+    source_type: str  # "api" or "json"
+    api_data: Optional[LifeAppApiSource] = None
+
+
+class LifeAppDatasetPrepareRequest(BaseModel):
+    source_type: str  # "api" or "json"
+    api_data: Optional[LifeAppApiSource] = None
+    json_data: Optional[List[Dict[str, Any]]] = None # This will be populated from the uploaded JSON in the frontend
