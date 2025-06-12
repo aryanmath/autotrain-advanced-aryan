@@ -8,12 +8,9 @@ import librosa
 from datetime import datetime
 import pandas as pd
 import traceback
-import base64
-import io
-import soundfile as sf
 
 from accelerate.state import PartialState
-from datasets import load_from_disk, load_dataset, Dataset, DatasetDict, Audio
+from datasets import load_from_disk, load_dataset, Dataset
 from huggingface_hub import HfApi
 from transformers import (
     AutoConfig,
@@ -24,15 +21,9 @@ from transformers import (
     EarlyStoppingCallback,
     Trainer,
     TrainingArguments,
-    WhisperForConditionalGeneration,
-    Wav2Vec2ForCTC,
 )
 from transformers.trainer_callback import PrinterCallback
 from transformers.trainer_utils import get_last_checkpoint
-from accelerate import Accelerator
-from optimum.bettertransformer import BetterTransformer
-from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
-from transformers import BitsAndBytesConfig
 
 from autotrain import logger
 from autotrain.trainers.common import (
@@ -68,51 +59,7 @@ def load_data(params, is_validation=False):
         Dataset: Loaded dataset
     """
     try:
-        if params.using_life_app_dataset:
-            logger.info(f"Loading dataset from LiFE App: {params.life_app_dataset_name}")
-            dataset_path = os.path.join("src/autotrain/app/static", params.life_app_dataset_name)
-            if not os.path.exists(dataset_path):
-                raise ValueError(f"LiFE App dataset not found: {dataset_path}")
-            
-            with open(dataset_path, 'r') as f:
-                life_app_data = json.load(f)
-
-            # Create a list of dictionaries suitable for Dataset.from_dict
-            # Save audio bytes to temporary files for Dataset.from_dict to handle
-            dataset_rows = []
-            temp_audio_dir = "./temp_audio_files"
-            os.makedirs(temp_audio_dir, exist_ok=True)
-
-            for i, item in enumerate(life_app_data):
-                # Get audio bytes directly from audio field
-                audio_bytes = item["audio"]
-                audio_filename = os.path.join(temp_audio_dir, f"audio_{i}.wav")
-                with sf.SoundFile(audio_filename, mode='w', samplerate=params.sampling_rate, 
-                                  channels=1, format='WAV', subtype='PCM_16') as file:
-                    file.write(io.BytesIO(audio_bytes).read())
-
-                dataset_rows.append({"audio": audio_filename, "transcription": item["transcription"]})
-            
-            # Create a Hugging Face Dataset from the prepared data
-            dataset = Dataset.from_list(dataset_rows)
-            dataset = dataset.cast_column("audio", Audio(sampling_rate=params.sampling_rate))
-
-            # Remove temporary audio files after dataset creation
-            for filename in os.listdir(temp_audio_dir):
-                os.remove(os.path.join(temp_audio_dir, filename))
-            os.rmdir(temp_audio_dir)
-
-            logger.info(f"Successfully loaded {len(dataset)} examples from LiFE App dataset")
-
-            # Log first example for verification
-            if len(dataset) > 0:
-                logger.info("First example in dataset:")
-                logger.info(f"Audio path: {dataset[0]['audio']}")
-                logger.info(f"Transcription: {dataset[0]['transcription']}")
-
-            return dataset
-
-        elif params.using_hub_dataset:
+        if params.using_hub_dataset:
             # Load from HuggingFace Hub
             dataset = load_dataset(
                 params.data_path,

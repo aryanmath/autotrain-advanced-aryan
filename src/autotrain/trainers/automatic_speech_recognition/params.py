@@ -44,24 +44,22 @@ class AutomaticSpeechRecognitionParams(BaseModel):
     
     # Dataset fields
     using_hub_dataset: bool = False
-    using_life_app_dataset: bool = False
-    life_app_dataset_name: Optional[str] = None
     train_split: Optional[str] = None
     valid_split: Optional[str] = None
     audio_column: str = "audio"
     text_column: str = "transcription"
     max_duration: float = 30.0
     sampling_rate: int = 16000
-    max_seq_length: int = 512
+    max_seq_length: int = 128
     
     # Output fields
-    output_dir: str = "autotrain-output"
+    output_dir: str = Field(default="output")
     
     # Training fields
     batch_size: int = 8
     gradient_accumulation: int = 1
     epochs: int = 3
-    lr: float = 5e-5
+    lr: float = 3e-5
     scheduler: str = "linear"
     optimizer: str = "adamw_torch"
     mixed_precision: str = "no"
@@ -87,11 +85,7 @@ class AutomaticSpeechRecognitionParams(BaseModel):
             raise ValueError("data_path must be provided")
             
         # Validate hub dataset parameters
-        if self.using_life_app_dataset:
-            if not self.life_app_dataset_name:
-                raise ValueError("life_app_dataset_name must be provided when using LiFE App dataset")
-            # No need to check for file existence here, it will be handled in load_data
-        elif self.using_hub_dataset:
+        if self.using_hub_dataset:
             if not self.train_split:
                 raise ValueError("train_split must be provided when using hub dataset")
             if not self.token:
