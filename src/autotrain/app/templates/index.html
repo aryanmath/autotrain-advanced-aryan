@@ -424,33 +424,6 @@
                                 class="mt-1 block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                                 <option value="local">Local Files</option>
                                 <option value="huggingface">Hugging Face Dataset</option>
-                                <option value="life_app">LiFE App Dataset</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- LiFE App Project and Script Selection -->
-                    <div id="life-app-selection" style="display: none;">
-                        <div class="mb-4">
-                            <label for="life_app_project" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Project</label>
-                            <select id="life_app_project" name="life_app_project"
-                                class="mt-1 block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                                <option value="">Select Project</option>
-                            </select>
-                            <div id="life-app-project-tags" class="mt-2"></div>
-                        </div>
-                        <div class="mb-4">
-                            <label for="life_app_script" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Script</label>
-                            <select id="life_app_script" name="life_app_script"
-                                class="mt-1 block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                                <option value="">Select Script</option>
-                            </select>
-                        </div>
-                        <div class="mb-4">
-                            <label for="life_app_dataset_file" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Dataset</label>
-                            <select id="life_app_dataset_file" name="life_app_dataset_file"
-                                class="mt-1 block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                                <option value="">Select Dataset</option>
                             </select>
                         </div>
                     </div>
@@ -751,24 +724,6 @@
                 baseModelInput.classList.add('hidden');
             }
         });
-    </script>
-    <script>
-        // Fetch and populate LiFE App dataset files
-        fetch('/ui/life_app_dataset_files')
-            .then(response => response.json())
-            .then(data => {
-                console.log("Data from life_app_dataset_files:", data);
-                const select = document.getElementById('life_app_dataset_file');
-                select.innerHTML = '<option value="">--Select a file--</option>'; // Clear existing options
-                data.forEach(item => {
-                    const option = document.createElement('option');
-                    option.value = item.id;
-                    option.textContent = item.name;
-                    select.appendChild(option);
-                });
-            })
-            .catch(error => console.error('Error fetching LiFE App dataset files:', error));
-    });
     </script>
 </body>
 

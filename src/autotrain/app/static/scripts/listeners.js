@@ -53,159 +53,16 @@ document.addEventListener('DOMContentLoaded', function () {
     function handleDataSource() {
         const dataSource = document.getElementById("dataset_source");
         const taskSelect = document.getElementById('task');
-        const lifeAppSelection = document.getElementById("life-app-selection");
         const hubDataTabContent = document.getElementById('hub-data-tab-content');
         const uploadDataTabContent = document.getElementById("upload-data-tab-content");
         const uploadDataTabs = document.getElementById("upload-data-tabs");
 
         // Always hide both first
-        if (lifeAppSelection) lifeAppSelection.style.display = "none";
         if (hubDataTabContent) hubDataTabContent.style.display = "none";
         if (uploadDataTabContent) uploadDataTabContent.style.display = "none";
         if (uploadDataTabs) uploadDataTabs.style.display = "none";
 
-        if (dataSource.value === "life_app") {
-            if (taskSelect.value !== "automatic-speech-recognition") {
-                alert("LiFE App Dataset can only be used with Automatic Speech Recognition task.");
-                dataSource.value = "local";
-                if (uploadDataTabContent) uploadDataTabContent.style.display = "block";
-                if (uploadDataTabs) uploadDataTabs.style.display = "block";
-                return;
-            }
-            if (lifeAppSelection) lifeAppSelection.style.display = "block";
-
-            // --- Multi-select with tags for Project ---
-            const projectSelect = document.getElementById('life_app_project');
-            const scriptSelect = document.getElementById('life_app_script');
-            const datasetSelect = document.getElementById('life_app_dataset');
-            let tagContainer = document.getElementById('life-app-project-tags');
-            
-            if (!tagContainer) {
-                tagContainer = document.createElement('div');
-                tagContainer.id = 'life-app-project-tags';
-                tagContainer.className = 'mt-2 flex flex-wrap gap-2';
-                projectSelect.parentElement.appendChild(tagContainer);
-            } else {
-                tagContainer.innerHTML = '';
-            }
-
-            let hiddenInput = document.getElementById('life_app_project_hidden');
-            if (!hiddenInput) {
-                hiddenInput = document.createElement('input');
-                hiddenInput.type = 'hidden';
-                hiddenInput.id = 'life_app_project_hidden';
-                hiddenInput.name = 'life_app_project';
-                projectSelect.parentElement.appendChild(hiddenInput);
-            }
-
-            // Fetch and populate projects
-            fetch('/static/projectList.json')
-                .then(response => response.json())
-                .then(data => {
-                    let availableProjects = [...data];
-                    let selectedProjects = [];
-
-                    function updateTags() {
-                        tagContainer.innerHTML = '';
-                        selectedProjects.forEach(project => {
-                            const tag = document.createElement('span');
-                            tag.className = 'inline-flex items-center px-2 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800';
-                            tag.innerHTML = `
-                                ${project}
-                                <button type="button" class="ml-1 text-gray-500 hover:text-red-500 focus:outline-none">
-                                    <span class="sr-only">Remove</span>
-                                    <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                    </svg>
-                                </button>
-                            `;
-                            
-                            const removeBtn = tag.querySelector('button');
-                            removeBtn.onclick = function() {
-                                // Remove from selected projects
-                                selectedProjects = selectedProjects.filter(p => p !== project);
-                                // Add back to available projects
-                                availableProjects.push(project);
-                                // Sort available projects alphabetically
-                                availableProjects.sort();
-                                // Update both dropdown and tags
-                                updateDropdown();
-                                updateTags();
-                            };
-                            
-                            tagContainer.appendChild(tag);
-                        });
-                        hiddenInput.value = selectedProjects.join(',');
-                    }
-
-                    function updateDropdown() {
-                        projectSelect.innerHTML = '<option value="">Select Project</option>';
-                        // Sort available projects alphabetically
-                        availableProjects.sort();
-                        availableProjects.forEach(project => {
-                            const option = document.createElement('option');
-                            option.value = project;
-                            option.textContent = project;
-                            projectSelect.appendChild(option);
-                        });
-                    }
-
-                    // Initial setup
-                    updateDropdown();
-                    updateTags();
-
-                    // Handle project selection
-                    projectSelect.onchange = function() {
-                        const selectedValue = projectSelect.value;
-                        if (selectedValue && !selectedProjects.includes(selectedValue)) {
-                            // Add to selected projects
-                            selectedProjects.push(selectedValue);
-                            // Remove from available projects
-                            availableProjects = availableProjects.filter(p => p !== selectedValue);
-                            // Update both dropdown and tags
-                            updateDropdown();
-                            updateTags();
-                        }
-                        // Reset dropdown selection
-                        projectSelect.value = '';
-                    };
-                });
-
-            // --- Script dropdown (single select) ---
-            if (scriptSelect) {
-                scriptSelect.innerHTML = '<option value="">Select Script</option>';
-                fetch('/static/scriptList.json')
-                    .then(response => response.json())
-                    .then(data => {
-                        data.forEach(script => {
-                            const option = document.createElement('option');
-                            option.value = script;
-                            option.textContent = script;
-                            scriptSelect.appendChild(option);
-                        });
-                    });
-            }
-
-            // --- Dataset Dropdown ---
-            if (datasetSelect) {
-                // Fetch and populate datasets
-                fetch('/static/dataset.json')
-                    .then(response => response.json())
-                    .then(data => {
-                        datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
-                        data.forEach(dataset => {
-                            const option = document.createElement('option');
-                            option.value = dataset;
-                            option.textContent = dataset;
-                            datasetSelect.appendChild(option);
-                        });
-                    })
-                    .catch(error => {
-                        console.error('Error loading datasets:', error);
-                        datasetSelect.innerHTML = '<option value="">Error loading datasets</option>';
-                    });
-            }
-        } else if (dataSource.value === "huggingface") {
+        if (dataSource.value === "huggingface") {
             if (hubDataTabContent) hubDataTabContent.style.display = "block";
         } else if (dataSource.value === "local") {
             if (uploadDataTabContent) uploadDataTabContent.style.display = "block";

@@ -503,9 +503,6 @@ async def handle_form(
     hub_dataset: str = Form(""),
     train_split: str = Form(""),
     valid_split: str = Form(""),
-    life_app_project: Optional[List[str]] = Form(None, alias="life-app-project"),
-    life_app_script: Optional[str] = Form(None, alias="life-app-script"),
-    life_app_dataset_file: Optional[str] = Form(None, alias="life-app-dataset-file"),
     token: str = Depends(user_authentication),
 ):
     """
@@ -545,37 +542,8 @@ async def handle_form(
 
     form = await request.form()
     data_source = form.get("dataset_source", "local")
-    selected_project = form.get("life_app_project")
-    selected_script = form.get("life_app_script")
     
-    # Handle LiFE app datasets for ASR tasks
-    if data_source == "life_app":
-        if task != "automatic-speech-recognition":
-            raise HTTPException(
-                status_code=400, 
-                detail="LiFE app datasets can only be used with Automatic Speech Recognition tasks"
-            )
-        if not life_app_project or not life_app_script or not life_app_dataset_file:
-            raise HTTPException(
-                status_code=400,
-                detail="Please select project(s), script, and dataset file from LiFE App."
-            )
-        # Call the prepare_life_app_dataset internally to get the data path
-        prepared_data_response = await prepare_life_app_dataset(
-            request=request, # Pass request directly
-            project_ids=life_app_project,
-            script_id=life_app_script,
-            dataset_file=life_app_dataset_file,
-            token=token
-        )
-        data_path = prepared_data_response.body.decode('utf-8')
-        data_path = json.loads(data_path)["path"]
-
-        # Add selected LiFE App project(s) and script to params for logging/future use
-        params["life_app_project_ids"] = life_app_project
-        params["life_app_script_id"] = life_app_script
-        
-    elif len(training_files) > 0 and len(hub_dataset) > 0:
+    if len(training_files) > 0 and len(hub_dataset) > 0:
         raise HTTPException(
             status_code=400, detail="Please either upload a dataset or choose a dataset from the Hugging Face Hub."
         )
@@ -910,83 +878,3 @@ async def handle_form(request: Request):
             return {"status": "error", "message": f"Error starting training: {str(e)}"}
     
     return {"status": "error", "message": "Invalid task type"}
-
-
-@ui_router.get("/life_app_projects", response_class=JSONResponse)
-async def get_life_app_projects(token: str = Depends(token_verification)):
-    try:
-        with open("src/autotrain/app/static/projectList.json", "r") as f:
-            projects = json.load(f)
-        # Transform the list of strings into a list of dictionaries
-        transformed_projects = []
-        for p in projects:
-            transformed_projects.append({"id": p, "name": p})
-        return JSONResponse(transformed_projects)
-    except FileNotFoundError:
-        raise HTTPException(status_code=404, detail="projectList.json not found.")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error loading projects: {e}")
-
-
-@ui_router.get("/life_app_scripts", response_class=JSONResponse)
-async def get_life_app_scripts(token: str = Depends(token_verification)):
-    try:
-        with open("src/autotrain/app/static/scriptList.json", "r") as f:
-            scripts = json.load(f)
-        return JSONResponse(scripts)
-    except FileNotFoundError:
-        raise HTTPException(status_code=404, detail="scriptList.json not found.")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error loading scripts: {e}")
-
-
-@ui_router.get("/life_app_dataset_files", response_class=JSONResponse)
-async def get_life_app_dataset_files(token: str = Depends(token_verification)):
-    """
-    This function is used to fetch the list of dataset files from src/autotrain/app/static/.
-    """
-    dataset_files_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
-    if not os.path.exists(dataset_files_dir):
-        return []
-    
-    json_files = [f for f in os.listdir(dataset_files_dir) if f.endswith('.json')]
-    
-    # Transform the list of strings into a list of dictionaries with 'id' and 'name' keys
-    transformed_files = []
-    for f in json_files:
-        transformed_files.append({"id": f, "name": f})
-    
-    return JSONResponse(transformed_files)
-
-
-@ui_router.post("/life_app_dataset/prepare", response_class=JSONResponse)
-async def prepare_life_app_dataset(
-    request: Request,
-    project_ids: List[str] = Form(...),
-    script_id: str = Form(...),
-    dataset_file: str = Form(...),
-    token: str = Depends(token_verification),
-):
-    if dataset_file != "dataset.json":
-        raise HTTPException(status_code=400, detail="Only 'dataset.json' is supported for now.")
-
-    try:
-        # Construct the path to dataset.json. Assuming it's always the same for now.
-        dataset_path = "src/autotrain/app/static/dataset.json"
-        with open(dataset_path, "r") as f:
-            dataset = json.load(f)
-        
-        # Add validation if needed, e.g., check for 'audio' and 'transcription' fields
-        if not isinstance(dataset, list) or not all("audio" in item and "transcription" in item for item in dataset):
-            raise ValueError("Invalid dataset.json format: must be an array of objects with 'audio' and 'transcription' fields.")
-
-        # For now, we return the path to the dataset. In a real scenario, you might want to process it further.
-        return JSONResponse({"status": "success", "path": dataset_path})
-    except FileNotFoundError:
-        raise HTTPException(status_code=404, detail=f"Dataset file {dataset_path} not found.")
-    except json.JSONDecodeError:
-        raise HTTPException(status_code=400, detail="Invalid JSON format in dataset.json.")
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=f"Dataset content error: {e}")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An error occurred during dataset preparation: {e}")
