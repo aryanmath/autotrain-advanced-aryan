@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
         modal.classList.add('hidden');
     }
 
-    window.showModal = function() {
+    function showModal() {
         const modal = document.getElementById('confirmation-modal');
         modal.classList.add('flex');
         modal.classList.remove('hidden');
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
         modal.classList.add('hidden');
     }
 
-    window.hideModal = function() {
+    function hideModal() {
         const modal = document.getElementById('confirmation-modal');
         modal.classList.remove('flex');
         modal.classList.add('hidden');
@@ -61,89 +61,80 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.querySelector('#confirmation-modal .confirm').addEventListener('click', async function () {
         hideModal();
-        const loadingSpinner = document.getElementById('loading-spinner');
         loadingSpinner.classList.remove('hidden');
         console.log(document.getElementById('params_json').value)
 
-        const datasetSource = document.getElementById('dataset_source').value;
+        var formData = new FormData();
+        var columnMapping = {};
+        var params;
+        var paramsJsonElement = document.getElementById('params_json');
+        document.querySelectorAll('[id^="col_map_"]').forEach(function (element) {
+            var key = element.id.replace('col_map_', '');
+            columnMapping[key] = element.value;
+        });
 
-        if (datasetSource === 'life_app') {
-            // Call the LiFE App specific submission function
-            window.submitLifeAppTraining();
-        } else {
-            // Existing logic for other dataset sources
-            var formData = new FormData();
-            var columnMapping = {};
-            var params;
-            var paramsJsonElement = document.getElementById('params_json');
-            document.querySelectorAll('[id^="col_map_"]').forEach(function (element) {
-                var key = element.id.replace('col_map_', '');
-                columnMapping[key] = element.value;
+        if (paramsJsonElement.value == '{}' || paramsJsonElement.value == '') {
+            var paramsDict = {};
+            document.querySelectorAll('[id^="param_"]').forEach(function (element) {
+                var key = element.id.replace('param_', '');
+                paramsDict[key] = element.value;
             });
-
-            if (paramsJsonElement.value == '{}' || paramsJsonElement.value == '') {
-                var paramsDict = {};
-                document.querySelectorAll('[id^="param_"]').forEach(function (element) {
-                    var key = element.id.replace('param_', '');
-                    paramsDict[key] = element.value;
-                });
-                params = JSON.stringify(paramsDict);
-            } else {
-                params = paramsJsonElement.value;
-            }
-            const baseModelValue = document.getElementById('base_model_checkbox').checked
-                ? document.getElementById('base_model_input').value
-                : document.getElementById('base_model').value;
-
-            formData.append('base_model', baseModelValue);
-            formData.append('project_name', document.getElementById('project_name').value);
-            formData.append('task', document.getElementById('task').value);
-            formData.append('hardware', document.getElementById('hardware').value);
-            formData.append('params', params);
-            formData.append('autotrain_user', document.getElementById('autotrain_user').value);
-            formData.append('column_mapping', JSON.stringify(columnMapping));
-            formData.append('hub_dataset', document.getElementById('hub_dataset').value);
-            formData.append('train_split', document.getElementById('train_split').value);
-            formData.append('valid_split', document.getElementById('valid_split').value);
-
-            var trainingFiles = document.getElementById('data_files_training').files;
-            for (var i = 0; i < trainingFiles.length; i++) {
-                formData.append('data_files_training', trainingFiles[i]);
-            }
-
-            var validationFiles = document.getElementById('data_files_valid').files;
-            for (var i = 0; i < validationFiles.length; i++) {
-                formData.append('data_files_valid', validationFiles[i]);
-            }
-
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', '/ui/create_project', true);
-
-            xhr.onload = function () {
-                loadingSpinner.classList.add('hidden');
-                var finalModalContent = document.querySelector('#final-modal .text-center');
-
-                if (xhr.status === 200) {
-                    var responseObj = JSON.parse(xhr.responseText);
-                    var monitorURL = responseObj.monitor_url;
-                    if (monitorURL.startsWith('http')) {
-                        finalModalContent.innerHTML = '<p>Success!</p>' +
-                            '<p>You can check the progress of your training here: <a href="' + monitorURL + '" target="_blank">' + monitorURL + '</a></p>';
-                    } else {
-                        finalModalContent.innerHTML = '<p>Success!</p>' +
-                            '<p>' + monitorURL + '</p>';
-                    }
-
-                    showFinalModal();
-                } else {
-                    finalModalContent.innerHTML = '<p>Error: ' + xhr.status + ' ' + xhr.statusText + '</p>' + '<p> Please check the logs for more information.!</p>';
-                    console.error('Error:', xhr.status, xhr.statusText);
-                    showFinalModal();
-                }
-            };
-
-            xhr.send(formData);
+            params = JSON.stringify(paramsDict);
+        } else {
+            params = paramsJsonElement.value;
         }
+        const baseModelValue = document.getElementById('base_model_checkbox').checked
+            ? document.getElementById('base_model_input').value
+            : document.getElementById('base_model').value;
+
+        formData.append('base_model', baseModelValue);
+        formData.append('project_name', document.getElementById('project_name').value);
+        formData.append('task', document.getElementById('task').value);
+        formData.append('hardware', document.getElementById('hardware').value);
+        formData.append('params', params);
+        formData.append('autotrain_user', document.getElementById('autotrain_user').value);
+        formData.append('column_mapping', JSON.stringify(columnMapping));
+        formData.append('hub_dataset', document.getElementById('hub_dataset').value);
+        formData.append('train_split', document.getElementById('train_split').value);
+        formData.append('valid_split', document.getElementById('valid_split').value);
+
+        var trainingFiles = document.getElementById('data_files_training').files;
+        for (var i = 0; i < trainingFiles.length; i++) {
+            formData.append('data_files_training', trainingFiles[i]);
+        }
+
+        var validationFiles = document.getElementById('data_files_valid').files;
+        for (var i = 0; i < validationFiles.length; i++) {
+            formData.append('data_files_valid', validationFiles[i]);
+        }
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/ui/create_project', true);
+
+        xhr.onload = function () {
+            loadingSpinner.classList.add('hidden');
+            var finalModalContent = document.querySelector('#final-modal .text-center');
+
+            if (xhr.status === 200) {
+                var responseObj = JSON.parse(xhr.responseText);
+                var monitorURL = responseObj.monitor_url;
+                if (monitorURL.startsWith('http')) {
+                    finalModalContent.innerHTML = '<p>Success!</p>' +
+                        '<p>You can check the progress of your training here: <a href="' + monitorURL + '" target="_blank">' + monitorURL + '</a></p>';
+                } else {
+                    finalModalContent.innerHTML = '<p>Success!</p>' +
+                        '<p>' + monitorURL + '</p>';
+                }
+
+                showFinalModal();
+            } else {
+                finalModalContent.innerHTML = '<p>Error: ' + xhr.status + ' ' + xhr.statusText + '</p>' + '<p> Please check the logs for more information.</p>';
+                console.error('Error:', xhr.status, xhr.statusText);
+                showFinalModal();
+            }
+        };
+
+        xhr.send(formData);
     });
 
     document.querySelector('#confirmation-modal .cancel').addEventListener('click', function () {
