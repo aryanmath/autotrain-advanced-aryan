@@ -80,18 +80,12 @@ def load_data(params, is_validation=False):
             files = os.listdir(params.data_path)
             logger.info(f"Files in directory: {files}")
             
-            # Look for dataset.csv
-            if 'dataset.csv' in files:
-                logger.info("Found dataset.csv, loading...")
-                csv_file_path = os.path.join(params.data_path, 'dataset.csv')
-            else:
-                # Look for any CSV file
-                csv_files = [f for f in files if f.endswith('.csv')]
-                if csv_files:
-                    csv_file_path = os.path.join(params.data_path, csv_files[0])
-                    logger.info(f"Using CSV file: {csv_files[0]}")
-                else:
-                    raise ValueError(f"No CSV file found in {params.data_path}")
+            # Look for any CSV file
+            csv_files = [f for f in files if f.endswith('.csv')]
+            if not csv_files:
+                raise ValueError(f"No CSV file found in {params.data_path}")
+            csv_file_path = os.path.join(params.data_path, csv_files[0])
+            logger.info(f"Using CSV file: {csv_file_path}")
             
             # Read CSV file using pandas
             logger.info(f"Loading CSV file: {csv_file_path}")
