@@ -186,18 +186,23 @@ document.addEventListener('DOMContentLoaded', function () {
                     });
             }
 
-            // --- Dataset dropdown (single select) ---
+            // --- Dataset Dropdown ---
             if (datasetSelect) {
-                datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
-                fetch('/static/datasetList.json')
+                // Fetch and populate datasets
+                fetch('/static/dataset.json')
                     .then(response => response.json())
                     .then(data => {
+                        datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
                         data.forEach(dataset => {
                             const option = document.createElement('option');
                             option.value = dataset;
                             option.textContent = dataset;
                             datasetSelect.appendChild(option);
                         });
+                    })
+                    .catch(error => {
+                        console.error('Error loading datasets:', error);
+                        datasetSelect.innerHTML = '<option value="">Error loading datasets</option>';
                     });
             }
         } else if (dataSource.value === "huggingface") {
