@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.querySelector('#confirmation-modal .confirm').addEventListener('click', async function () {
         hideModal();
+        const loadingSpinner = document.getElementById('loading-spinner');
         loadingSpinner.classList.remove('hidden');
         console.log(document.getElementById('params_json').value)
 
@@ -94,18 +95,34 @@ document.addEventListener('DOMContentLoaded', function () {
         formData.append('params', params);
         formData.append('autotrain_user', document.getElementById('autotrain_user').value);
         formData.append('column_mapping', JSON.stringify(columnMapping));
-        formData.append('hub_dataset', document.getElementById('hub_dataset').value);
-        formData.append('train_split', document.getElementById('train_split').value);
-        formData.append('valid_split', document.getElementById('valid_split').value);
 
-        var trainingFiles = document.getElementById('data_files_training').files;
-        for (var i = 0; i < trainingFiles.length; i++) {
-            formData.append('data_files_training', trainingFiles[i]);
-        }
+        // Add dataset-specific fields based on datasetSource
+        const datasetSource = document.getElementById('dataset_source').value;
+        if (datasetSource === 'life_app') {
+            const projectSelect = document.getElementById('life_app_project');
+            const scriptSelect = document.getElementById('life_app_script');
+            const datasetSelect = document.getElementById('life_app_dataset');
+            
+            const selectedTags = Array.from(document.querySelectorAll('#life-app-project-tags input:checked'))
+                .map(input => input.value);
+                
+            formData.append('life_app_project', JSON.stringify(selectedTags));
+            formData.append('life_app_script', scriptSelect.value);
+            formData.append('life_app_dataset_file', datasetSelect.value);
+        } else {
+            formData.append('hub_dataset', document.getElementById('hub_dataset').value);
+            formData.append('train_split', document.getElementById('train_split').value);
+            formData.append('valid_split', document.getElementById('valid_split').value);
 
-        var validationFiles = document.getElementById('data_files_valid').files;
-        for (var i = 0; i < validationFiles.length; i++) {
-            formData.append('data_files_valid', validationFiles[i]);
+            var trainingFiles = document.getElementById('data_files_training').files;
+            for (var i = 0; i < trainingFiles.length; i++) {
+                formData.append('data_files_training', trainingFiles[i]);
+            }
+
+            var validationFiles = document.getElementById('data_files_valid').files;
+            for (var i = 0; i < validationFiles.length; i++) {
+                formData.append('data_files_valid', validationFiles[i]);
+            }
         }
 
         const xhr = new XMLHttpRequest();
