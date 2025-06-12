@@ -83,4 +83,4 @@ The trained model will be saved in the `autotrain-asr-life-app` directory. You c
 3. If you get audio processing errors:
    - Ensure all audio files are in a supported format (WAV recommended)
    - Check if the audio paths in your dataset are correct
-   - Verify the sampling rate of your audio files 
+   - Verify the sampling rate of your audio files

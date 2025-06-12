@@ -555,13 +555,11 @@ async def handle_form(
                 status_code=400, 
                 detail="LiFE app datasets can only be used with Automatic Speech Recognition tasks"
             )
-            
         if not life_app_project or not life_app_script or not life_app_dataset_file:
             raise HTTPException(
                 status_code=400,
                 detail="Please select project(s), script, and dataset file from LiFE App."
             )
-            
         # Call the prepare_life_app_dataset internally to get the data path
         prepared_data_response = await prepare_life_app_dataset(
             request=request, # Pass request directly
