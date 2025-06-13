@@ -338,7 +338,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 fetch('/static/projectList.json')
                     .then(response => response.json())
                     .then(data => {
-                        projectSelect.innerHTML = '';
+                        projectSelect.innerHTML = '<option value="">Select Project</option>';
                         data.forEach(project => {
                             const option = document.createElement('option');
                             option.value = project;
@@ -401,7 +401,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const projectSelect = document.getElementById('life_app_project');
         const projectTagsContainer = document.getElementById('life-app-project-tags');
         if (!projectSelect) return;
-        projectSelect.innerHTML = ''; // Clear existing options
+        projectSelect.innerHTML = '<option value="">Select Project</option>'; // Clear existing options
         projectTagsContainer.innerHTML = ''; // Clear existing tags
 
         try {
@@ -414,7 +414,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 projectSelect.appendChild(option);
             });
             // Trigger change event to update tags
-            projectSelect.dispatchEvent(new Event('change'));
+            updateProjectTags();
         } catch (error) {
             console.error('Error loading projects:', error);
         }
@@ -456,14 +456,9 @@ document.addEventListener('DOMContentLoaded', function () {
             removeBtn.innerHTML = '&times;';
             removeBtn.onclick = () => {
                 // Deselect the option in the dropdown
-                for (let i = 0; i < projectSelect.options.length; i++) {
-                    if (projectSelect.options[i].value === option.value) {
-                        projectSelect.options[i].selected = false;
-                        break;
-                    }
-                }
+                option.selected = false;
+                projectSelect.dispatchEvent(new Event('change')); // Trigger change event
                 updateProjectTags(); // Refresh tags
-                loadLifeAppScripts(); // Re-filter scripts
             };
             tag.appendChild(removeBtn);
             projectTagsContainer.appendChild(tag);

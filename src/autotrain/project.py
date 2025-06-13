@@ -478,6 +478,7 @@ def asr_munge_data(params, local):
     if hasattr(params, "data_path") and params.data_path == "life_app_data":
         params.text_column = "transcription"
         params.audio_column = "audio"
+        params.data_path = "life_app_data"  # Ensure data_path is correctly set
     return params
 
 
