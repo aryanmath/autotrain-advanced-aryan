@@ -19,6 +19,17 @@
 </head>
 
 <script>
+    window.addEventListener('load', function () {
+        const modalIds = ['final-modal', 'help-modal', 'dataset-viewer-modal'];
+        modalIds.forEach(modalId => {
+            const modalDiv = document.getElementById(modalId);
+            if (modalDiv) {
+                modalDiv.remove();
+            }
+        });
+    });
+</script>
+<script>
     window.addEventListener("load", function () {
         function createColumnMappings(selectedTask) {
             const colMapDiv = document.getElementById("div_cmap");
@@ -668,7 +679,7 @@
             </div>
         </div>
     </div>
-    <div id="dataset-viewer-modal" tabindex="-1"x items-center justify-center w-full h-full bg-black bg-opacity-50">
+    <div id="dataset-viewer-modal" tabindex="-1"
         class="hidden fixed inset-0 z-50 flex items-center justify-center w-full h-full bg-black bg-opacity-50">
         <div class="relative w-full max-w-5xl p-4">bg-gray-800 rounded-lg shadow-2xl">
             <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-2xl">
