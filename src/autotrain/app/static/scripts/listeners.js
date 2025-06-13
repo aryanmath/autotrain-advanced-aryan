@@ -405,10 +405,12 @@ document.addEventListener('DOMContentLoaded', function () {
             // Clear existing options but keep the placeholder
             datasetSelect.html('<option value="">Select Dataset</option>');
             
-            // Add dataset.json as an option
-            datasetSelect.append(new Option('dataset.json', 'dataset.json'));
+            // Add dataset.json with just filename display but full path as value
+            const datasetPath = "src/autotrain/app/static/dataset.json";
+            const fileName = "dataset.json"; // Just show filename in dropdown
+            datasetSelect.append(new Option(fileName, datasetPath));
             
-            // Initialize/refresh select2
+            // Initialize select2
             datasetSelect.select2({
                 placeholder: 'Select Dataset File',
                 width: '100%',
@@ -425,6 +427,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function formatDataset(dataset) {
         if (!dataset.id) return dataset.text;
+        // Display just the filename with icon
         return $(`<span><i class="fas fa-file-code mr-2"></i> ${dataset.text}</span>`);
     }
 
