@@ -451,7 +451,7 @@
                     </div>
 
                     <div class="items-stretch justify-center h-48 rounded">
-                        <div id="hub-data-tab-content" class="w-full px-4">
+                        <div id="hub-data-tab-content" class="w-full px-4" style="display:none;">
                             <label for="hub_dataset" class="text-sm font-medium text-gray-700 dark:text-gray-300">Hub
                                 dataset path</label>
                             <div class="mt-1 flex items-center">
@@ -481,7 +481,8 @@
                                     class="mt-1 block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                             </div>
                         </div>
-                        <div id="upload-data-tabs" class="w-full px-4">
+
+                        <div id="upload-data-tabs" class="w-full px-4" style="display:none;">
                             <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="upload-data-tab"
                                 data-tabs-toggle="#upload-data-tab-content" role="tablist">
                                 <li class="me-2" role="presentation">
@@ -498,7 +499,7 @@
                                 </li>
                             </ul>
                         </div>
-                        <div id="upload-data-tab-content" class="w-full px-4">
+                        <div id="upload-data-tab-content" class="w-full px-4" style="display:none;">
                             <div class="hidden p-4" id="training-data" role="tabpanel"
                                 aria-labelledby="training-data-tab">
                                 <div class="flex items-center justify-center w-full h-20">
@@ -547,6 +548,22 @@
                                     </label>
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- Move LiFE App selection here, just after hub-data-tab-content -->
+                        <div id="life-app-selection" style="display:none;" class="w-full px-4 mb-4">
+                            <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">LiFE App Project(s)</label>
+                            <select id="life_app_project" name="life_app_project" multiple
+                                class="block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 mb-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                <!-- Options will be populated by JS -->
+                            </select>
+                            <div id="life-app-project-tags" class="mb-2"></div>
+                            <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">LiFE App Script</label>
+                            <select id="life_app_script" name="life_app_script"
+                                class="block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 mb-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                <!-- Options will be populated by JS -->
+                            </select>
+                            <!-- Add more fields here if needed -->
                         </div>
                     </div>
                     <div class="items-center justify-center h-24">
@@ -767,22 +784,6 @@
             toggleLifeAppSelection();
         });
     </script>
-
-    <!-- Add this block for LiFE App selection UI -->
-    <div id="life-app-selection" style="display:none;" class="w-full px-4 mb-4">
-        <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">LiFE App Project(s)</label>
-        <select id="life_app_project" name="life_app_project" multiple
-            class="block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 mb-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-            <!-- Options will be populated by JS -->
-        </select>
-        <div id="life-app-project-tags" class="mb-2"></div>
-        <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">LiFE App Script</label>
-        <select id="life_app_script" name="life_app_script"
-            class="block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 mb-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-            <!-- Options will be populated by JS -->
-        </select>
-        <!-- Add more fields here if needed -->
-    </div>
 </body>
 
 </html>

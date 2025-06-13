@@ -59,6 +59,8 @@ document.addEventListener('DOMContentLoaded', function () {
             if (hubDataTabContent) hubDataTabContent.style.display = "none";
             if (uploadDataTabContent) uploadDataTabContent.style.display = "none";
             if (uploadDataTabs) uploadDataTabs.style.display = "none";
+            loadLifeAppProjects();
+            loadLifeAppScripts();
         } else if (dataSource.value === "huggingface") {
             // Show hub dataset section
             if (hubDataTabContent) hubDataTabContent.style.display = "block";
