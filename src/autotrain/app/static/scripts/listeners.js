@@ -471,4 +471,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
     });
+
+    handleDataSource(); // ADD THIS LINE
 });
