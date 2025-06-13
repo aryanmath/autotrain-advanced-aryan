@@ -413,7 +413,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 option.textContent = project;
                 projectSelect.appendChild(option);
             });
-            updateProjectTags(); // Update tags after loading projects
+            // Trigger change event to update tags
+            projectSelect.dispatchEvent(new Event('change'));
         } catch (error) {
             console.error('Error loading projects:', error);
         }
