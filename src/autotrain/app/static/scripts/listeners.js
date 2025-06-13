@@ -398,32 +398,39 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Function to load dataset files
     async function loadDatasetFiles() {
-        const datasetSelect = $('#dataset_file');
-        if (!datasetSelect.length) return;
+        const datasetSelect = document.getElementById('dataset_file');
+        if (!datasetSelect) return;
         
         try {
-            // Clear existing options
-            datasetSelect.empty();
+            // First destroy any existing select2
+            if ($(datasetSelect).hasClass('select2-hidden-accessible')) {
+                $(datasetSelect).select2('destroy');
+            }
             
-            // Add the options
-            datasetSelect.append(new Option('Select Dataset', ''));
-            datasetSelect.append(new Option('dataset.json', 'dataset.json'));
-            
-            // Initialize select2
-            datasetSelect.select2({
+            // Clear and add options directly to the select element
+            datasetSelect.innerHTML = `
+                <option value="">Select Dataset</option>
+                <option value="dataset.json">dataset.json</option>
+            `;
+
+            // Initialize select2 with proper container
+            $(datasetSelect).select2({
+                dropdownParent: $('#dataset_file_div'),
                 width: '100%',
-                templateResult: function(data) {
+                placeholder: 'Select Dataset',
+                allowClear: true,
+                templateResult: (data) => {
                     if (!data.id) return data.text;
-                    return $('<span><i class="fas fa-file-code mr-2"></i>' + data.text + '</span>');
+                    return $(`<span><i class="fas fa-file-code mr-2"></i>${data.text}</span>`);
                 },
-                templateSelection: function(data) {
+                templateSelection: (data) => {
                     if (!data.id) return data.text;
-                    return $('<span><i class="fas fa-file-code mr-2"></i>' + data.text + '</span>');
+                    return $(`<span><i class="fas fa-file-code mr-2"></i>${data.text}</span>`);
                 }
             });
 
-            // Show the container
-            $('#dataset_file_div').show();
+            // Make sure container is visible
+            document.getElementById('dataset_file_div').style.display = 'block';
         } catch (error) {
             console.error('Error loading dataset files:', error);
         }
@@ -488,36 +495,4 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     handleDataSource(); // ADD THIS LINE
-});
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Existing dataset select event listener
-    const datasetSelect = document.getElementById('dataset_file');
-    if (datasetSelect) {
-        // Initialize select2 with custom template
-        $("#dataset_file").select2({
-            templateSelection: function(data) {
-                if (!data.id) return data.text; // If no ID, just return text
-                // Custom template for selected option
-                return $(`<span>
-                    <i class="fas fa-file-code mr-2"></i> 
-                    ${data.text}
-                </span>`);
-            },
-            templateResult: function(data) {
-                if (!data.id) return data.text;  
-                // Custom template for dropdown options
-                return $(`<span>
-                    <i class="fas fa-file-code mr-2"></i>
-                    ${data.text}
-                </span>`);
-            }
-        });
-
-        // Keep existing change handler
-        datasetSelect.addEventListener('change', function() {
-            const selectedFile = this.value;
-            console.log('Selected dataset file:', selectedFile);
-        });
-    }
 });
