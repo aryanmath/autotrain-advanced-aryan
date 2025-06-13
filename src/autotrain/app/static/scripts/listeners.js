@@ -398,8 +398,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Function to load projects
     async function loadLifeAppProjects() {
-        const projectSelect = document.getElementById('life-app-project');
+        const projectSelect = document.getElementById('life_app_project');
         const projectTagsContainer = document.getElementById('life-app-project-tags');
+        if (!projectSelect) return;
         projectSelect.innerHTML = ''; // Clear existing options
         projectTagsContainer.innerHTML = ''; // Clear existing tags
 
@@ -408,53 +409,38 @@ document.addEventListener('DOMContentLoaded', function () {
             const projects = await response.json();
             projects.forEach(project => {
                 const option = document.createElement('option');
-                option.value = project.project_id;
-                option.textContent = project.project_name;
+                option.value = project;
+                option.textContent = project;
                 projectSelect.appendChild(option);
             });
             updateProjectTags(); // Update tags after loading projects
         } catch (error) {
             console.error('Error loading projects:', error);
-            alert('Failed to load projects. Please check console for details.');
         }
     }
 
-    // Function to load scripts based on selected projects
+    // Function to load scripts
     async function loadLifeAppScripts() {
-        const projectSelect = document.getElementById('life-app-project');
-        const scriptSelect = document.getElementById('life-app-script');
-        scriptSelect.innerHTML = '<option value="">Select Script</option>'; // Clear and reset
-
-        const selectedProjectIds = Array.from(projectSelect.selectedOptions).map(option => option.value);
-
-        if (selectedProjectIds.length === 0) {
-            return; // No projects selected, so no scripts to load
-        }
-
+        const scriptSelect = document.getElementById('life_app_script');
+        if (!scriptSelect) return;
+        scriptSelect.innerHTML = '<option value="">Select Script</option>';
         try {
             const response = await fetch('/static/scriptList.json');
-            const allScripts = await response.json();
-
-            // Filter scripts based on selected projects
-            const filteredScripts = allScripts.filter(script => 
-                selectedProjectIds.includes(script.project_id)
-            );
-
-            filteredScripts.forEach(script => {
+            const scripts = await response.json();
+            scripts.forEach(script => {
                 const option = document.createElement('option');
-                option.value = script.script_id;
-                option.textContent = script.script_name;
+                option.value = script;
+                option.textContent = script;
                 scriptSelect.appendChild(option);
             });
         } catch (error) {
             console.error('Error loading scripts:', error);
-            alert('Failed to load scripts. Please check console for details.');
         }
     }
 
     // Function to update project tags
     function updateProjectTags() {
-        const projectSelect = document.getElementById('life-app-project');
+        const projectSelect = document.getElementById('life_app_project');
         const projectTagsContainer = document.getElementById('life-app-project-tags');
         projectTagsContainer.innerHTML = ''; // Clear existing tags
 
