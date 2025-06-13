@@ -567,6 +567,18 @@
                                 <!-- Options will be populated by JS -->
                             </select>
                             <!-- Add more fields here if needed -->
+                            <div class="items-center justify-center h-24" id="dataset_file_div" style="display:none;">
+                                <div class="w-full px-4">
+                                    <p for="dataset_file" class="text-xl text-gray-800 dark:text-gray-200 mb-2 mt-2">
+                                        Dataset File
+                                    </p>
+                                    <select id="dataset_file" name="dataset_file"
+                                        class="mt-1 block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                        <option value="">Select Dataset File</option>
+                                        <!-- Options will be populated by JS -->
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="items-center justify-center h-24">
@@ -601,218 +613,205 @@
                 </div>
             </div>
         </div>
-        <div class="items-center justify-center h-24">
-            <div class="w-full px-4" id="dataset_file_div" style="display:none;">
-                <p for="dataset_file" class="text-xl text-gray-800 dark:text-gray-200 mb-2 mt-2">
-                    Dataset File
-                </p>
-                <select id="dataset_file" name="dataset_file"
-                    class="mt-1 block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                    <option value="">Select Dataset File</option>
-                    <!-- Options will be populated by JS -->
-                </select>
-            </div>
+        <div id="json-error-message" style="color: red;"></div>
+        <div id="error-message" style="color: red;"></div>
+        <div id="success-message" style="color: green;"></div>
+        <div id="loadingSpinner" role="status"
+            class="hidden absolute -translate-x-1/2 -translate-y-1/2 top-2/4 left-1/2 flex flex-col items-center">
+            <div class="animate-spin rounded-full h-32 w-32 border-t-4 border-b-4 border-blue-400"></div>
+            <span class="sr-only mt-4 text-blue-500">Loading...</span>
         </div>
-    </div>
-    <div id="json-error-message" style="color: red;"></div>
-    <div id="error-message" style="color: red;"></div>
-    <div id="success-message" style="color: green;"></div>
-    <div id="loadingSpinner" role="status"
-        class="hidden absolute -translate-x-1/2 -translate-y-1/2 top-2/4 left-1/2 flex flex-col items-center">
-        <div class="animate-spin rounded-full h-32 w-32 border-t-4 border-b-4 border-blue-400"></div>
-        <span class="sr-only mt-4 text-blue-500">Loading...</span>
-    </div>
-    <div class="hidden justify-center items-center">
-        <div class="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
-    </div>
-    <div id="confirmation-modal" tabindex="-1"
-        class="hidden fixed inset-0 z-50 flex items-center justify-center w-full h-full bg-black bg-opacity-50">
-        <div class="relative w-full max-w-md p-4">
-            <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-2xl">
-                <div class="p-6 text-center">
-                    <h3 class="mb-5 text-lg font-medium text-gray-900 dark:text-gray-100">AutoTrain is a paid offering
-                        and you will be
-                        charged for this action. You can ignore this message if you are running AutoTrain on a local
-                        hardware.
-                        Are you sure you want to continue?</h3>
-                    <div class="flex justify-center space-x-4">
-                        <button data-modal-hide="confirmation-modal" type="button"
-                            class="confirm text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none">
-                            Yes, I'm sure
-                        </button>
-                        <button data-modal-hide="confirmation-modal" type="button"
-                            class="cancel text-gray-700 bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:ring-gray-300 rounded-lg text-sm font-medium px-5 py-2.5 focus:outline-none">
-                            No, cancel
-                        </button>
+        <div class="hidden justify-center items-center">
+            <div class="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+        </div>
+        <div id="confirmation-modal" tabindex="-1"
+            class="hidden fixed inset-0 z-50 flex items-center justify-center w-full h-full bg-black bg-opacity-50">
+            <div class="relative w-full max-w-md p-4">
+                <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-2xl">
+                    <div class="p-6 text-center">
+                        <h3 class="mb-5 text-lg font-medium text-gray-900 dark:text-gray-100">AutoTrain is a paid offering
+                            and you will be
+                            charged for this action. You can ignore this message if you are running AutoTrain on a local
+                            hardware.
+                            Are you sure you want to continue?</h3>
+                        <div class="flex justify-center space-x-4">
+                            <button data-modal-hide="confirmation-modal" type="button"
+                                class="confirm text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none">
+                                Yes, I'm sure
+                            </button>
+                            <button data-modal-hide="confirmation-modal" type="button"
+                                class="cancel text-gray-700 bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:ring-gray-300 rounded-lg text-sm font-medium px-5 py-2.5 focus:outline-none">
+                                No, cancel
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div id="logs-modal" tabindex="-1"
-        class="hidden fixed inset-0 z-50 flex items-center justify-center w-full h-full bg-black bg-opacity-50">
-        <div class="relative w-full max-w-5xl p-4">
-            <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-2xl">
-                <button type="button"
-                    class="absolute top-3 right-3 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-gray-100 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center"
-                    data-modal-hide="logs-modal">
-                    <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-                        viewBox="0 0 14 14">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-                    </svg>
-                    <span class="sr-only">Close</span>
-                </button>
-                <div class="p-6 md:p-8 text-center">
-                    <h3 class="mb-5 text-lg font-medium text-gray-900 dark:text-gray-100">Logs</h3>
-                    <div id="logContent"
+        <div id="logs-modal" tabindex="-1"
+            class="hidden fixed inset-0 z-50 flex items-center justify-center w-full h-full bg-black bg-opacity-50">
+            <div class="relative w-full max-w-5xl p-4">
+                <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-2xl">
+                    <button type="button"
+                        class="absolute top-3 right-3 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-gray-100 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center"
+                        data-modal-hide="logs-modal">
+                        <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 14 14">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                        </svg>
+                        <span class="sr-only">Close</span>
+                    </button>
+                    <div class="p-6 md:p-8 text-center">
+                        <h3 class="mb-5 text-lg font-medium text-gray-900 dark:text-gray-100">Logs</h3>
+                        <div id="logContent"
+                            class="text-xs font-normal text-left overflow-y-auto max-h-[calc(100vh-400px)] border-t border-gray-200 dark:border-gray-700 pt-4">
                         class="text-xs font-normal text-left overflow-y-auto max-h-[calc(100vh-400px)] border-t border-gray-200 dark:border-gray-700 pt-4">
                         <!-- Logs will be appended here -->
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div id="final-modal" tabindex="-1"
+    </div>iv id="final-modal" tabindex="-1"
+    <div id="final-modal" tabindex="-1"to overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
         class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-        <div class="relative p-4 w-full max-w-md max-h-full">
+        <div class="relative p-4 w-full max-w-md max-h-full">0 rounded-lg shadow-2xl">
             <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-2xl">
-                <button type="button"
+                <button type="button"te top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-gray-100 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
                     class="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-gray-100 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
-                    data-modal-hide="final-modal">
+                    data-modal-hide="final-modal">hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
                     <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-                        viewBox="0 0 14 14">
+                        viewBox="0 0 14 14">rrentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-                    </svg>
+                    </svg>pan class="sr-only">Close</span>
                     <span class="sr-only">Close</span>
-                </button>
-                <div class="p-4 md:p-5 text-center">
+                </button>class="p-4 md:p-5 text-center">
+                <div class="p-4 md:p-5 text-center">-normal text-gray-800 dark:text-gray-200"></h3>
                     <h3 class="mb-5 text-sm font-normal text-gray-800 dark:text-gray-200"></h3>
                 </div>
             </div>
         </div>
-    </div>
-    <div id="help-modal" tabindex="-1"
+    </div>iv id="help-modal" tabindex="-1"
+    <div id="help-modal" tabindex="-1"uto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
         class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-        <div class="relative p-4 w-full max-w-md max-h-full">
+        <div class="relative p-4 w-full max-w-md max-h-full">0 rounded-lg shadow-2xl">
             <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-2xl">
-                <br>
-                <button type="button"
+                <br><button type="button"
+                <button type="button"te top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-gray-100 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
                     class="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-gray-100 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
-                    data-modal-hide="help-modal">
+                    data-modal-hide="help-modal">-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
                     <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-                        viewBox="0 0 14 14">
+                        viewBox="0 0 14 14">rrentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-                    </svg>
+                    </svg>pan class="sr-only">Close</span>
                     <span class="sr-only">Close</span>
-                </button>
-                <div class="p-4 md:p-5 text-center">
+                </button>class="p-4 md:p-5 text-center">
+                <div class="p-4 md:p-5 text-center">-normal text-gray-800 dark:text-gray-200"></h3>
                     <h3 class="mb-5 text-sm font-normal text-gray-800 dark:text-gray-200"></h3>
                 </div>
             </div>
         </div>
-    </div>
-    <div id="dataset-viewer-modal" tabindex="-1"
+    </div>iv id="dataset-viewer-modal" tabindex="-1"
+    <div id="dataset-viewer-modal" tabindex="-1"x items-center justify-center w-full h-full bg-black bg-opacity-50">
         class="hidden fixed inset-0 z-50 flex items-center justify-center w-full h-full bg-black bg-opacity-50">
-        <div class="relative w-full max-w-5xl p-4">
+        <div class="relative w-full max-w-5xl p-4">bg-gray-800 rounded-lg shadow-2xl">
             <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-2xl">
-                <button type="button"
+                <button type="button"te top-3 right-3 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-gray-100 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center"
                     class="absolute top-3 right-3 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-gray-100 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center"
-                    data-modal-hide="dataset-viewer-modal">
+                    data-modal-hide="dataset-viewer-modal">rue" xmlns="http://www.w3.org/2000/svg" fill="none"
                     <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-                        viewBox="0 0 14 14">
+                        viewBox="0 0 14 14">rrentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-                    </svg>
+                    </svg>pan class="sr-only">Close</span>
                     <span class="sr-only">Close</span>
-                </button>
-                <div class="p-6 md:p-8 text-center">
+                </button>class="p-6 md:p-8 text-center">
+                <div class="p-6 md:p-8 text-center">-medium text-gray-900 dark:text-gray-100">Dataset Viewer</h3>
                     <h3 class="mb-5 text-lg font-medium text-gray-900 dark:text-gray-100">Dataset Viewer</h3>
-                    <div id="datasetViewerContent"
+                    <div id="datasetViewerContent"rmal text-left overflow-y-auto max-h-[calc(100vh-400px)] border-t border-gray-200 dark:border-gray-700 pt-4">
                         class="text-xs font-normal text-left overflow-y-auto max-h-[calc(100vh-400px)] border-t border-gray-200 dark:border-gray-700 pt-4">
                         <!-- dataset will be appended here -->
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <script>
+    </div>cript>
+    <script>var autotrain_local_value = {{ enable_local }};
         var autotrain_local_value = {{ enable_local }};
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
+    </script>pt>
+    <script>document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function () {'stop-training-button');
             const stopTrainingButton = document.getElementById('stop-training-button');
             const loadingSpinner = document.getElementById('loadingSpinner');
-
+                stopTrainingButton.addEventListener('click', function () {
             stopTrainingButton.addEventListener('click', function () {
                 loadingSpinner.classList.remove('hidden');
-
+                    fetch('/ui/stop_training', {
                 fetch('/ui/stop_training', {
                     method: 'GET'
-                })
+                })      .then(response => response.text())
                     .then(response => response.text())
-                    .then data => {
-                        console.log(data);
+                    .then data => {.log(data);
+                        console.log(data);.classList.add('hidden');
                         loadingSpinner.classList.add('hidden');
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
+                    })  .catch(error => {
+                    .catch(error => {rror('Error:', error);
+                        console.error('Error:', error);d('hidden');
                         loadingSpinner.classList.add('hidden');
                     });
             });
-        });
-    </script>
-    <script>
+        });cript>
+    </script>pt>
+    <script>document.getElementById('base_model_checkbox').addEventListener('change', function () {
         document.getElementById('base_model_checkbox').addEventListener('change', function () {
-            const selectElement = document.getElementById('base_model');
+            const selectElement = document.getElementById('base_model');el_input');
             const baseModelInput = document.getElementById('base_model_input');
-
-            if (this.checked) {
+                if (this.checked) {
+            if (this.checked) {put.placeholder = selectElement.options[selectElement.selectedIndex].text;
                 baseModelInput.placeholder = selectElement.options[selectElement.selectedIndex].text;
-                selectElement.classList.add('hidden');
+                selectElement.classList.add('hidden');idden');
                 baseModelInput.classList.remove('hidden');
-            } else {
-                selectElement.classList.remove('hidden');
+            } else {selectElement.classList.remove('hidden');
+                selectElement.classList.remove('hidden'););
                 baseModelInput.classList.add('hidden');
-            }
-        });
+            });
+        });cript>
     </script>
-
-    <script>
-        // Show/hide LiFE App selection UI based on dataset source
-        document.addEventListener('DOMContentLoaded', function () {
-            const datasetSource = document.getElementById('dataset_source');
+        <script>
+    <script>// Show/hide LiFE App selection UI based on dataset source
+        // Show/hide LiFE App selection UI based on dataset source () {
+        document.addEventListener('DOMContentLoaded', function () {set_source');
+            const datasetSource = document.getElementById('dataset_source');election');
             const lifeAppSelection = document.getElementById('life-app-selection');
-
-            function toggleLifeAppSelection() {
-                if (datasetSource.value === 'life_app') {
+                function toggleLifeAppSelection() {
+            function toggleLifeAppSelection() { 'life_app') {
+                if (datasetSource.value === 'life_app') {'';
                     lifeAppSelection.style.display = '';
-                } else {
+                } else {lifeAppSelection.style.display = 'none';
                     lifeAppSelection.style.display = 'none';
                 }
             }
-
+                datasetSource.addEventListener('change', toggleLifeAppSelection);
             datasetSource.addEventListener('change', toggleLifeAppSelection);
-            // Initialize on page load
+            // Initialize on page load();
             toggleLifeAppSelection();
-        });
-    </script>
-    <script>
-        $(document).ready(function() {
-            $('#life_app_project').select2({
-                maximumSelectionLength: 2,
+        });cript>
+    </script>pt>
+    <script>$(document).ready(function() {
+        $(document).ready(function() {.select2({
+            $('#life_app_project').select2({2,
+                maximumSelectionLength: 2,rojects"
                 placeholder: "Select Projects"
-            });
-            $('#life_app_script').select2({
+            }); $('#life_app_script').select2({
+            $('#life_app_script').select2({ript"
                 placeholder: "Select Script"
-            });
-            $('#dataset_file').select2({
+            }); $('#dataset_file').select2({
+            $('#dataset_file').select2({ Dataset File"
                 placeholder: "Select Dataset File"
             });
-        });
+        });cript>
     </script>
 </body>
-
-</html>
+</html></html>
