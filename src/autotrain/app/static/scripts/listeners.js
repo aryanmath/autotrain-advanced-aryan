@@ -389,7 +389,7 @@ document.addEventListener('DOMContentLoaded', function () {
             removeBtn.innerHTML = '&times;';
             removeBtn.onclick = () => {
                 option.selected = false;
-                tag.remove();
+                updateProjectTags(); // Refresh tags
             };
             tag.appendChild(removeBtn);
             tagContainer.appendChild(tag);
@@ -442,6 +442,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function updateProjectTags() {
         const projectSelect = document.getElementById('life_app_project');
         const projectTagsContainer = document.getElementById('life-app-project-tags');
+        if (!projectSelect || !projectTagsContainer) return;
         projectTagsContainer.innerHTML = ''; // Clear existing tags
 
         Array.from(projectSelect.selectedOptions).forEach(option => {
@@ -469,17 +470,19 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Event listener for project selection change
-    document.getElementById('life-app-project').addEventListener('change', () => {
-        loadLifeAppScripts();
+    document.getElementById('life_app_project').addEventListener('change', () => {
         updateProjectTags();
     });
 
-    // Initial call to load projects if already on LiFE App selection (e.g., after a refresh)
-    if (document.getElementById('dataset_source').value === 'life_app') {
-        loadLifeAppProjects();
-    }
+    // When LiFE App is selected, load projects/scripts
+    document.getElementById('dataset_source').addEventListener('change', function() {
+        if (this.value === 'life_app') {
+            loadLifeAppProjects();
+            loadLifeAppScripts();
+        }
+    });
 
-    // On page load, hide LiFE App dataset source if not ASR
+    // --- On page load, hide LiFE App dataset source if not ASR ---
     document.getElementById('task').addEventListener('change', function() {
         const taskValue = this.value;
         const lifeAppOption = document.getElementById("dataset_source").querySelector('option[value="life_app"]');
