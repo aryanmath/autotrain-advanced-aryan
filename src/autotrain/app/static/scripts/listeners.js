@@ -271,30 +271,6 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log('Showing LiFE App selection');
             lifeAppSelection.style.display = 'block';
 
-            // --- Project dropdown (multi-select) ---
-            if (projectSelect) {
-                console.log('Loading projects...');
-                fetch('/static/projectList.json')
-                    .then(response => {
-                        console.log('Project list response:', response.status);
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log('Projects loaded:', data);
-                        projectSelect.innerHTML = '<option value="">Select Project</option>';
-                        data.forEach(project => {
-                            const option = document.createElement('option');
-                            option.value = project;
-                            option.textContent = project;
-                            projectSelect.appendChild(option);
-                        });
-                    })
-                    .catch(error => {
-                        console.error('Error loading projects:', error);
-                        alert('Failed to load projects. Please check console for details.');
-                    });
-            }
-
             // --- Script dropdown (single select) ---
             if (scriptSelect) {
                 console.log('Loading scripts...');
@@ -332,25 +308,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (this.value === 'life_app') {
             lifeAppSelection.style.display = 'block';
-
-            // --- Project dropdown (multi-select) ---
-            if (projectSelect) {
-                fetch('/static/projectList.json')
-                    .then(response => response.json())
-                    .then(data => {
-                        projectSelect.innerHTML = '<option value="">Select Project</option>';
-                        data.forEach(project => {
-                            const option = document.createElement('option');
-                            option.value = project;
-                            option.textContent = project;
-                            projectSelect.appendChild(option);
-                        });
-                    })
-                    .catch(error => {
-                        console.error('Error loading projects:', error);
-                        alert('Failed to load projects. Please check console for details.');
-                    });
-            }
 
             // --- Script dropdown (single select) ---
             if (scriptSelect) {
