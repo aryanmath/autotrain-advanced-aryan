@@ -395,6 +395,25 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Function to load dataset files
+    async function loadDatasetFiles() {
+        const datasetSelect = document.getElementById('dataset_file');
+        if (!datasetSelect) return;
+        datasetSelect.innerHTML = '';
+
+        try {
+            const datasetFiles = ["dataset.json"]; // Directly use the datasetFiles array
+            datasetFiles.forEach(datasetFile => {
+                const option = document.createElement('option');
+                option.value = datasetFile;
+                option.textContent = datasetFile;
+                datasetSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error loading dataset files:', error);
+        }
+    }
+
     // Function to update project tags
     function updateProjectTags() {
         const projectSelect = document.getElementById('life_app_project');
@@ -448,4 +467,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
     });
+
+    loadDatasetFiles();
 });
