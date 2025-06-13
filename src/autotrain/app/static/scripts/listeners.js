@@ -396,79 +396,36 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Replace this function entirely
-    async function loadDatasetFiles() {
-        const datasetDiv = document.getElementById('dataset_file_div');
-        const datasetSelect = document.getElementById('dataset_file');
+    // Replace the loadDatasetFiles function with this simplified version
+    function loadDatasetFiles() {
+        const container = document.getElementById('dataset_file_div');
+        const select = document.getElementById('dataset_file');
         
-        // Basic error check
-        if (!datasetDiv || !datasetSelect) {
-            console.error('Missing elements');
+        if (!container || !select) {
+            console.error('Dataset elements not found');
             return;
         }
 
-        try {
-            // Reset the select element
-            datasetSelect.innerHTML = '';
-            
-            // Create default option
-            const defaultOption = document.createElement('option');
-            defaultOption.value = '';
-            defaultOption.text = 'Select Dataset';
-            datasetSelect.add(defaultOption);
+        // Clear current options
+        select.innerHTML = '';
+        
+        // Add options directly
+        select.innerHTML = `
+            <option value="">Select Dataset</option>
+            <option value="dataset.json">dataset.json</option>
+        `;
 
-            // Add dataset.json option
-            const datasetOption = document.createElement('option');
-            datasetOption.value = 'dataset.json';
-            datasetOption.text = 'dataset.json';
-            datasetSelect.add(datasetOption);
-
-            // Make sure div is visible
-            datasetDiv.style.display = 'block';
-            datasetSelect.style.display = 'block';
-        } catch (err) {
-            console.error('Error setting up dataset select:', err);
-        }
+        // Make sure container is visible
+        container.style.display = 'block';
     }
 
-    // Function to update project tags
-    function updateProjectTags() {
-        const projectSelect = document.getElementById('life_app_project');
-        const projectTagsContainer = document.getElementById('life-app-project-tags');
-        if (!projectSelect || !projectTagsContainer) return;
-        projectTagsContainer.innerHTML = '';
-
-        Array.from(projectSelect.selectedOptions).forEach(option => {
-            const tag = document.createElement('span');
-            tag.className = 'bg-blue-200 text-blue-800 text-sm font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-900';
-            tag.textContent = option.textContent;
-
-            const removeBtn = document.createElement('button');
-            removeBtn.className = 'ml-1 text-blue-800 hover:text-blue-600 focus:outline-none';
-            removeBtn.innerHTML = '&times;';
-            removeBtn.onclick = () => {
-                // Deselect the option in the dropdown
-                option.selected = false;
-                projectSelect.dispatchEvent(new Event('change')); // Trigger change event
-                updateProjectTags(); // Refresh tags
-            };
-            tag.appendChild(removeBtn);
-            projectTagsContainer.appendChild(tag);
-        });
-    }
-
-    // Event listener for project selection change
-    document.getElementById('life_app_project').addEventListener('change', () => {
-        updateProjectTags();
-    });
-
-    // When LiFE App is selected, load projects/scripts
+    // Update the dataset source change handler to be simpler
     document.getElementById('dataset_source').addEventListener('change', function() {
         if (this.value === 'life_app') {
             loadLifeAppProjects();
             loadLifeAppScripts();
             document.getElementById('dataset_file_div').style.display = 'block';
-            loadDatasetFiles(); // This will now show a basic dropdown
+            loadDatasetFiles(); // This will always show dataset.json
         } else {
             document.getElementById('dataset_file_div').style.display = 'none';
         }
