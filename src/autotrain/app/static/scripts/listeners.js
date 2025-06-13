@@ -398,46 +398,30 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Replace the loadDatasetFiles function with this simpler version
     async function loadDatasetFiles() {
-        const datasetDiv = document.getElementById('dataset_file_div');
-        const datasetSelect = document.getElementById('dataset_file');
+        // Get the select element and its container
+        const dataset_div = document.getElementById('dataset_file_div');
+        const dataset_select = document.getElementById('dataset_file');
         
-        if (!datasetDiv || !datasetSelect) return;
+        if (!dataset_div || !dataset_select) {
+            console.error('Dataset elements not found');
+            return;
+        }
 
-        try {
-            // Basic dropdown creation
-            datasetSelect.innerHTML = `
-                <option value="">Select Dataset</option>
-                <option value="dataset.json">dataset.json</option>
-            `;
-            
-            // Add basic styling
-            datasetSelect.className = "mt-1 block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500";
-            
-            // Add icon using a wrapper div
-            const wrapper = document.createElement('div');
-            wrapper.className = 'relative';
-            wrapper.innerHTML = `
-                <i class="fas fa-file-code absolute left-3 top-3 text-gray-400"></i>
-            `;
-            
-            // Wrap select in the div and adjust padding for icon
-            datasetSelect.style.paddingLeft = '2rem';
-            datasetSelect.parentNode.insertBefore(wrapper, datasetSelect);
-            wrapper.appendChild(datasetSelect);
-            
-            // Show the container
-            datasetDiv.style.display = 'block';
+        // Clear any existing options
+        dataset_select.innerHTML = '';
+        
+        // Add the options directly without any fancy stuff
+        dataset_select.innerHTML = `
+            <option value="">Select Dataset</option>
+            <option value="dataset.json">dataset.json</option>
+        `;
 
-            // Add a simple change handler
-            datasetSelect.addEventListener('change', function() {
-                const selectedFile = this.value;
-                if (selectedFile) {
-                    console.log('Selected dataset file:', selectedFile);
-                }
-            });
+        // Make container visible
+        dataset_div.style.display = 'block';
 
-        } catch (error) {
-            console.error('Error loading dataset files:', error);
+        // Remove any existing select2 
+        if ($(dataset_select).data('select2')) {
+            $(dataset_select).select2('destroy');
         }
     }
 
@@ -478,7 +462,7 @@ document.addEventListener('DOMContentLoaded', function () {
             loadLifeAppProjects();
             loadLifeAppScripts();
             document.getElementById('dataset_file_div').style.display = 'block';
-            loadDatasetFiles();
+            loadDatasetFiles(); // This will now show a basic dropdown
         } else {
             document.getElementById('dataset_file_div').style.display = 'none';
         }
