@@ -398,21 +398,34 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Function to load dataset files
     async function loadDatasetFiles() {
-        const datasetSelect = document.getElementById('dataset_file');
-        if (!datasetSelect) return;
-        datasetSelect.innerHTML = '<option value="">Select Dataset File</option>';
-
+        const datasetSelect = $('#dataset_file'); // Use jQuery selector
+        if (!datasetSelect.length) return;
+        
         try {
-            const datasetFiles = ["dataset.json"]; // Directly use the datasetFiles array
-            datasetFiles.forEach(datasetFile => {
-                const option = document.createElement('option');
-                option.value = datasetFile;
-                option.textContent = datasetFile;
-                datasetSelect.appendChild(option);
+            // Clear existing options but keep the placeholder
+            datasetSelect.html('<option value="">Select Dataset</option>');
+            
+            // Add dataset.json as an option
+            datasetSelect.append(new Option('dataset.json', 'dataset.json'));
+            
+            // Initialize/refresh select2
+            datasetSelect.select2({
+                placeholder: 'Select Dataset File',
+                width: '100%',
+                templateResult: formatDataset,
+                templateSelection: formatDataset
             });
+
+            // Show the dataset dropdown div
+            $('#dataset_file_div').show();
         } catch (error) {
             console.error('Error loading dataset files:', error);
         }
+    }
+
+    function formatDataset(dataset) {
+        if (!dataset.id) return dataset.text;
+        return $(`<span><i class="fas fa-file-code mr-2"></i> ${dataset.text}</span>`);
     }
 
     // Function to update project tags
