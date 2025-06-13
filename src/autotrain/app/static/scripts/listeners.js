@@ -475,3 +475,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     handleDataSource(); // ADD THIS LINE
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Only add the new event listener, keeping all existing code 
+    const datasetSelect = document.getElementById('dataset_file');
+    if (datasetSelect) {
+        datasetSelect.addEventListener('change', function() {
+            const selectedFile = this.value;
+            console.log('Selected dataset file:', selectedFile);
+        });
+    }
+});
