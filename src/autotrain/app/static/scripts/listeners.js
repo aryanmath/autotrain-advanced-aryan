@@ -451,8 +451,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (this.value === 'life_app') {
             loadLifeAppProjects();
             loadLifeAppScripts();
+            loadDatasetFiles(); // MOVE THIS LINE HERE
             document.getElementById('dataset_file_div').style.display = '';
-            loadDatasetFiles();
         } else {
             document.getElementById('dataset_file_div').style.display = 'none';
         }
