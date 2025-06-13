@@ -358,8 +358,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const projectSelect = document.getElementById('life_app_project');
         const projectTagsContainer = document.getElementById('life-app-project-tags');
         if (!projectSelect) return;
-        projectSelect.innerHTML = '<option value="">Select Project</option>'; // Clear existing options
-        projectTagsContainer.innerHTML = ''; // Clear existing tags
+        projectSelect.innerHTML = '';
 
         try {
             const response = await fetch('/static/projectList.json');
@@ -401,7 +400,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const projectSelect = document.getElementById('life_app_project');
         const projectTagsContainer = document.getElementById('life-app-project-tags');
         if (!projectSelect || !projectTagsContainer) return;
-        projectTagsContainer.innerHTML = ''; // Clear existing tags
+        projectTagsContainer.innerHTML = '';
 
         Array.from(projectSelect.selectedOptions).forEach(option => {
             const tag = document.createElement('span');
