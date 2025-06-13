@@ -399,38 +399,35 @@ document.addEventListener('DOMContentLoaded', function () {
     // Function to load dataset files
     async function loadDatasetFiles() {
         const datasetDiv = document.getElementById('dataset_file_div');
-        if (!datasetDiv) return;
-
-        // Initialize select2 only after adding options
-        const datasetSelect = $('#dataset_file');
+        const datasetSelect = document.getElementById('dataset_file');
         
-        // Remove any existing select2 initialization
-        if (datasetSelect.hasClass('select2-hidden-accessible')) {
-            datasetSelect.select2('destroy');
+        if (!datasetDiv || !datasetSelect) return;
+
+        try {
+            // First initialize without select2
+            datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
+            datasetSelect.innerHTML += '<option value="dataset.json">dataset.json</option>';
+
+            // Initialize select2 with simple options
+            $(datasetSelect).select2({
+                dropdownParent: datasetDiv,
+                width: '100%',
+                templateResult: function(data) {
+                    if (!data.id) return data.text;
+                    return $('<span><i class="fas fa-file-code mr-2"></i>' + data.text + '</span>');
+                },
+                templateSelection: function(data) {
+                    if (!data.id) return data.text;
+                    return $('<span><i class="fas fa-file-code mr-2"></i>' + data.text + '</span>');
+                }
+            });
+            
+            // Show the container and trigger change
+            datasetDiv.style.display = 'block';
+            $(datasetSelect).trigger('change');
+        } catch (error) {
+            console.error('Error loading dataset files:', error);
         }
-        
-        // Clear and add options
-        datasetSelect.empty();
-        datasetSelect.append(new Option('Select Dataset', '', true, true));
-        datasetSelect.append(new Option('dataset.json', 'dataset.json'));
-
-        // Initialize select2 with simpler options
-        datasetSelect.select2({
-            width: '100%',
-            dropdownParent: datasetDiv,
-            minimumResultsForSearch: -1, // Disable search
-            templateResult: (data) => {
-                if (!data.id) return data.text;
-                return $(`<span><i class="fas fa-file-code mr-2"></i>${data.text}</span>`);
-            },
-            templateSelection: (data) => {
-                if (!data.id) return data.text;
-                return $(`<span><i class="fas fa-file-code mr-2"></i>${data.text}</span>`);
-            }
-        });
-
-        // Show the container
-        datasetDiv.style.display = 'block';
     }
 
     // Function to update project tags
