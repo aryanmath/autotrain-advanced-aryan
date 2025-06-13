@@ -471,6 +471,4 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
     });
-
-    loadDatasetFiles();
 });
