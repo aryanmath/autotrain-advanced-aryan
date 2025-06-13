@@ -396,32 +396,38 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Replace the loadDatasetFiles function with this simpler version
+    // Replace this function entirely
     async function loadDatasetFiles() {
-        // Get the select element and its container
-        const dataset_div = document.getElementById('dataset_file_div');
-        const dataset_select = document.getElementById('dataset_file');
+        const datasetDiv = document.getElementById('dataset_file_div');
+        const datasetSelect = document.getElementById('dataset_file');
         
-        if (!dataset_div || !dataset_select) {
-            console.error('Dataset elements not found');
+        // Basic error check
+        if (!datasetDiv || !datasetSelect) {
+            console.error('Missing elements');
             return;
         }
 
-        // Clear any existing options
-        dataset_select.innerHTML = '';
-        
-        // Add the options directly without any fancy stuff
-        dataset_select.innerHTML = `
-            <option value="">Select Dataset</option>
-            <option value="dataset.json">dataset.json</option>
-        `;
+        try {
+            // Reset the select element
+            datasetSelect.innerHTML = '';
+            
+            // Create default option
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.text = 'Select Dataset';
+            datasetSelect.add(defaultOption);
 
-        // Make container visible
-        dataset_div.style.display = 'block';
+            // Add dataset.json option
+            const datasetOption = document.createElement('option');
+            datasetOption.value = 'dataset.json';
+            datasetOption.text = 'dataset.json';
+            datasetSelect.add(datasetOption);
 
-        // Remove any existing select2 
-        if ($(dataset_select).data('select2')) {
-            $(dataset_select).select2('destroy');
+            // Make sure div is visible
+            datasetDiv.style.display = 'block';
+            datasetSelect.style.display = 'block';
+        } catch (err) {
+            console.error('Error setting up dataset select:', err);
         }
     }
 
