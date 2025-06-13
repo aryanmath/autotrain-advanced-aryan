@@ -561,17 +561,18 @@
                                 <!-- Options will be populated by JS -->
                             </select>
                             <div id="life-app-project-tags" class="mb-2"></div>
-                            <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">LiFE App Script</label>
-                            <select id="life_app_script" name="life_app_script"
-                                class="block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 mb-4 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" style="margin-bottom: 40px;">
-                                <!-- Options will be populated by JS -->
-                            </select>
-                            <!-- Add more fields here if needed -->
-                            <div class="items-center justify-center h-24" id="dataset_file_div" style="display:none;">
-                                <div class="w-full px-4">
-                                    <p for="dataset_file" class="text-xl text-gray-800 dark:text-gray-200 mb-2 mt-2">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="w-full">
+                                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">LiFE App Script</label>
+                                    <select id="life_app_script" name="life_app_script"
+                                        class="block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 mb-4 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                        <!-- Options will be populated by JS -->
+                                    </select>
+                                </div>
+                                <div class="w-full" id="dataset_file_div" style="display:none;">
+                                    <label for="dataset_file" class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
                                         Dataset File
-                                    </p>
+                                    </label>
                                     <select id="dataset_file" name="dataset_file"
                                         class="mt-1 block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                                         <option value="">Select Dataset File</option>
@@ -579,6 +580,7 @@
                                     </select>
                                 </div>
                             </div>
+                            <!-- Add more fields here if needed -->
                         </div>
                     </div>
                     <div class="items-center justify-center h-24">
@@ -813,5 +815,7 @@
             });
         });cript>
     </script>
-</body>
-</html></html>
+
+
+
+</html></body></html></html>
