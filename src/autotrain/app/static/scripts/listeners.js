@@ -398,19 +398,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Function to load dataset files
     async function loadDatasetFiles() {
-        const datasetDiv = document.getElementById('dataset_file_div');
-        const datasetSelect = document.getElementById('dataset_file');
+        const datasetSelect = $('#dataset_file');
+        if (!datasetSelect.length) return;
         
-        if (!datasetDiv || !datasetSelect) return;
-
         try {
-            // First initialize without select2
-            datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
-            datasetSelect.innerHTML += '<option value="dataset.json">dataset.json</option>';
-
-            // Initialize select2 with simple options
-            $(datasetSelect).select2({
-                dropdownParent: datasetDiv,
+            // Clear existing options
+            datasetSelect.empty();
+            
+            // Add the options
+            datasetSelect.append(new Option('Select Dataset', ''));
+            datasetSelect.append(new Option('dataset.json', 'dataset.json'));
+            
+            // Initialize select2
+            datasetSelect.select2({
                 width: '100%',
                 templateResult: function(data) {
                     if (!data.id) return data.text;
@@ -421,10 +421,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     return $('<span><i class="fas fa-file-code mr-2"></i>' + data.text + '</span>');
                 }
             });
-            
-            // Show the container and trigger change
-            datasetDiv.style.display = 'block';
-            $(datasetSelect).trigger('change');
+
+            // Show the container
+            $('#dataset_file_div').show();
         } catch (error) {
             console.error('Error loading dataset files:', error);
         }
@@ -466,10 +465,10 @@ document.addEventListener('DOMContentLoaded', function () {
         if (this.value === 'life_app') {
             loadLifeAppProjects();
             loadLifeAppScripts();
-            loadDatasetFiles(); // This will show/initialize the dataset dropdown
+            $('#dataset_file_div').show();
+            loadDatasetFiles();
         } else {
-            const datasetDiv = document.getElementById('dataset_file_div');
-            if (datasetDiv) datasetDiv.style.display = 'none';
+            $('#dataset_file_div').hide();
         }
     });
 
