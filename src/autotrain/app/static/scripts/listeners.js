@@ -448,13 +448,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // When LiFE App is selected, load projects/scripts
     document.getElementById('dataset_source').addEventListener('change', function() {
+        const datasetFileDiv = document.getElementById('dataset_file_div'); // ADD THIS LINE
         if (this.value === 'life_app') {
             loadLifeAppProjects();
             loadLifeAppScripts();
-            loadDatasetFiles(); // MOVE THIS LINE HERE
-            document.getElementById('dataset_file_div').style.display = '';
+            loadDatasetFiles();
+            if (datasetFileDiv) { // ADD THIS CONDITION
+                datasetFileDiv.style.display = 'block'; // CHANGED FROM '' TO 'block'
+            }
         } else {
-            document.getElementById('dataset_file_div').style.display = 'none';
+            if (datasetFileDiv) { // ADD THIS CONDITION
+                datasetFileDiv.style.display = 'none';
+            }
         }
     });
 
