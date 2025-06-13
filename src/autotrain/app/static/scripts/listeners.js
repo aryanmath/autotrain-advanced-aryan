@@ -52,13 +52,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function handleDataSource() {
         const lifeAppSelection = document.getElementById("life-app-selection");
-        const datasetFileDiv = document.getElementById("dataset_file_div"); // ADD THIS LINE
 
         if (dataSource.value === "life_app") {
             // Show only LiFE App selection UI
             if (lifeAppSelection) lifeAppSelection.style.display = "block";
-            // Show dataset file dropdown
-            if (datasetFileDiv) datasetFileDiv.style.display = ""; // ADD THIS LINE
             // Hide hub and local upload sections
             if (hubDataTabContent) hubDataTabContent.style.display = "none";
             if (uploadDataTabContent) uploadDataTabContent.style.display = "none";
@@ -70,7 +67,6 @@ document.addEventListener('DOMContentLoaded', function () {
             if (hubDataTabContent) hubDataTabContent.style.display = "block";
             // Hide LiFE App and local upload sections
             if (lifeAppSelection) lifeAppSelection.style.display = "none";
-            if (datasetFileDiv) datasetFileDiv.style.display = "none"; // ADD THIS LINE
             if (uploadDataTabContent) uploadDataTabContent.style.display = "none";
             if (uploadDataTabs) uploadDataTabs.style.display = "none";
         } else if (dataSource.value === "local") {
@@ -80,7 +76,6 @@ document.addEventListener('DOMContentLoaded', function () {
             // Hide LiFE App and hub dataset sections
             if (hubDataTabContent) hubDataTabContent.style.display = "none";
             if (lifeAppSelection) lifeAppSelection.style.display = "none";
-            if (datasetFileDiv) datasetFileDiv.style.display = "none"; // ADD THIS LINE
         }
     }
 
