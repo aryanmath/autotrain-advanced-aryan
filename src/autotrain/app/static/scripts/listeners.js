@@ -398,37 +398,39 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Function to load dataset files
     async function loadDatasetFiles() {
-        const datasetSelect = $('#dataset_file'); // Use jQuery selector
-        if (!datasetSelect.length) return;
+        const datasetDiv = document.getElementById('dataset_file_div');
+        if (!datasetDiv) return;
+
+        // Initialize select2 only after adding options
+        const datasetSelect = $('#dataset_file');
         
-        try {
-            // Clear existing options but keep the placeholder
-            datasetSelect.html('<option value="">Select Dataset</option>');
-            
-            // Add dataset.json with just filename display but full path as value
-            const datasetPath = "src/autotrain/app/static/dataset.json";
-            const fileName = "dataset.json"; // Just show filename in dropdown
-            datasetSelect.append(new Option(fileName, datasetPath));
-            
-            // Initialize select2
-            datasetSelect.select2({
-                placeholder: 'Select Dataset File',
-                width: '100%',
-                templateResult: formatDataset,
-                templateSelection: formatDataset
-            });
-
-            // Show the dataset dropdown div
-            $('#dataset_file_div').show();
-        } catch (error) {
-            console.error('Error loading dataset files:', error);
+        // Remove any existing select2 initialization
+        if (datasetSelect.hasClass('select2-hidden-accessible')) {
+            datasetSelect.select2('destroy');
         }
-    }
+        
+        // Clear and add options
+        datasetSelect.empty();
+        datasetSelect.append(new Option('Select Dataset', '', true, true));
+        datasetSelect.append(new Option('dataset.json', 'dataset.json'));
 
-    function formatDataset(dataset) {
-        if (!dataset.id) return dataset.text;
-        // Display just the filename with icon
-        return $(`<span><i class="fas fa-file-code mr-2"></i> ${dataset.text}</span>`);
+        // Initialize select2 with simpler options
+        datasetSelect.select2({
+            width: '100%',
+            dropdownParent: datasetDiv,
+            minimumResultsForSearch: -1, // Disable search
+            templateResult: (data) => {
+                if (!data.id) return data.text;
+                return $(`<span><i class="fas fa-file-code mr-2"></i>${data.text}</span>`);
+            },
+            templateSelection: (data) => {
+                if (!data.id) return data.text;
+                return $(`<span><i class="fas fa-file-code mr-2"></i>${data.text}</span>`);
+            }
+        });
+
+        // Show the container
+        datasetDiv.style.display = 'block';
     }
 
     // Function to update project tags
@@ -467,10 +469,10 @@ document.addEventListener('DOMContentLoaded', function () {
         if (this.value === 'life_app') {
             loadLifeAppProjects();
             loadLifeAppScripts();
-            document.getElementById('dataset_file_div').style.display = '';
-            loadDatasetFiles();
+            loadDatasetFiles(); // This will show/initialize the dataset dropdown
         } else {
-            document.getElementById('dataset_file_div').style.display = 'none';
+            const datasetDiv = document.getElementById('dataset_file_div');
+            if (datasetDiv) datasetDiv.style.display = 'none';
         }
     });
 
