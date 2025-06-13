@@ -396,41 +396,46 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Function to load dataset files
+    // Replace the loadDatasetFiles function with this simpler version
     async function loadDatasetFiles() {
+        const datasetDiv = document.getElementById('dataset_file_div');
         const datasetSelect = document.getElementById('dataset_file');
-        if (!datasetSelect) return;
         
+        if (!datasetDiv || !datasetSelect) return;
+
         try {
-            // First destroy any existing select2
-            if ($(datasetSelect).hasClass('select2-hidden-accessible')) {
-                $(datasetSelect).select2('destroy');
-            }
-            
-            // Clear and add options directly to the select element
+            // Basic dropdown creation
             datasetSelect.innerHTML = `
                 <option value="">Select Dataset</option>
                 <option value="dataset.json">dataset.json</option>
             `;
+            
+            // Add basic styling
+            datasetSelect.className = "mt-1 block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500";
+            
+            // Add icon using a wrapper div
+            const wrapper = document.createElement('div');
+            wrapper.className = 'relative';
+            wrapper.innerHTML = `
+                <i class="fas fa-file-code absolute left-3 top-3 text-gray-400"></i>
+            `;
+            
+            // Wrap select in the div and adjust padding for icon
+            datasetSelect.style.paddingLeft = '2rem';
+            datasetSelect.parentNode.insertBefore(wrapper, datasetSelect);
+            wrapper.appendChild(datasetSelect);
+            
+            // Show the container
+            datasetDiv.style.display = 'block';
 
-            // Initialize select2 with proper container
-            $(datasetSelect).select2({
-                dropdownParent: $('#dataset_file_div'),
-                width: '100%',
-                placeholder: 'Select Dataset',
-                allowClear: true,
-                templateResult: (data) => {
-                    if (!data.id) return data.text;
-                    return $(`<span><i class="fas fa-file-code mr-2"></i>${data.text}</span>`);
-                },
-                templateSelection: (data) => {
-                    if (!data.id) return data.text;
-                    return $(`<span><i class="fas fa-file-code mr-2"></i>${data.text}</span>`);
+            // Add a simple change handler
+            datasetSelect.addEventListener('change', function() {
+                const selectedFile = this.value;
+                if (selectedFile) {
+                    console.log('Selected dataset file:', selectedFile);
                 }
             });
 
-            // Make sure container is visible
-            document.getElementById('dataset_file_div').style.display = 'block';
         } catch (error) {
             console.error('Error loading dataset files:', error);
         }
@@ -472,10 +477,10 @@ document.addEventListener('DOMContentLoaded', function () {
         if (this.value === 'life_app') {
             loadLifeAppProjects();
             loadLifeAppScripts();
-            $('#dataset_file_div').show();
+            document.getElementById('dataset_file_div').style.display = 'block';
             loadDatasetFiles();
         } else {
-            $('#dataset_file_div').hide();
+            document.getElementById('dataset_file_div').style.display = 'none';
         }
     });
 
