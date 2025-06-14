@@ -91,6 +91,7 @@ document.addEventListener('DOMContentLoaded', function () {
         formData.append('project_name', document.getElementById('project_name').value);
         formData.append('task', document.getElementById('task').value);
         formData.append('hardware', document.getElementById('hardware').value);
+        formData.append('dataset_source', document.getElementById('dataset_source').value);
         formData.append('params', params);
         formData.append('autotrain_user', document.getElementById('autotrain_user').value);
         formData.append('column_mapping', JSON.stringify(columnMapping));
