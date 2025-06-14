@@ -52,30 +52,30 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function handleDataSource() {
         const lifeAppSelection = document.getElementById("life-app-selection");
+        const projectSelect = document.getElementById('life_app_project');
+        const scriptSelect = document.getElementById('life_app_script');
+        const tagContainer = document.getElementById('life-app-project-tags');
+        const datasetFileDiv = document.getElementById('dataset_file_div');
+
+        if (hubDataTabContent) hubDataTabContent.style.display = "none";
+        if (uploadDataTabContent) uploadDataTabContent.style.display = "none";
+        if (uploadDataTabs) uploadDataTabs.style.display = "none";
+        if (lifeAppSelection) lifeAppSelection.style.display = "none";
+        if (datasetFileDiv) datasetFileDiv.style.display = 'none';
 
         if (dataSource.value === "life_app") {
-            // Show only LiFE App selection UI
             if (lifeAppSelection) lifeAppSelection.style.display = "block";
-            // Hide hub and local upload sections
-            if (hubDataTabContent) hubDataTabContent.style.display = "none";
-            if (uploadDataTabContent) uploadDataTabContent.style.display = "none";
-            if (uploadDataTabs) uploadDataTabs.style.display = "none";
+            
             loadLifeAppProjects();
             loadLifeAppScripts();
+
+            if (datasetFileDiv) datasetFileDiv.style.display = 'block';
+            loadDatasetFiles();
         } else if (dataSource.value === "huggingface") {
-            // Show hub dataset section
             if (hubDataTabContent) hubDataTabContent.style.display = "block";
-            // Hide LiFE App and local upload sections
-            if (lifeAppSelection) lifeAppSelection.style.display = "none";
-            if (uploadDataTabContent) uploadDataTabContent.style.display = "none";
-            if (uploadDataTabs) uploadDataTabs.style.display = "none";
         } else if (dataSource.value === "local") {
-            // Show local upload sections
             if (uploadDataTabContent) uploadDataTabContent.style.display = "block";
             if (uploadDataTabs) uploadDataTabs.style.display = "block";
-            // Hide LiFE App and hub dataset sections
-            if (hubDataTabContent) hubDataTabContent.style.display = "none";
-            if (lifeAppSelection) lifeAppSelection.style.display = "none";
         }
     }
 
@@ -207,10 +207,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Add event listener for task changes
     document.getElementById('task').addEventListener('change', function() {
-        if (dataSource.value === "life_app" && this.value !== "automatic-speech-recognition") {
-            alert("LiFE app datasets can only be used with Automatic Speech Recognition tasks");
-            dataSource.value = "local";
-            handleDataSource();
+        const taskValue = this.value;
+        const lifeAppOption = document.getElementById("dataset_source").querySelector('option[value="life_app"]');
+        if (taskValue === "automatic-speech-recognition") {
+            if (lifeAppOption) lifeAppOption.style.display = "";
+        } else {
+            if (lifeAppOption) lifeAppOption.style.display = "none";
+            if (dataSource.value === "life_app") {
+                dataSource.value = "local";
+                handleDataSource();
+            }
         }
     });
 
@@ -257,80 +263,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             };
             reader.readAsText(file);
-        }
-    });
-
-    // Update dataset source change handler
-    document.getElementById('dataset_source').addEventListener('change', function() {
-        console.log('Dataset source changed to:', this.value);
-        const lifeAppSelection = document.getElementById('life-app-selection');
-        const projectSelect = document.getElementById('life_app_project');
-        const scriptSelect = document.getElementById('life_app_script');
-        const tagContainer = document.getElementById('life-app-project-tags');
-        const datasetFileDiv = document.getElementById('dataset_file_div');
-
-        if (this.value === 'life_app') {
-            console.log('Showing LiFE App selection');
-            lifeAppSelection.style.display = 'block';
-
-            // --- Script dropdown (single select) ---
-            if (scriptSelect) {
-                console.log('Loading scripts...');
-                fetch('/static/scriptList.json')
-                    .then(response => {
-                        console.log('Script list response:', response.status);
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log('Scripts loaded:', data);
-                        scriptSelect.innerHTML = '<option value="">Select Script</option>';
-                        data.forEach(script => {
-                            const option = document.createElement('option');
-                            option.value = script;
-                            option.textContent = script;
-                            scriptSelect.appendChild(option);
-                        });
-                    })
-                    .catch(error => {
-                        console.error('Error loading scripts:', error);
-                        alert('Failed to load scripts. Please check console for details.');
-                    });
-            }
-        } else {
-            lifeAppSelection.style.display = 'none';
-        }
-    });
-
-    // --- LiFE App Dataset Selection: Show/Hide and Populate ---
-    document.getElementById('dataset_source').addEventListener('change', function() {
-        const lifeAppSelection = document.getElementById('life-app-selection');
-        const projectSelect = document.getElementById('life_app_project');
-        const scriptSelect = document.getElementById('life_app_script');
-        const tagContainer = document.getElementById('life-app-project-tags');
-
-        if (this.value === 'life_app') {
-            lifeAppSelection.style.display = 'block';
-
-            // --- Script dropdown (single select) ---
-            if (scriptSelect) {
-                fetch('/static/scriptList.json')
-                    .then(response => response.json())
-                    .then(data => {
-                        scriptSelect.innerHTML = '<option value="">Select Script</option>';
-                        data.forEach(script => {
-                            const option = document.createElement('option');
-                            option.value = script;
-                            option.textContent = script;
-                            scriptSelect.appendChild(option);
-                        });
-                    })
-                    .catch(error => {
-                        console.error('Error loading scripts:', error);
-                        alert('Failed to load scripts. Please check console for details.');
-                    });
-            }
-        } else {
-            lifeAppSelection.style.display = 'none';
         }
     });
 
@@ -397,18 +329,24 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Replace the loadDatasetFiles function with this simplified version
     function loadDatasetFiles() {
         const container = document.getElementById('dataset_file_div');
         const select = document.getElementById('dataset_file');
-        
+
         if (!container || !select) {
             console.error('Dataset elements not found');
             return;
         }
 
+        // Destroy existing Select2 instance if it exists
+        if ($(select).data('select2')) {
+            $(select).select2('destroy');
+        }
+
         // Clear current options
         select.innerHTML = '';
-        
+
         // Add options directly
         select.innerHTML = `
             <option value="">Select Dataset</option>
@@ -417,7 +355,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Make sure container is visible
         container.style.display = 'block';
-        
+
         // Reinitialize Select2
         if ($.fn.select2) {
             $(select).select2({
@@ -425,23 +363,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 width: '100%'
             });
         }
-    }
-
-    // Update the dataset source change handler to be simpler
-    document.getElementById('dataset_source').addEventListener('change', function() {
-        if (this.value === 'life_app') {
-            loadLifeAppProjects();
-            loadLifeAppScripts();
-            document.getElementById('dataset_file_div').style.display = 'block';
-            loadDatasetFiles(); // This will show your dataset.json
-        } else {
-            document.getElementById('dataset_file_div').style.display = 'none';
-        }
-    });
-
-    // Initialize dataset file selection on page load if life_app is selected
-    if (dataSource.value === 'life_app') {
-        loadDatasetFiles();
     }
 
     // --- On page load, hide LiFE App dataset source if not ASR ---
@@ -459,5 +380,5 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    handleDataSource(); // ADD THIS LINE
+    handleDataSource();
 });
