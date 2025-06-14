@@ -397,7 +397,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Replace the loadDatasetFiles function with this simplified version
     function loadDatasetFiles() {
         const container = document.getElementById('dataset_file_div');
         const select = document.getElementById('dataset_file');
@@ -418,6 +417,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Make sure container is visible
         container.style.display = 'block';
+        
+        // Reinitialize Select2
+        if ($.fn.select2) {
+            $(select).select2({
+                placeholder: "Select Dataset File",
+                width: '100%'
+            });
+        }
     }
 
     // Update the dataset source change handler to be simpler
@@ -426,11 +433,16 @@ document.addEventListener('DOMContentLoaded', function () {
             loadLifeAppProjects();
             loadLifeAppScripts();
             document.getElementById('dataset_file_div').style.display = 'block';
-            loadDatasetFiles(); // This will always show dataset.json
+            loadDatasetFiles(); // This will show your dataset.json
         } else {
             document.getElementById('dataset_file_div').style.display = 'none';
         }
     });
+
+    // Initialize dataset file selection on page load if life_app is selected
+    if (dataSource.value === 'life_app') {
+        loadDatasetFiles();
+    }
 
     // --- On page load, hide LiFE App dataset source if not ASR ---
     document.getElementById('task').addEventListener('change', function() {
