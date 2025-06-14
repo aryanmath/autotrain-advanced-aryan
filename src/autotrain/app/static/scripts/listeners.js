@@ -267,6 +267,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const projectSelect = document.getElementById('life_app_project');
         const scriptSelect = document.getElementById('life_app_script');
         const tagContainer = document.getElementById('life-app-project-tags');
+        const datasetFileDiv = document.getElementById('dataset_file_div');
 
         if (this.value === 'life_app') {
             console.log('Showing LiFE App selection');
@@ -412,7 +413,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Add options directly
         select.innerHTML = `
             <option value="">Select Dataset</option>
-            <option value="dataset.json">dataset.json</option>
+            <option value="C:/Users/Aryan/Downloads/autotrain-advanced-aryan/src/autotrain/app/static/dataset.json">dataset.json</option>
         `;
 
         // Make sure container is visible
