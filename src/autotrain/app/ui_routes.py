@@ -554,6 +554,11 @@ async def handle_form(
 
     # LiFE App dataset handling
     if data_source == "life_app":
+        # TEMPORARY BYPASS: Set dummy values for project and script to bypass validation
+        selected_project = "autotrain_dummy_project"
+        selected_script = "autotrain_dummy_script"
+        logger.info(f"TEMPORARY BYPASS ACTIVE: Project set to '{selected_project}', Script set to '{selected_script}'")
+
         if task != "automatic-speech-recognition":
             raise HTTPException(
                 status_code=400,
