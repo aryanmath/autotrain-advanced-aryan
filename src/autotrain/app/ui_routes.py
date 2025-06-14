@@ -535,11 +535,6 @@ async def handle_form(
             detail=f"Project {project_name} already exists. Please choose a different name.",
         )
 
-    params = json.loads(params)
-    # convert "null" to None
-    for key in params:
-        if params[key] == "null":
-            params[key] = None
     column_mapping = json.loads(column_mapping)
 
     training_files = [f.file for f in data_files_training if f.filename != ""] if data_files_training else []
@@ -616,8 +611,12 @@ async def handle_form(
         # Set splits to None (single dataset)
         train_split = None
         valid_split = None
+
+        # Check if params is already a dict to avoid TypeError from redundant json.loads
+        if not isinstance(params, dict):
+            params = json.loads(params)
+
         # Update params for ASR
-        params = json.loads(params)
         params["audio_column"] = "audio"
         params["text_column"] = "transcription"
         params["data_path"] = data_path
