@@ -510,6 +510,9 @@ async def handle_form(
     """
     Handle form submission for creating and managing AutoTrain projects.
     """
+    logger.info("---------- handle_form (first definition) started ----------")
+    logger.info(f"Incoming form data: {await request.form()}") # Log all incoming form data
+
     train_split = train_split.strip()
     if len(train_split) == 0:
         train_split = None
@@ -547,6 +550,8 @@ async def handle_form(
     selected_project = form.get("life_app_project")
     selected_script = form.get("life_app_script")
 
+    logger.info(f"LiFE App Data Source: {data_source}, Project: {selected_project}, Script: {selected_script}")
+
     # LiFE App dataset handling
     if data_source == "life_app":
         if task != "automatic-speech-recognition":
@@ -561,6 +566,7 @@ async def handle_form(
             )
         # Load dataset from dataset.json
         dataset_path = os.path.join(BASE_DIR, "static", "dataset.json")
+        logger.info(f"Checking LiFE App dataset path: {dataset_path}, Exists: {os.path.exists(dataset_path)}")
         if not os.path.exists(dataset_path):
             raise HTTPException(
                 status_code=400,
