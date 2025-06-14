@@ -166,13 +166,13 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('task').addEventListener('change', function () {
         fetchParams().then(params => {
             document.getElementById('dynamic-ui').innerHTML = '';
-            let jsonCheckBoxFlag = false;
+            let jsonCheckboxFlag = false;
             if (jsonCheckbox.checked) {
                 jsonCheckbox.checked = false;
-                jsonCheckBoxFlag = true;
+                jsonCheckboxFlag = true;
             }
             renderUI(params);
-            if (jsonCheckBoxFlag) {
+            if (jsonCheckboxFlag) {
                 jsonCheckbox.checked = true;
                 updateTextarea();
                 observeParamChanges();
@@ -184,13 +184,13 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('parameter_mode').addEventListener('change', function () {
         fetchParams().then(params => {
             document.getElementById('dynamic-ui').innerHTML = '';
-            let jsonCheckBoxFlag = false;
+            let jsonCheckboxFlag = false;
             if (jsonCheckbox.checked) {
                 jsonCheckbox.checked = false;
-                jsonCheckBoxFlag = true;
+                jsonCheckboxFlag = true;
             }
             renderUI(params);
-            if (jsonCheckBoxFlag) {
+            if (jsonCheckboxFlag) {
                 jsonCheckbox.checked = true;
                 updateTextarea();
                 observeParamChanges();
@@ -382,7 +382,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 });
-
 
 
 
