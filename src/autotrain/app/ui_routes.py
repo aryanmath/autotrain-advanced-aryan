@@ -535,6 +535,11 @@ async def handle_form(
             detail=f"Project {project_name} already exists. Please choose a different name.",
         )
 
+    params = json.loads(params)
+    # convert "null" to None
+    for key in params:
+        if params[key] == "null":
+            params[key] = None
     column_mapping = json.loads(column_mapping)
 
     training_files = [f.file for f in data_files_training if f.filename != ""] if data_files_training else []
