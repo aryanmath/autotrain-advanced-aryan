@@ -561,6 +561,7 @@ async def handle_form(
             )
         # Load dataset from dataset.json
         dataset_path = os.path.join(BASE_DIR, "static", "dataset.json")
+        print(f"DEBUG: Checking for dataset at: {dataset_path}")
         if not os.path.exists(dataset_path):
             raise HTTPException(
                 status_code=400,
