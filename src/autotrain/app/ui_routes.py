@@ -503,7 +503,7 @@ async def handle_form(
     hub_dataset: str = Form(""),
     train_split: str = Form(""),
     valid_split: str = Form(""),
-    token=token,
+    token: str,
     life_app_project: str = Form(""),
     life_app_script: str = Form(""),
 ):
