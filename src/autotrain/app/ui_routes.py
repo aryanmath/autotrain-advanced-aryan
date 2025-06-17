@@ -997,38 +997,90 @@ async def handle_form(request: Request):
     return {"status": "error", "message": "Invalid task type"}
 
 
+import os
+import json
+import tempfile
+from typing import Optional
+
+from fastapi import APIRouter, Depends
+from fastapi.responses import JSONResponse
+
+from autotrain.api import security
+from autotrain.api.deps import user_authentication
+from autotrain.app.core.settings import BASE_DIR
+
+ui_router = APIRouter()
+
+# Define a temporary directory to store the files
+TEMP_DIR = os.path.join(BASE_DIR, "tmp_life_app_data")
+os.makedirs(TEMP_DIR, exist_ok=True)
+
+def fetch_and_save_json(url: str, filename: str):
+    """
+    Fetches JSON data from a URL (simulated with local files), saves it to a temporary file,
+    and returns the file path.  For now, it just copies the existing static files.
+    """
+    filepath = os.path.join(BASE_DIR, "static", filename)
+    temp_filepath = os.path.join(TEMP_DIR, filename)
+    try:
+        # Simulate fetching from API and saving to temp file
+        with open(filepath, "r", encoding="utf-8") as src, open(temp_filepath, "w", encoding="utf-8") as dest:
+            data = json.load(src)
+            json.dump(data, dest)  # Save to the temporary file
+        return temp_filepath
+    except Exception as e:
+        print(f"Error fetching and saving {filename}: {e}")
+        return None
+
+
 @ui_router.get("/life_app_projects", response_class=JSONResponse)
 async def get_life_app_projects(authenticated: bool = Depends(user_authentication)):
     """
-    Returns the list of projects from the local JSON file for LiFE App integration.
+    Returns the list of projects, fetching from a temporary file if available,
+    otherwise using the static file.
     """
-    project_list_path = os.path.join(BASE_DIR, "static", "projectList.json")
-    if not os.path.exists(project_list_path):
+    filename = "projectList.json"
+    temp_filepath = os.path.join(TEMP_DIR, filename)
+
+    if not os.path.exists(temp_filepath):
+        # If the temporary file doesn't exist, create it (simulating API fetch)
+        fetch_and_save_json("/fake_api/projects", filename)  # Simulate API URL
+
+    if os.path.exists(temp_filepath):
+        with open(temp_filepath, "r", encoding="utf-8") as f:
+            projects = json.load(f)
+        return projects
+    else:
         return JSONResponse(content={"projects": []})
-    with open(project_list_path, "r", encoding="utf-8") as f:
-        projects = json.load(f)
-    return {"projects": projects}
+
 
 @ui_router.get("/life_app_scripts", response_class=JSONResponse)
-async def get_life_app_scripts(authenticated: bool = Depends(user_authentication)):
+async def get_life_app_scripts(projects: Optional[str] = None, authenticated: bool = Depends(user_authentication)):
     """
-    Returns the list of scripts from the local JSON file for LiFE App integration.
+    Returns the list of scripts, optionally filtered by selected projects.
+    Fetches from a temporary file if available, otherwise using the static file.
     """
-    script_list_path = os.path.join(BASE_DIR, "static", "scriptList.json")
-    if not os.path.exists(script_list_path):
-        return JSONResponse(content={"scripts": []})
-    with open(script_list_path, "r", encoding="utf-8") as f:
-        scripts = json.load(f)
-    return {"scripts": scripts}
+    filename = "scriptList.json"
+    temp_filepath = os.path.join(TEMP_DIR, filename)
 
-@ui_router.get("/life_app_dataset", response_class=JSONResponse)
-async def get_life_app_dataset(authenticated: bool = Depends(user_authentication)):
-    """
-    Returns the dataset from the local JSON file for LiFE App integration.
-    """
-    dataset_path = os.path.join(BASE_DIR, "static", "dataset.json")
-    if not os.path.exists(dataset_path):
-        return JSONResponse(content={"dataset": []})
-    with open(dataset_path, "r", encoding="utf-8") as f:
-        dataset = json.load(f)
-    return {"dataset": dataset}
+    if not os.path.exists(temp_filepath):
+        # If the temporary file doesn't exist, create it (simulating API fetch)
+        fetch_and_save_json("/fake_api/scripts", filename)  # Simulate API URL
+
+    if os.path.exists(temp_filepath):
+        with open(temp_filepath, "r", encoding="utf-8") as f:
+            all_scripts = json.load(f)
+    else:
+        return JSONResponse(content={"scripts": []})
+
+
+    # Simulate filtering based on selected projects (replace with actual logic if needed)
+    if projects:
+        selected_projects = projects.split(",")  # Assuming comma-separated project names
+        # In a real scenario, you would filter the scripts based on the selected projects.
+        # For this example, we'll just return all scripts.
+        scripts = all_scripts  # Replace with your filtering logic
+    else:
+        scripts = all_scripts
+
+    return {"scripts": scripts}

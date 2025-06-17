@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 lifeAppOption.style.display = "none"; // Hide option
                 // If LiFE App was selected, switch to local
-        if (dataSource.value === "life_app") {
+                if (dataSource.value === "life_app") {
                     dataSource.value = "local";
                 }
             }
@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (lifeAppSelection) lifeAppSelection.style.display = "block";
             if (datasetFileDiv) datasetFileDiv.style.display = 'block';
             loadLifeAppProjects();
-            loadLifeAppScripts();
+            // loadLifeAppScripts(); // Load scripts only after project selection
             loadDatasetFiles();
         } else if (dataSource.value === "huggingface") {
             if (hubDataTabContent) hubDataTabContent.style.display = "block";
@@ -292,7 +292,10 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    document.getElementById('life_app_project').addEventListener('change', updateProjectTags);
+    document.getElementById('life_app_project').addEventListener('change', function() {
+        updateProjectTags();
+        loadLifeAppScripts(); // Load scripts when projects change
+    });
 
     // Function to load projects
     async function loadLifeAppProjects() {
@@ -301,9 +304,9 @@ document.addEventListener('DOMContentLoaded', function () {
         projectSelect.innerHTML = '';
 
         try {
-            const response = await fetch('/static/projectList.json');
+            const response = await fetch('/ui/life_app_projects');
             const projects = await response.json();
-            projects.forEach(project => {
+            projects.projects.forEach(project => { // Access the projects array
                 const option = document.createElement('option');
                 option.value = project;
                 option.textContent = project;
@@ -325,12 +328,21 @@ document.addEventListener('DOMContentLoaded', function () {
     // Function to load scripts
     async function loadLifeAppScripts() {
         const scriptSelect = document.getElementById('life_app_script');
-        if (!scriptSelect) return;
+        const projectSelect = document.getElementById('life_app_project');
+        if (!scriptSelect || !projectSelect) return;
         scriptSelect.innerHTML = '<option value="">Select Script</option>';
+
+        // Get selected projects
+        const selectedProjects = Array.from(projectSelect.selectedOptions).map(option => option.value).join(',');
+
         try {
-            const response = await fetch('/static/scriptList.json');
+            let url = '/ui/life_app_scripts';
+            if (selectedProjects) {
+                url += `?projects=${selectedProjects}`;
+            }
+            const response = await fetch(url);
             const scripts = await response.json();
-            scripts.forEach(script => {
+            scripts.scripts.forEach(script => { // Access the scripts array
                 const option = document.createElement('option');
                 option.value = script;
                 option.textContent = script;
@@ -350,7 +362,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function loadDatasetFiles() {
         const container = document.getElementById('dataset_file_div');
         const select = document.getElementById('dataset_file');
-        
+
         if (!container || !select) {
             console.error('Dataset elements not found');
             return;
