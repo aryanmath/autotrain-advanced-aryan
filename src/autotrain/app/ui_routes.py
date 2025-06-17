@@ -1032,3 +1032,33 @@ async def get_life_app_dataset(authenticated: bool = Depends(user_authentication
     with open(dataset_path, "r", encoding="utf-8") as f:
         dataset = json.load(f)
     return {"dataset": dataset}
+
+@ui_router.get("/life_app/projects")
+async def get_life_app_projects():
+    try:
+        project_path = os.path.join(BASE_DIR, "static", "projectList.json")
+        with open(project_path, "r") as f:
+            projects = json.load(f)
+        return {"projects": projects}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@ui_router.get("/life_app/scripts")
+async def get_life_app_scripts(project_ids: List[str]):
+    try:
+        script_path = os.path.join(BASE_DIR, "static", "scriptList.json")
+        with open(script_path, "r") as f:
+            scripts = json.load(f)
+        return {"scripts": scripts}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@ui_router.get("/life_app/datasets")
+async def get_life_app_datasets(project_ids: List[str], script_id: str):
+    try:
+        dataset_path = os.path.join(BASE_DIR, "static", "dataset.json")
+        with open(dataset_path, "r") as f:
+            datasets = json.load(f)
+        return {"datasets": datasets}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
