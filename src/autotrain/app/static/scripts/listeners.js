@@ -310,6 +310,11 @@ document.addEventListener('DOMContentLoaded', function () {
         scriptSelect.innerHTML = '<option value="">Select Script</option>';
         datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
         
+        // Destroy existing Select2 instance if it exists before re-initializing
+        if ($(projectSelect).data('select2')) {
+            $(projectSelect).select2('destroy');
+        }
+
         try {
             const response = await fetch('/life_app_projects');
             if (!response.ok) {
@@ -323,10 +328,15 @@ document.addEventListener('DOMContentLoaded', function () {
             
             if (data.projects.length === 0) {
                 projectSelect.innerHTML = '<option value="">No projects available</option>';
+                // Even if no projects, try to initialize Select2 for consistent styling
+                $(projectSelect).select2({
+                    maximumSelectionLength: 2,
+                    placeholder: "No projects available"
+                });
                 return;
             }
             
-            projectSelect.innerHTML = '';
+            projectSelect.innerHTML = ''; // Clear existing options
             data.projects.forEach(project => {
                 const option = document.createElement('option');
                 option.value = project;
@@ -334,6 +344,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 projectSelect.appendChild(option);
             });
             
+            // Re-initialize Select2 after populating options
             $(projectSelect).select2({
                 maximumSelectionLength: 2,
                 placeholder: "Select Projects"
@@ -341,6 +352,13 @@ document.addEventListener('DOMContentLoaded', function () {
         } catch (error) {
             console.error('Error loading projects:', error);
             projectSelect.innerHTML = '<option value="">Error loading projects</option>';
+            // Initialize Select2 even on error to show error message with Select2 styling
+            if (!$(projectSelect).data('select2')) { // Only initialize if not already
+                $(projectSelect).select2({
+                    maximumSelectionLength: 2,
+                    placeholder: "Error loading projects"
+                });
+            }
         }
     }
 
@@ -351,12 +369,25 @@ document.addEventListener('DOMContentLoaded', function () {
         
         // Clear dataset dropdown
         datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
+        if ($(datasetSelect).data('select2')) { // Destroy if exists
+            $(datasetSelect).select2('destroy');
+        }
         
         if (!selectedProjects || selectedProjects.length === 0) {
             scriptSelect.innerHTML = '<option value="">Select Script</option>';
+            if ($(scriptSelect).data('select2')) { // Destroy if exists
+                $(scriptSelect).select2('destroy');
+            }
+            $(scriptSelect).select2({
+                placeholder: "Select Script"
+            });
             return;
         }
         
+        if ($(scriptSelect).data('select2')) { // Destroy existing Select2 for scriptSelect
+            $(scriptSelect).select2('destroy');
+        }
+
         try {
             const response = await fetch(`/life_app/scripts?project_ids=${JSON.stringify(selectedProjects)}`);
             if (!response.ok) {
@@ -370,6 +401,9 @@ document.addEventListener('DOMContentLoaded', function () {
             
             if (data.scripts.length === 0) {
                 scriptSelect.innerHTML = '<option value="">No scripts available</option>';
+                $(scriptSelect).select2({
+                    placeholder: "No scripts available"
+                });
                 return;
             }
             
@@ -387,6 +421,11 @@ document.addEventListener('DOMContentLoaded', function () {
         } catch (error) {
             console.error('Error loading scripts:', error);
             scriptSelect.innerHTML = '<option value="">Error loading scripts</option>';
+            if (!$(scriptSelect).data('select2')) { // Only initialize if not already
+                $(scriptSelect).select2({
+                    placeholder: "Error loading scripts"
+                });
+            }
         }
     }
 
@@ -396,7 +435,17 @@ document.addEventListener('DOMContentLoaded', function () {
         
         if (!selectedProjects || selectedProjects.length === 0 || !selectedScript) {
             datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
+            if ($(datasetSelect).data('select2')) { // Destroy if exists
+                $(datasetSelect).select2('destroy');
+            }
+            $(datasetSelect).select2({
+                placeholder: "Select Dataset File"
+            });
             return;
+        }
+
+        if ($(datasetSelect).data('select2')) { // Destroy existing Select2 for datasetSelect
+            $(datasetSelect).select2('destroy');
         }
         
         try {
@@ -412,6 +461,9 @@ document.addEventListener('DOMContentLoaded', function () {
             
             if (data.datasets.length === 0) {
                 datasetSelect.innerHTML = '<option value="">No datasets available</option>';
+                $(datasetSelect).select2({
+                    placeholder: "No datasets available"
+                });
                 return;
             }
             
@@ -429,6 +481,11 @@ document.addEventListener('DOMContentLoaded', function () {
         } catch (error) {
             console.error('Error loading datasets:', error);
             datasetSelect.innerHTML = '<option value="">Error loading datasets</option>';
+            if (!$(datasetSelect).data('select2')) { // Only initialize if not already
+                $(datasetSelect).select2({
+                    placeholder: "Error loading datasets"
+                });
+            }
         }
     }
 
