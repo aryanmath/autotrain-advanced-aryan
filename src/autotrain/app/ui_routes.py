@@ -997,60 +997,38 @@ async def handle_form(request: Request):
     return {"status": "error", "message": "Invalid task type"}
 
 
-import os
-import json
-import tempfile
-from typing import Optional
-
-from fastapi import APIRouter
-from fastapi.responses import JSONResponse
-
-
-ui_router = APIRouter()
-
-# Define a temporary directory to store the files
-TEMP_DIR = os.path.join(BASE_DIR, "tmp_life_app_data")
-os.makedirs(TEMP_DIR, exist_ok=True)
-
-
 @ui_router.get("/life_app_projects", response_class=JSONResponse)
-async def get_life_app_projects():
+async def get_life_app_projects(authenticated: bool = Depends(user_authentication)):
     """
-    Returns the list of projects, fetching from a temporary file if available,
-    otherwise using the static file.
+    Returns the list of projects from the local JSON file for LiFE App integration.
     """
-    print("Fetching projects from somewhere...")
     project_list_path = os.path.join(BASE_DIR, "static", "projectList.json")
     if not os.path.exists(project_list_path):
         return JSONResponse(content={"projects": []})
-
     with open(project_list_path, "r", encoding="utf-8") as f:
         projects = json.load(f)
-
-    return projects
-
+    return {"projects": projects}
 
 @ui_router.get("/life_app_scripts", response_class=JSONResponse)
-async def get_life_app_scripts(projects: Optional[str] = None):
+async def get_life_app_scripts(authenticated: bool = Depends(user_authentication)):
     """
-    Returns the list of scripts, optionally filtered by selected projects.
-    Fetches from a temporary file if available, otherwise using the static file.
+    Returns the list of scripts from the local JSON file for LiFE App integration.
     """
-    # Simulate filtering based on selected projects (replace with actual logic if needed)
-    print(f"Fetching scripts based on projects: {projects} from somewhere...")
     script_list_path = os.path.join(BASE_DIR, "static", "scriptList.json")
     if not os.path.exists(script_list_path):
         return JSONResponse(content={"scripts": []})
-
     with open(script_list_path, "r", encoding="utf-8") as f:
-        all_scripts = json.load(f)
-
-    if projects:
-        selected_projects = projects.split(",")  # Assuming comma-separated project names
-        # In a real scenario, you would filter the scripts based on the selected projects.
-        # For this example, we'll just return all scripts.
-        scripts = all_scripts  # Replace with your filtering logic
-    else:
-        scripts = all_scripts
-
+        scripts = json.load(f)
     return {"scripts": scripts}
+
+@ui_router.get("/life_app_dataset", response_class=JSONResponse)
+async def get_life_app_dataset(authenticated: bool = Depends(user_authentication)):
+    """
+    Returns the dataset from the local JSON file for LiFE App integration.
+    """
+    dataset_path = os.path.join(BASE_DIR, "static", "dataset.json")
+    if not os.path.exists(dataset_path):
+        return JSONResponse(content={"dataset": []})
+    with open(dataset_path, "r", encoding="utf-8") as f:
+        dataset = json.load(f)
+    return {"dataset": dataset}
