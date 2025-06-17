@@ -1062,47 +1062,18 @@ async def get_life_app_dataset():
     """
     Returns the dataset from the local JSON file for LiFE App integration.
     """
-    dataset_path = os.path.join(BASE_DIR, "static", "dataset.json")
-    if not os.path.exists(dataset_path):
-        return JSONResponse(content={"dataset": []})
-    with open(dataset_path, "r", encoding="utf-8") as f:
-        dataset = json.load(f)
-    return {"dataset": dataset}
-
-@ui_router.get("/life_app/projects")
-async def get_life_app_projects():
-    try:
-        project_path = os.path.join(BASE_DIR, "static", "projectList.json")
-        with open(project_path, "r") as f:
-            projects = json.load(f)
-        return {"projects": projects}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@ui_router.get("/life_app/scripts", response_class=JSONResponse)
-async def get_life_app_scripts(project_ids: List[str]):
-    try:
-        script_path = os.path.join(BASE_DIR, "static", "scriptList.json")
-        with open(script_path, "r") as f:
-            all_scripts = json.load(f)
-            
-        # Filter scripts based on selected projects
-        # For now, just return all scripts as we don't have project-script mapping
-        # TODO: Implement proper project-script mapping
-        return {"scripts": all_scripts}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@ui_router.get("/life_app/datasets", response_class=JSONResponse)
-async def get_life_app_datasets(project_ids: List[str], script_id: str):
     try:
         dataset_path = os.path.join(BASE_DIR, "static", "dataset.json")
-        with open(dataset_path, "r") as f:
-            all_datasets = json.load(f)
-            
-        # Filter datasets based on selected projects and script
-        # For now, just return all datasets as we don't have project-script-dataset mapping
-        # TODO: Implement proper project-script-dataset mapping
-        return {"datasets": all_datasets}
+        if not os.path.exists(dataset_path):
+            logger.error(f"Dataset file not found at: {dataset_path}")
+            return JSONResponse(content={"dataset": []})
+        with open(dataset_path, "r", encoding="utf-8") as f:
+            dataset = json.load(f)
+        if not isinstance(dataset, list):
+            logger.error(f"Invalid dataset format in {dataset_path}")
+            return JSONResponse(content={"dataset": []})
+        logger.info(f"Successfully loaded {len(dataset)} datasets")
+        return {"dataset": dataset}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Error loading datasets: {str(e)}")
+        return JSONResponse(content={"dataset": []})
