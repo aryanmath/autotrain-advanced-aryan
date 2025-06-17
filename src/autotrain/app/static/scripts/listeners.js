@@ -312,24 +312,35 @@ document.addEventListener('DOMContentLoaded', function () {
         
         try {
             const response = await fetch('/life_app_projects');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             const data = await response.json();
             
-            if (data.projects && data.projects.length > 0) {
-                projectSelect.innerHTML = '';
-                data.projects.forEach(project => {
-                    const option = document.createElement('option');
-                    option.value = project;
-                    option.textContent = project;
-                    projectSelect.appendChild(option);
-                });
-                
-                $(projectSelect).select2({
-                    maximumSelectionLength: 2,
-                    placeholder: "Select Projects"
-                });
+            if (!data.projects) {
+                throw new Error('Invalid response format: projects field missing');
             }
+            
+            if (data.projects.length === 0) {
+                projectSelect.innerHTML = '<option value="">No projects available</option>';
+                return;
+            }
+            
+            projectSelect.innerHTML = '';
+            data.projects.forEach(project => {
+                const option = document.createElement('option');
+                option.value = project;
+                option.textContent = project;
+                projectSelect.appendChild(option);
+            });
+            
+            $(projectSelect).select2({
+                maximumSelectionLength: 2,
+                placeholder: "Select Projects"
+            });
         } catch (error) {
             console.error('Error loading projects:', error);
+            projectSelect.innerHTML = '<option value="">Error loading projects</option>';
         }
     }
 
@@ -348,23 +359,34 @@ document.addEventListener('DOMContentLoaded', function () {
         
         try {
             const response = await fetch(`/life_app/scripts?project_ids=${JSON.stringify(selectedProjects)}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             const data = await response.json();
             
-            if (data.scripts && data.scripts.length > 0) {
-                scriptSelect.innerHTML = '<option value="">Select Script</option>';
-                data.scripts.forEach(script => {
-                    const option = document.createElement('option');
-                    option.value = script;
-                    option.textContent = script;
-                    scriptSelect.appendChild(option);
-                });
-                
-                $(scriptSelect).select2({
-                    placeholder: "Select Script"
-                });
+            if (!data.scripts) {
+                throw new Error('Invalid response format: scripts field missing');
             }
+            
+            if (data.scripts.length === 0) {
+                scriptSelect.innerHTML = '<option value="">No scripts available</option>';
+                return;
+            }
+            
+            scriptSelect.innerHTML = '<option value="">Select Script</option>';
+            data.scripts.forEach(script => {
+                const option = document.createElement('option');
+                option.value = script;
+                option.textContent = script;
+                scriptSelect.appendChild(option);
+            });
+            
+            $(scriptSelect).select2({
+                placeholder: "Select Script"
+            });
         } catch (error) {
             console.error('Error loading scripts:', error);
+            scriptSelect.innerHTML = '<option value="">Error loading scripts</option>';
         }
     }
 
@@ -379,23 +401,34 @@ document.addEventListener('DOMContentLoaded', function () {
         
         try {
             const response = await fetch(`/life_app/datasets?project_ids=${JSON.stringify(selectedProjects)}&script_id=${selectedScript}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             const data = await response.json();
             
-            if (data.datasets && data.datasets.length > 0) {
-                datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
-                data.datasets.forEach(dataset => {
-                    const option = document.createElement('option');
-                    option.value = dataset;
-                    option.textContent = dataset;
-                    datasetSelect.appendChild(option);
-                });
-                
-                $(datasetSelect).select2({
-                    placeholder: "Select Dataset File"
-                });
+            if (!data.datasets) {
+                throw new Error('Invalid response format: datasets field missing');
             }
+            
+            if (data.datasets.length === 0) {
+                datasetSelect.innerHTML = '<option value="">No datasets available</option>';
+                return;
+            }
+            
+            datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
+            data.datasets.forEach(dataset => {
+                const option = document.createElement('option');
+                option.value = dataset;
+                option.textContent = dataset;
+                datasetSelect.appendChild(option);
+            });
+            
+            $(datasetSelect).select2({
+                placeholder: "Select Dataset File"
+            });
         } catch (error) {
             console.error('Error loading datasets:', error);
+            datasetSelect.innerHTML = '<option value="">Error loading datasets</option>';
         }
     }
 

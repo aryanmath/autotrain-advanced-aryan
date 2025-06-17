@@ -14,6 +14,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from huggingface_hub import repo_exists
 from nvitop import Device
+import httpx
 
 from autotrain import __version__, logger
 from autotrain.app.db import AutoTrainDB
@@ -999,26 +1000,21 @@ async def handle_form(request: Request):
 
 @ui_router.get("/life_app_projects", response_class=JSONResponse)
 async def get_life_app_projects(authenticated: bool = Depends(user_authentication)):
-    """
-    Returns the list of projects from the local JSON file for LiFE App integration.
-    """
     try:
         project_list_path = os.path.join(BASE_DIR, "static", "projectList.json")
-        if not os.path.exists(project_list_path):
-            logger.error(f"Project list file not found at: {project_list_path}")
-            return JSONResponse(content={"projects": []})
+        
+        # Call original API
+        async with httpx.AsyncClient() as client:
+            response = await client.get("ORIGINAL_API_URL")
+            projects = response.json()
             
-        with open(project_list_path, "r", encoding="utf-8") as f:
-            projects = json.load(f)
+        # Save to same file
+        with open(project_list_path, "w", encoding="utf-8") as f:
+            json.dump(projects, f, indent=4)
             
-        if not isinstance(projects, list):
-            logger.error(f"Invalid project list format in {project_list_path}")
-            return JSONResponse(content={"projects": []})
-            
-        logger.info(f"Successfully loaded {len(projects)} projects")
         return {"projects": projects}
     except Exception as e:
-        logger.error(f"Error loading projects: {str(e)}")
+        logger.error(f"Error: {str(e)}")
         return JSONResponse(content={"projects": []})
 
 @ui_router.get("/life_app_scripts", response_class=JSONResponse)
