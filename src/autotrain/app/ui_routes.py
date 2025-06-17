@@ -368,7 +368,7 @@ async def user_authentication(request: Request):
 
 
 @ui_router.get("/", response_class=HTMLResponse)
-async def load_index(request: Request, token: str = Depends(user_authentication)):
+async def load_index(request: Request, token: str):
     """
     This function is used to load the index page
     :return: HTMLResponse
@@ -393,7 +393,7 @@ async def load_index(request: Request, token: str = Depends(user_authentication)
 
 
 @ui_router.get("/logout", response_class=HTMLResponse)
-async def oauth_logout(request: Request, authenticated: bool = Depends(user_authentication)):
+async def oauth_logout(request: Request):
     """
     This function is used to logout the oauth user
     :return: HTMLResponse
@@ -403,7 +403,7 @@ async def oauth_logout(request: Request, authenticated: bool = Depends(user_auth
 
 
 @ui_router.get("/params/{task}/{param_type}", response_class=JSONResponse)
-async def fetch_params(task: str, param_type: str, authenticated: bool = Depends(user_authentication)):
+async def fetch_params(task: str, param_type: str):
     """
     This function is used to fetch the parameters for a given task
     :param task: str
@@ -430,7 +430,6 @@ async def fetch_params(task: str, param_type: str, authenticated: bool = Depends
 async def fetch_model_choices(
     task: str,
     custom_models: str = Query(None),
-    authenticated: bool = Depends(user_authentication),
 ):
     """
     This function is used to fetch the model choices for a given task
@@ -504,7 +503,7 @@ async def handle_form(
     hub_dataset: str = Form(""),
     train_split: str = Form(""),
     valid_split: str = Form(""),
-    token: str = Depends(user_authentication),
+    token: str,
     life_app_project: str = Form(""),
     life_app_script: str = Form(""),
 ):
@@ -804,7 +803,7 @@ async def handle_form(
 
 
 @ui_router.get("/help/{element_id}", response_class=JSONResponse)
-async def fetch_help(element_id: str, authenticated: bool = Depends(user_authentication)):
+async def fetch_help(element_id: str):
     """
     This function is used to fetch the help text for a given element
     :param element_id: str
@@ -834,7 +833,7 @@ async def available_accelerators():
 
 
 @ui_router.get("/is_model_training", response_class=JSONResponse)
-async def is_model_training(authenticated: bool = Depends(user_authentication)):
+async def is_model_training():
     """
     This function is used to fetch the number of running jobs
     :return: JSONResponse
@@ -848,7 +847,7 @@ async def is_model_training(authenticated: bool = Depends(user_authentication)):
 
 
 @ui_router.get("/logs", response_class=JSONResponse)
-async def fetch_logs(authenticated: bool = Depends(user_authentication)):
+async def fetch_logs():
     """
     This function is used to fetch the logs
     :return: JSONResponse
@@ -880,7 +879,7 @@ async def fetch_logs(authenticated: bool = Depends(user_authentication)):
 
 
 @ui_router.get("/stop_training", response_class=JSONResponse)
-async def stop_training(authenticated: bool = Depends(user_authentication)):
+async def stop_training():
     """
     This function is used to stop the training
     :return: JSONResponse
