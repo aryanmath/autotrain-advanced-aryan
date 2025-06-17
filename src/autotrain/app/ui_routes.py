@@ -999,7 +999,7 @@ async def handle_form(request: Request):
 
 
 @ui_router.get("/life_app_projects", response_class=JSONResponse)
-async def get_life_app_projects(authenticated: bool = Depends(user_authentication)):
+async def get_life_app_projects():
     """
     Returns the list of projects from the local JSON file for LiFE App integration.
     """
@@ -1067,7 +1067,7 @@ async def get_life_app_projects():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@ui_router.get("/life_app/scripts")
+@ui_router.get("/life_app/scripts", response_class=JSONResponse)
 async def get_life_app_scripts(project_ids: List[str]):
     try:
         script_path = os.path.join(BASE_DIR, "static", "scriptList.json")
@@ -1081,7 +1081,7 @@ async def get_life_app_scripts(project_ids: List[str]):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@ui_router.get("/life_app/datasets")
+@ui_router.get("/life_app/datasets", response_class=JSONResponse)
 async def get_life_app_datasets(project_ids: List[str], script_id: str):
     try:
         dataset_path = os.path.join(BASE_DIR, "static", "dataset.json")
