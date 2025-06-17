@@ -433,4 +433,4 @@ class LifeAppDatasetValidationRequest(BaseModel):
 class LifeAppDatasetPrepareRequest(BaseModel):
     project_ids: List[str]
     script_id: str
-    dataset_file: str
+    dataset_file: str # Expected to be "dataset.json"

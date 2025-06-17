@@ -760,7 +760,7 @@
                     method: 'GET'
                 })
                     .then(response => response.text())
-                    .then((data) => {
+                    .then data => {
                         console.log(data);
                         loadingSpinner.classList.add('hidden');
                     })

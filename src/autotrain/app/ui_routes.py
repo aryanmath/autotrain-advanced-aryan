@@ -14,7 +14,6 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from huggingface_hub import repo_exists
 from nvitop import Device
-import httpx
 
 from autotrain import __version__, logger
 from autotrain.app.db import AutoTrainDB
@@ -368,7 +367,7 @@ async def user_authentication(request: Request):
 
 
 @ui_router.get("/", response_class=HTMLResponse)
-async def load_index(request: Request, token: str):
+async def load_index(request: Request, token: str = Depends(user_authentication)):
     """
     This function is used to load the index page
     :return: HTMLResponse
@@ -393,7 +392,7 @@ async def load_index(request: Request, token: str):
 
 
 @ui_router.get("/logout", response_class=HTMLResponse)
-async def oauth_logout(request: Request):
+async def oauth_logout(request: Request, authenticated: bool = Depends(user_authentication)):
     """
     This function is used to logout the oauth user
     :return: HTMLResponse
@@ -403,7 +402,7 @@ async def oauth_logout(request: Request):
 
 
 @ui_router.get("/params/{task}/{param_type}", response_class=JSONResponse)
-async def fetch_params(task: str, param_type: str):
+async def fetch_params(task: str, param_type: str, authenticated: bool = Depends(user_authentication)):
     """
     This function is used to fetch the parameters for a given task
     :param task: str
@@ -430,6 +429,7 @@ async def fetch_params(task: str, param_type: str):
 async def fetch_model_choices(
     task: str,
     custom_models: str = Query(None),
+    authenticated: bool = Depends(user_authentication),
 ):
     """
     This function is used to fetch the model choices for a given task
@@ -503,7 +503,7 @@ async def handle_form(
     hub_dataset: str = Form(""),
     train_split: str = Form(""),
     valid_split: str = Form(""),
-    token: str,
+    token: str = Depends(user_authentication),
     life_app_project: str = Form(""),
     life_app_script: str = Form(""),
 ):
@@ -803,7 +803,7 @@ async def handle_form(
 
 
 @ui_router.get("/help/{element_id}", response_class=JSONResponse)
-async def fetch_help(element_id: str):
+async def fetch_help(element_id: str, authenticated: bool = Depends(user_authentication)):
     """
     This function is used to fetch the help text for a given element
     :param element_id: str
@@ -814,7 +814,7 @@ async def fetch_help(element_id: str):
 
 
 @ui_router.get("/accelerators", response_class=JSONResponse)
-async def available_accelerators():
+async def available_accelerators(authenticated: bool = Depends(user_authentication)):
     """
     This function is used to fetch the number of available accelerators
     :return: JSONResponse
@@ -833,7 +833,7 @@ async def available_accelerators():
 
 
 @ui_router.get("/is_model_training", response_class=JSONResponse)
-async def is_model_training():
+async def is_model_training(authenticated: bool = Depends(user_authentication)):
     """
     This function is used to fetch the number of running jobs
     :return: JSONResponse
@@ -847,7 +847,7 @@ async def is_model_training():
 
 
 @ui_router.get("/logs", response_class=JSONResponse)
-async def fetch_logs():
+async def fetch_logs(authenticated: bool = Depends(user_authentication)):
     """
     This function is used to fetch the logs
     :return: JSONResponse
@@ -879,7 +879,7 @@ async def fetch_logs():
 
 
 @ui_router.get("/stop_training", response_class=JSONResponse)
-async def stop_training():
+async def stop_training(authenticated: bool = Depends(user_authentication)):
     """
     This function is used to stop the training
     :return: JSONResponse
@@ -998,81 +998,37 @@ async def handle_form(request: Request):
 
 
 @ui_router.get("/life_app_projects", response_class=JSONResponse)
-async def get_life_app_projects():
+async def get_life_app_projects(authenticated: bool = Depends(user_authentication)):
     """
     Returns the list of projects from the local JSON file for LiFE App integration.
     """
-    try:
-        project_list_path = os.path.join(BASE_DIR, "static", "projectList.json")
-        
-        # TODO: When original API is available, uncomment this code
-        # # Call original API
-        # async with httpx.AsyncClient() as client:
-        #     response = await client.get("ORIGINAL_API_URL")
-        #     projects = response.json()
-        #     
-        # # Save to same file
-        # with open(project_list_path, "w", encoding="utf-8") as f:
-        #     json.dump(projects, f, indent=4)
-        
-        if not os.path.exists(project_list_path):
-            logger.error(f"Project list file not found at: {project_list_path}")
-            return JSONResponse(content={"projects": []})
-            
-        with open(project_list_path, "r", encoding="utf-8") as f:
-            projects = json.load(f)
-            
-        if not isinstance(projects, list):
-            logger.error(f"Invalid project list format in {project_list_path}")
-            return JSONResponse(content={"projects": []})
-            
-        logger.info(f"Successfully loaded {len(projects)} projects")
-        return {"projects": projects}
-    except Exception as e:
-        logger.error(f"Error loading projects: {str(e)}")
+    project_list_path = os.path.join(BASE_DIR, "static", "projectList.json")
+    if not os.path.exists(project_list_path):
         return JSONResponse(content={"projects": []})
+    with open(project_list_path, "r", encoding="utf-8") as f:
+        projects = json.load(f)
+    return {"projects": projects}
 
 @ui_router.get("/life_app_scripts", response_class=JSONResponse)
-async def get_life_app_scripts(project_ids: List[str]):
+async def get_life_app_scripts(authenticated: bool = Depends(user_authentication)):
     """
     Returns the list of scripts from the local JSON file for LiFE App integration.
     """
-    try:
-        script_list_path = os.path.join(BASE_DIR, "static", "scriptList.json")
-        if not os.path.exists(script_list_path):
-            logger.error(f"Script list file not found at: {script_list_path}")
-            return JSONResponse(content={"scripts": []})
-            
-        with open(script_list_path, "r", encoding="utf-8") as f:
-            scripts = json.load(f)
-            
-        if not isinstance(scripts, list):
-            logger.error(f"Invalid script list format in {script_list_path}")
-            return JSONResponse(content={"scripts": []})
-            
-        logger.info(f"Successfully loaded {len(scripts)} scripts")
-        return {"scripts": scripts}
-    except Exception as e:
-        logger.error(f"Error loading scripts: {str(e)}")
+    script_list_path = os.path.join(BASE_DIR, "static", "scriptList.json")
+    if not os.path.exists(script_list_path):
         return JSONResponse(content={"scripts": []})
+    with open(script_list_path, "r", encoding="utf-8") as f:
+        scripts = json.load(f)
+    return {"scripts": scripts}
 
 @ui_router.get("/life_app_dataset", response_class=JSONResponse)
-async def get_life_app_dataset():
+async def get_life_app_dataset(authenticated: bool = Depends(user_authentication)):
     """
     Returns the dataset from the local JSON file for LiFE App integration.
     """
-    try:
-        dataset_path = os.path.join(BASE_DIR, "static", "dataset.json")
-        if not os.path.exists(dataset_path):
-            logger.error(f"Dataset file not found at: {dataset_path}")
-            return JSONResponse(content={"dataset": []})
-        with open(dataset_path, "r", encoding="utf-8") as f:
-            dataset = json.load(f)
-        if not isinstance(dataset, list):
-            logger.error(f"Invalid dataset format in {dataset_path}")
-            return JSONResponse(content={"dataset": []})
-        logger.info(f"Successfully loaded {len(dataset)} datasets")
-        return {"dataset": dataset}
-    except Exception as e:
-        logger.error(f"Error loading datasets: {str(e)}")
+    dataset_path = os.path.join(BASE_DIR, "static", "dataset.json")
+    if not os.path.exists(dataset_path):
         return JSONResponse(content={"dataset": []})
+    with open(dataset_path, "r", encoding="utf-8") as f:
+        dataset = json.load(f)
+    return {"dataset": dataset}
