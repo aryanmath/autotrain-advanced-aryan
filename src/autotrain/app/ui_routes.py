@@ -1034,19 +1034,31 @@ async def get_life_app_projects():
         return JSONResponse(content={"projects": []})
 
 @ui_router.get("/life_app_scripts", response_class=JSONResponse)
-async def get_life_app_scripts(authenticated: bool = Depends(user_authentication)):
+async def get_life_app_scripts(project_ids: List[str]):
     """
     Returns the list of scripts from the local JSON file for LiFE App integration.
     """
-    script_list_path = os.path.join(BASE_DIR, "static", "scriptList.json")
-    if not os.path.exists(script_list_path):
+    try:
+        script_list_path = os.path.join(BASE_DIR, "static", "scriptList.json")
+        if not os.path.exists(script_list_path):
+            logger.error(f"Script list file not found at: {script_list_path}")
+            return JSONResponse(content={"scripts": []})
+            
+        with open(script_list_path, "r", encoding="utf-8") as f:
+            scripts = json.load(f)
+            
+        if not isinstance(scripts, list):
+            logger.error(f"Invalid script list format in {script_list_path}")
+            return JSONResponse(content={"scripts": []})
+            
+        logger.info(f"Successfully loaded {len(scripts)} scripts")
+        return {"scripts": scripts}
+    except Exception as e:
+        logger.error(f"Error loading scripts: {str(e)}")
         return JSONResponse(content={"scripts": []})
-    with open(script_list_path, "r", encoding="utf-8") as f:
-        scripts = json.load(f)
-    return {"scripts": scripts}
 
 @ui_router.get("/life_app_dataset", response_class=JSONResponse)
-async def get_life_app_dataset(authenticated: bool = Depends(user_authentication)):
+async def get_life_app_dataset():
     """
     Returns the dataset from the local JSON file for LiFE App integration.
     """
