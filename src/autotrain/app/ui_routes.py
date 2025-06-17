@@ -1002,12 +1002,24 @@ async def get_life_app_projects(authenticated: bool = Depends(user_authenticatio
     """
     Returns the list of projects from the local JSON file for LiFE App integration.
     """
-    project_list_path = os.path.join(BASE_DIR, "static", "projectList.json")
-    if not os.path.exists(project_list_path):
+    try:
+        project_list_path = os.path.join(BASE_DIR, "static", "projectList.json")
+        if not os.path.exists(project_list_path):
+            logger.error(f"Project list file not found at: {project_list_path}")
+            return JSONResponse(content={"projects": []})
+            
+        with open(project_list_path, "r", encoding="utf-8") as f:
+            projects = json.load(f)
+            
+        if not isinstance(projects, list):
+            logger.error(f"Invalid project list format in {project_list_path}")
+            return JSONResponse(content={"projects": []})
+            
+        logger.info(f"Successfully loaded {len(projects)} projects")
+        return {"projects": projects}
+    except Exception as e:
+        logger.error(f"Error loading projects: {str(e)}")
         return JSONResponse(content={"projects": []})
-    with open(project_list_path, "r", encoding="utf-8") as f:
-        projects = json.load(f)
-    return {"projects": projects}
 
 @ui_router.get("/life_app_scripts", response_class=JSONResponse)
 async def get_life_app_scripts(authenticated: bool = Depends(user_authentication)):

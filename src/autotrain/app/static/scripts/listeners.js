@@ -311,7 +311,7 @@ document.addEventListener('DOMContentLoaded', function () {
         datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
         
         try {
-            const response = await fetch('/life_app/projects');
+            const response = await fetch('/life_app_projects');
             const data = await response.json();
             
             if (data.projects && data.projects.length > 0) {
