@@ -1005,7 +1005,6 @@ from typing import Optional
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
-from autotrain.app.core.settings import BASE_DIR
 
 ui_router = APIRouter()
 
