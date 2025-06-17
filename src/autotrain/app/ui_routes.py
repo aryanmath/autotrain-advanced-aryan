@@ -815,7 +815,7 @@ async def fetch_help(element_id: str, authenticated: bool = Depends(user_authent
 
 
 @ui_router.get("/accelerators", response_class=JSONResponse)
-async def available_accelerators(authenticated: bool = Depends(user_authentication)):
+async def available_accelerators():
     """
     This function is used to fetch the number of available accelerators
     :return: JSONResponse
