@@ -1048,8 +1048,12 @@ async def get_life_app_scripts(project_ids: List[str]):
     try:
         script_path = os.path.join(BASE_DIR, "static", "scriptList.json")
         with open(script_path, "r") as f:
-            scripts = json.load(f)
-        return {"scripts": scripts}
+            all_scripts = json.load(f)
+            
+        # Filter scripts based on selected projects
+        # For now, just return all scripts as we don't have project-script mapping
+        # TODO: Implement proper project-script mapping
+        return {"scripts": all_scripts}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -1058,7 +1062,11 @@ async def get_life_app_datasets(project_ids: List[str], script_id: str):
     try:
         dataset_path = os.path.join(BASE_DIR, "static", "dataset.json")
         with open(dataset_path, "r") as f:
-            datasets = json.load(f)
-        return {"datasets": datasets}
+            all_datasets = json.load(f)
+            
+        # Filter datasets based on selected projects and script
+        # For now, just return all datasets as we don't have project-script-dataset mapping
+        # TODO: Implement proper project-script-dataset mapping
+        return {"datasets": all_datasets}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

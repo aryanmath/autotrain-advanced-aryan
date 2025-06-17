@@ -303,6 +303,13 @@ document.addEventListener('DOMContentLoaded', function () {
     // Project List Loading
     async function loadLifeAppProjects() {
         const projectSelect = document.getElementById('life_app_project');
+        const scriptSelect = document.getElementById('life_app_script');
+        const datasetSelect = document.getElementById('dataset_file');
+        
+        // Clear other dropdowns
+        scriptSelect.innerHTML = '<option value="">Select Script</option>';
+        datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
+        
         try {
             const response = await fetch('/life_app/projects');
             const data = await response.json();
@@ -326,11 +333,21 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Script List Loading
-    async function loadLifeAppScripts() {
+    // Script List Loading - Only when project is selected
+    async function loadLifeAppScripts(selectedProjects) {
         const scriptSelect = document.getElementById('life_app_script');
+        const datasetSelect = document.getElementById('dataset_file');
+        
+        // Clear dataset dropdown
+        datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
+        
+        if (!selectedProjects || selectedProjects.length === 0) {
+            scriptSelect.innerHTML = '<option value="">Select Script</option>';
+            return;
+        }
+        
         try {
-            const response = await fetch('/life_app/scripts');
+            const response = await fetch(`/life_app/scripts?project_ids=${JSON.stringify(selectedProjects)}`);
             const data = await response.json();
             
             if (data.scripts && data.scripts.length > 0) {
@@ -351,11 +368,17 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Dataset List Loading
-    async function loadDatasetFiles() {
+    // Dataset List Loading - Only when script is selected
+    async function loadDatasetFiles(selectedProjects, selectedScript) {
         const datasetSelect = document.getElementById('dataset_file');
+        
+        if (!selectedProjects || selectedProjects.length === 0 || !selectedScript) {
+            datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
+            return;
+        }
+        
         try {
-            const response = await fetch('/life_app/datasets');
+            const response = await fetch(`/life_app/datasets?project_ids=${JSON.stringify(selectedProjects)}&script_id=${selectedScript}`);
             const data = await response.json();
             
             if (data.datasets && data.datasets.length > 0) {
@@ -379,13 +402,27 @@ document.addEventListener('DOMContentLoaded', function () {
     // Event Listeners
     document.addEventListener('DOMContentLoaded', function() {
         const datasetSource = document.getElementById('dataset_source');
+        const projectSelect = document.getElementById('life_app_project');
+        const scriptSelect = document.getElementById('life_app_script');
         
+        // When LiFE App is selected
         datasetSource.addEventListener('change', function() {
             if (this.value === 'life_app') {
                 loadLifeAppProjects();
-                loadLifeAppScripts();
-                loadDatasetFiles();
             }
+        });
+        
+        // When project is selected
+        projectSelect.addEventListener('change', function() {
+            const selectedProjects = $(this).val();
+            loadLifeAppScripts(selectedProjects);
+        });
+        
+        // When script is selected
+        scriptSelect.addEventListener('change', function() {
+            const selectedProjects = $('#life_app_project').val();
+            const selectedScript = $(this).val();
+            loadDatasetFiles(selectedProjects, selectedScript);
         });
     });
 
