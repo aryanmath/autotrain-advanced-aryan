@@ -360,10 +360,19 @@ document.addEventListener('DOMContentLoaded', function () {
         // On project selection, load scripts
         $('#life_app_project').on('change', function() {
             const selectedProjects = $(this).val();
+            console.log('Selected projects:', selectedProjects);
             if (selectedProjects && selectedProjects.length > 0) {
                 loadLifeAppScripts(selectedProjects);
             } else {
                 $('#life_app_script').prop('disabled', true).empty();
+                if ($('#life_app_script').data('select2')) {
+                    $('#life_app_script').select2('destroy');
+                }
+                $('#life_app_script').select2({
+                    placeholder: "Select Script",
+                    allowClear: true,
+                    width: '100%'
+                });
             }
         });
     });
@@ -375,10 +384,20 @@ document.addEventListener('DOMContentLoaded', function () {
         try {
             const response = await fetch('/ui/life_app_scripts');
             const data = await response.json();
+            console.log('Fetched scripts:', data.scripts);
             const scripts = data.scripts || [];
             scripts.forEach(script => {
                 const option = new Option(script, script, false, false);
                 scriptSelect.append(option);
+            });
+            // Destroy and re-initialize Select2 to show new options
+            if (scriptSelect.data('select2')) {
+                scriptSelect.select2('destroy');
+            }
+            scriptSelect.select2({
+                placeholder: "Select Script",
+                allowClear: true,
+                width: '100%'
             });
             scriptSelect.trigger('change');
         } catch (error) {
