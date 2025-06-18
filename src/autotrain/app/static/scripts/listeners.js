@@ -84,8 +84,8 @@ document.addEventListener('DOMContentLoaded', function () {
             if (lifeAppSelection) lifeAppSelection.style.display = "block";
             if (datasetFileDiv) datasetFileDiv.style.display = 'block';
             loadLifeAppProjects();
-            loadLifeAppScripts();
-            loadDatasetFiles();
+            // loadLifeAppScripts();
+            // loadDatasetFiles();
         } else if (dataSource.value === "huggingface") {
             if (hubDataTabContent) hubDataTabContent.style.display = "block";
         } else if (dataSource.value === "local") {
