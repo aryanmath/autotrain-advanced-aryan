@@ -297,17 +297,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 .then(scripts => {
                     scriptChoices.clearChoices();
                     scriptChoices.setChoices(scripts.map(s => ({ value: s, label: s })), 'value', 'label', false);
-                    scriptSelect.disabled = false;
                 });
         } else {
             scriptChoices.clearChoices();
-            scriptChoices.setChoices([{ value: '', label: 'Select Script', disabled: true }], 'value', 'label', false);
-            scriptSelect.disabled = true;
+            // No result found will be shown by Choices.js when there are no choices
         }
     });
-
-    // Initially disable script dropdown
-    scriptSelect.disabled = true;
 
     // Function to load projects
     async function loadLifeAppProjects() {
