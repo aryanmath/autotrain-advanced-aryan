@@ -353,27 +353,34 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Function to load scripts
-    async function loadLifeAppScripts() {
-        const scriptSelect = document.getElementById('life_app_script');
-        if (!scriptSelect) return;
-        scriptSelect.innerHTML = '<option value="">Select Script</option>';
+    // Disable script dropdown initially
+    $(document).ready(function() {
+        $('#life_app_script').prop('disabled', true).empty();
+
+        // On project selection, load scripts
+        $('#life_app_project').on('change', function() {
+            const selectedProjects = $(this).val();
+            if (selectedProjects && selectedProjects.length > 0) {
+                loadLifeAppScripts(selectedProjects);
+            } else {
+                $('#life_app_script').prop('disabled', true).empty();
+            }
+        });
+    });
+
+    async function loadLifeAppScripts(selectedProjects) {
+        const scriptSelect = $('#life_app_script');
+        scriptSelect.prop('disabled', false);
+        scriptSelect.empty();
         try {
-            // Fetch from backend API instead of static file
             const response = await fetch('/ui/life_app_scripts');
             const data = await response.json();
-            const scripts = data.scripts;
+            const scripts = data.scripts || [];
             scripts.forEach(script => {
-                const option = document.createElement('option');
-                option.value = script;
-                option.textContent = script;
-                scriptSelect.appendChild(option);
+                const option = new Option(script, script, false, false);
+                scriptSelect.append(option);
             });
-            // Initialize Select2 for the script dropdown
-            $(scriptSelect).select2({
-                placeholder: "Select LiFE App Script",
-                width: '100%'
-            });
+            scriptSelect.trigger('change');
         } catch (error) {
             console.error('Error loading scripts:', error);
         }
