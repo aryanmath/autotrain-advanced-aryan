@@ -1,0 +1,26 @@
+{
+    "Project_0": {
+        "scripts": ["Script_0", "Script_1"],
+        "dataset": "src/autotrain/app/static/dataset.json"
+    },
+    "Project_1": {
+        "scripts": ["Script_2", "Script_3"],
+        "dataset": "src/autotrain/app/static/dataset.json"
+    },
+    "Project_2": {
+        "scripts": ["Script_4", "Script_0"],
+        "dataset": "src/autotrain/app/static/dataset.json"
+    },
+    "Project_3": {
+        "scripts": ["Script_1", "Script_2"],
+        "dataset": "src/autotrain/app/static/dataset.json"
+    },
+    "Project_4": {
+        "scripts": ["Script_3", "Script_4"],
+        "dataset": "src/autotrain/app/static/dataset.json"
+    },
+    "Project_5": {
+        "scripts": ["Script_0", "Script_3"],
+        "dataset": "src/autotrain/app/static/dataset.json"
+    }
+} 
