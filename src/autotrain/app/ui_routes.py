@@ -1137,3 +1137,62 @@ async def get_life_app_dataset(request: Request, authenticated: bool = Depends(u
             content={"error": str(e)},
             status_code=500
         )
+
+@ui_router.post("/script_selected", response_class=JSONResponse)
+async def handle_script_selection(request: Request, authenticated: bool = Depends(user_authentication)):
+    """
+    Handle script selection and return corresponding datasets based on project-script-dataset mapping.
+    """
+    try:
+        data = await request.json()
+        selected_projects = data.get('projects', [])
+        selected_script = data.get('script', '')
+
+        logger.info(f"Projects for script selection: {selected_projects}")
+        logger.info(f"Script selected: {selected_script}")
+
+        mapping_path = os.path.join(BASE_DIR, "static", "project_script_dataset_mapping.json")
+        if not os.path.exists(mapping_path):
+            logger.error("Project-script-dataset mapping file not found")
+            return JSONResponse(content={"datasets": []})
+
+        with open(mapping_path, "r", encoding="utf-8") as f:
+            mapping = json.load(f)
+
+        available_datasets = set()
+        for project in selected_projects:
+            if project in mapping and selected_script in mapping[project]:
+                available_datasets.update(mapping[project][selected_script])
+
+        datasets = list(available_datasets)
+        logger.info(f"Available datasets for projects {selected_projects} and script {selected_script}: {datasets}")
+
+        return JSONResponse(content={
+            "status": "success",
+            "projects": selected_projects,
+            "script": selected_script,
+            "datasets": datasets
+        })
+    except Exception as e:
+        logger.error(f"Error in script selection: {str(e)}")
+        return JSONResponse(content={"error": str(e)}, status_code=500)
+
+@ui_router.post("/dataset_selected", response_class=JSONResponse)
+async def handle_dataset_selection(request: Request, authenticated: bool = Depends(user_authentication)):
+    """
+    Log dataset selection.
+    """
+    try:
+        data = await request.json()
+        selected_projects = data.get('projects', [])
+        selected_script = data.get('script', '')
+        selected_dataset = data.get('dataset', '')
+
+        logger.info(f"Projects for dataset selection: {selected_projects}")
+        logger.info(f"Script for dataset selection: {selected_script}")
+        logger.info(f"Dataset selected: {selected_dataset}")
+
+        return JSONResponse(content={"status": "success"})
+    except Exception as e:
+        logger.error(f"Error in dataset selection: {str(e)}")
+        return JSONResponse(content={"error": str(e)}, status_code=500)
