@@ -83,36 +83,9 @@ document.addEventListener('DOMContentLoaded', function () {
         if (dataSource.value === "life_app" && taskValue === "automatic-speech-recognition") {
             if (lifeAppSelection) lifeAppSelection.style.display = "block";
             if (datasetFileDiv) datasetFileDiv.style.display = 'block';
-            
-            // Fetch projects from backend when LiFE App is selected
-            const $project = $('#life_app_project');
-            showLoading($project[0]);
-            
-            fetch('/life_app_projects')  // Changed to use underscore instead of slash
-                .then(res => {
-                    if (!res.ok) {
-                        throw new Error(`HTTP error! status: ${res.status}`);
-                    }
-                    return res.json();
-                })
-                .then(data => {
-                    if (!data || !data.projects) {
-                        throw new Error('Invalid response format from server');
-                    }
-                    $project.empty();
-                    data.projects.forEach(p => {
-                        $project.append(new Option(p, p));
-                    });
-                    $project.trigger('change.select2');
-                })
-                .catch(error => {
-                    console.error('Error fetching projects:', error);
-                    const $container = $project.parent();
-                    $container.append(showError('Failed to load projects: ' + error.message));
-                })
-                .finally(() => {
-                    hideLoading($project[0]);
-                });
+            loadLifeAppProjects();
+            loadLifeAppScripts();
+            loadDatasetFiles();
         } else if (dataSource.value === "huggingface") {
             if (hubDataTabContent) hubDataTabContent.style.display = "block";
         } else if (dataSource.value === "local") {
@@ -328,22 +301,14 @@ document.addEventListener('DOMContentLoaded', function () {
         projectSelect.innerHTML = '';
 
         try {
-            const response = await fetch('/life_app_projects');
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            if (!data.projects || !Array.isArray(data.projects)) {
-                throw new Error('Invalid response format');
-            }
-            
-            data.projects.forEach(project => {
+            const response = await fetch('/static/projectList.json');
+            const projects = await response.json();
+            projects.forEach(project => {
                 const option = document.createElement('option');
                 option.value = project;
                 option.textContent = project;
                 projectSelect.appendChild(option);
             });
-            
             // Initialize Select2 after options are added
             $(projectSelect).select2({
                 placeholder: "Select LiFE App Project(s)",
@@ -354,11 +319,6 @@ document.addEventListener('DOMContentLoaded', function () {
             updateProjectTags(); // Update tags on initial load
         } catch (error) {
             console.error('Error loading projects:', error);
-            // Show error to user
-            const errorMessage = document.createElement('div');
-            errorMessage.className = 'text-red-500 text-sm mt-2';
-            errorMessage.textContent = 'Failed to load projects. Please try again.';
-            projectSelect.parentNode.appendChild(errorMessage);
         }
     }
 
