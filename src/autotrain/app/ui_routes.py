@@ -1034,7 +1034,7 @@ async def handle_form(request: Request):
 #     return {"dataset": dataset}
 
 
-@router.get("/life_app_projects")
+@ui_router.get("/life_app_projects")
 async def get_life_app_projects():
     with open("src/autotrain/app/static/projectList.json", "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -1042,7 +1042,7 @@ async def get_life_app_projects():
     projects = list(dict.fromkeys(data["projects"]))
     return {"projects": projects}
 
-@router.get("/life_app_scripts")
+@ui_router.get("/life_app_scripts")
 async def get_life_app_scripts(project_ids: str):
     with open("src/autotrain/app/static/scriptList.json", "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -1050,7 +1050,7 @@ async def get_life_app_scripts(project_ids: str):
     scripts = list(dict.fromkeys(data["scripts"]))
     return {"scripts": scripts}
 
-@router.get("/life_app_dataset")
+@ui_router.get("/life_app_dataset")
 async def get_life_app_dataset(project_ids: str, script_id: str):
     with open("src/autotrain/app/static/dataset.json", "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -1058,7 +1058,7 @@ async def get_life_app_dataset(project_ids: str, script_id: str):
     datasets = list({json.dumps(ds): ds for ds in data["datasets"]}.values())
     return {"datasets": datasets}
 
-@router.post("/ui/create_project")
+@ui_router.post("/ui/create_project")
 async def create_project(
     request: Request,
     life_app_projects: List[str] = Form(None),
