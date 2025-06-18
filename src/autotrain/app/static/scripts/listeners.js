@@ -304,6 +304,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const selectedProjects = Array.from(this.selectedOptions).map(opt => opt.value);
         scriptSelect.innerHTML = '<option value="">Select Script</option>';
         if (selectedProjects.length > 0) {
+            scriptSelect.removeAttribute('disabled');
             scriptSelect.disabled = false;
             fetch('/static/scriptList.json')
                 .then(response => response.json())
@@ -316,6 +317,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     });
                 });
         } else {
+            scriptSelect.innerHTML = '<option value="">Select Script</option>';
             scriptSelect.disabled = true;
         }
     });
