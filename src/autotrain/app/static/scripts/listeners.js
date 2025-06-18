@@ -353,38 +353,35 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Disable script dropdown initially
-    $(document).ready(function() {
-        $('#life_app_script').prop('disabled', true).empty();
-
-        // On project selection, load scripts
-        $('#life_app_project').on('change', function() {
-            const selectedProjects = $(this).val();
-            console.log('Selected Projects:', selectedProjects);  // Debug log
-            
-            // Turant backend ko inform karna
-            fetch('/ui/project_selected', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ 
-                    projects: selectedProjects 
-                })
+    // Project selection ka event listener
+    $('#life_app_project').on('change', function() {
+        const selectedProjects = $(this).val();
+        console.log('Selected Projects:', selectedProjects);  // Debug log
+        
+        // Turant backend ko inform karna
+        fetch('/ui/project_selected', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+                projects: selectedProjects 
             })
-            .then(response => response.json())
-            .then(data => {
-                // Backend se scripts milne par UI update karna
-                if (data.scripts) {
-                    const scriptSelect = $('#life_app_script');
-                    scriptSelect.prop('disabled', false).empty();
-                    data.scripts.forEach(script => {
-                        scriptSelect.append(new Option(script, script));
-                    });
-                }
-            })
-            .catch(error => console.error('Error:', error));
-        });
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Backend se scripts milne par UI update karna
+            if (data.scripts) {
+                const scriptSelect = $('#life_app_script');
+                scriptSelect.prop('disabled', false).empty();
+                scriptSelect.append(new Option('Select Script', '')); // Default option
+                data.scripts.forEach(script => {
+                    scriptSelect.append(new Option(script, script));
+                });
+                scriptSelect.trigger('change');
+            }
+        })
+        .catch(error => console.error('Error:', error));
     });
 
     async function loadLifeAppScripts(selectedProjects) {
