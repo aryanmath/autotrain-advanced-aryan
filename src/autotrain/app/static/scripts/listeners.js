@@ -353,26 +353,32 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Disable script dropdown initially
+    // Disable script dropdown and button initially
     $(document).ready(function() {
         $('#life_app_script').prop('disabled', true).empty();
+        $('#load-scripts-btn').prop('disabled', true);
 
-        // On project selection, load scripts
+        // On project selection, enable/disable the button
         $('#life_app_project').on('change', function() {
             const selectedProjects = $(this).val();
-            console.log('Selected projects:', selectedProjects);
+            $('#load-scripts-btn').prop('disabled', !(selectedProjects && selectedProjects.length > 0));
+            // Always disable and clear script dropdown until button is clicked
+            $('#life_app_script').prop('disabled', true).empty();
+            if ($('#life_app_script').data('select2')) {
+                $('#life_app_script').select2('destroy');
+            }
+            $('#life_app_script').select2({
+                placeholder: "Select Script",
+                allowClear: true,
+                width: '100%'
+            });
+        });
+
+        // On button click, load scripts
+        $('#load-scripts-btn').on('click', function() {
+            const selectedProjects = $('#life_app_project').val();
             if (selectedProjects && selectedProjects.length > 0) {
                 loadLifeAppScripts(selectedProjects);
-            } else {
-                $('#life_app_script').prop('disabled', true).empty();
-                if ($('#life_app_script').data('select2')) {
-                    $('#life_app_script').select2('destroy');
-                }
-                $('#life_app_script').select2({
-                    placeholder: "Select Script",
-                    allowClear: true,
-                    width: '100%'
-                });
             }
         });
     });
