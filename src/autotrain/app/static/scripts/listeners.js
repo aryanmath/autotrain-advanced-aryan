@@ -356,6 +356,54 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Add event listener for script selection
+    $('#life_app_script').on('change', function() {
+        const selectedScript = $(this).val();
+        const selectedProjects = $('#life_app_project').val();
+        
+        if (selectedScript && selectedProjects && selectedProjects.length > 0) {
+            // Load dataset files for selected project and script
+            loadDatasetFiles(selectedProjects, selectedScript);
+        } else {
+            // Clear dataset dropdown if no script selected
+            $('#dataset_file').prop('disabled', true).empty();
+        }
+    });
+
+    // Function to load dataset files
+    async function loadDatasetFiles(selectedProjects, selectedScript) {
+        const datasetSelect = $('#dataset_file');
+        datasetSelect.prop('disabled', false).empty();
+        datasetSelect.append(new Option('Select Dataset', '')); // Default option
+        
+        try {
+            const response = await fetch('/ui/life_app_dataset', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    projects: selectedProjects,
+                    script: selectedScript
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch dataset files');
+            }
+            
+            const data = await response.json();
+            if (data.datasets) {
+                data.datasets.forEach(dataset => {
+                    datasetSelect.append(new Option(dataset, dataset));
+                });
+            }
+            datasetSelect.trigger('change');
+        } catch (error) {
+            console.error('Error loading dataset files:', error);
+        }
+    }
+
     // Function to update project tags
     function updateProjectTags() {
         const projectSelect = document.getElementById('life_app_project');

@@ -1109,3 +1109,54 @@ async def handle_project_selection(request: Request, authenticated: bool = Depen
             content={"error": str(e)}, 
             status_code=500
         )
+
+@ui_router.post("/life_app_dataset", response_class=JSONResponse)
+async def get_life_app_dataset(request: Request, authenticated: bool = Depends(user_authentication)):
+    """
+    Get dataset files for selected project and script.
+    """
+    try:
+        data = await request.json()
+        selected_projects = data.get('projects', [])
+        selected_script = data.get('script', '')
+        
+        # Log selected projects and script
+        logger.info(f"Projects selected: {selected_projects}")
+        logger.info(f"Script selected: {selected_script}")
+        
+        # Load dataset files from mapping
+        mapping_path = os.path.join(BASE_DIR, "static", "project_script_mapping.json")
+        if not os.path.exists(mapping_path):
+            logger.error("Project-script mapping file not found")
+            return JSONResponse(content={"datasets": []})
+            
+        with open(mapping_path, "r", encoding="utf-8") as f:
+            project_script_mapping = json.load(f)
+        
+        # Get dataset files for selected project and script
+        available_datasets = set()
+        for project in selected_projects:
+            if project in project_script_mapping:
+                if selected_script in project_script_mapping[project]:
+                    # Add dataset files for this project-script combination
+                    available_datasets.update(project_script_mapping[project][selected_script])
+        
+        # Convert set to list for JSON response
+        datasets = list(available_datasets)
+        
+        # Log available datasets
+        logger.info(f"Available datasets for projects {selected_projects} and script {selected_script}: {datasets}")
+        
+        # Return datasets
+        return JSONResponse(content={
+            "status": "success",
+            "projects": selected_projects,
+            "script": selected_script,
+            "datasets": datasets
+        })
+    except Exception as e:
+        logger.error(f"Error in dataset loading: {str(e)}")
+        return JSONResponse(
+            content={"error": str(e)}, 
+            status_code=500
+        )
