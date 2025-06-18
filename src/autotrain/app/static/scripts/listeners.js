@@ -275,27 +275,30 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Initialize Select2 for all dropdowns
-    $(document).ready(function() {
+    if (typeof $ !== 'undefined') {
         // Initialize project dropdown with Select2
         $('#life_app_project').select2({
             placeholder: 'Select Project(s)',
             allowClear: true,
             multiple: true,
-            width: '100%'
+            width: '100%',
+            theme: 'classic'
         });
 
         // Initialize script dropdown with Select2
         $('#life_app_script').select2({
             placeholder: 'Select Script',
             allowClear: true,
-            width: '100%'
+            width: '100%',
+            theme: 'classic'
         });
 
         // Initialize dataset dropdown with Select2
         $('#dataset_file').select2({
             placeholder: 'Select Dataset',
             allowClear: true,
-            width: '100%'
+            width: '100%',
+            theme: 'classic'
         });
 
         // Function to load projects
@@ -309,10 +312,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 const projects = data.projects;
                 
                 // Clear and populate project dropdown
-                $('#life_app_project').empty().append('<option></option>');
+                $('#life_app_project').empty();
                 projects.forEach(project => {
                     $('#life_app_project').append(new Option(project, project));
                 });
+                $('#life_app_project').trigger('change');
             } catch (error) {
                 console.error('Error loading projects:', error);
                 showError('Failed to load projects. Please try again.');
@@ -328,7 +332,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     .then(data => {
                         const scripts = data.scripts;
                         // Clear and populate script dropdown
-                        $('#life_app_script').empty().append('<option></option>');
+                        $('#life_app_script').empty();
                         scripts.forEach(script => {
                             $('#life_app_script').append(new Option(script, script));
                         });
@@ -339,7 +343,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         showError('Failed to load scripts. Please try again.');
                     });
             } else {
-                $('#life_app_script').empty().append('<option></option>').prop('disabled', true).trigger('change');
+                $('#life_app_script').empty().prop('disabled', true).trigger('change');
             }
         });
 
@@ -350,7 +354,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 datasetSelect.prop('disabled', false);
                 loadDatasetFiles();
             } else {
-                datasetSelect.empty().append('<option></option>').prop('disabled', true).trigger('change');
+                datasetSelect.empty().prop('disabled', true).trigger('change');
             }
         });
 
@@ -366,7 +370,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const dataset = data.dataset;
                 
                 // Clear and populate dataset dropdown
-                datasetSelect.empty().append('<option></option>');
+                datasetSelect.empty();
                 datasetSelect.append(new Option('Current Dataset', 'dataset.json'));
                 datasetSelect.prop('disabled', false).trigger('change');
             } catch (error) {
@@ -395,5 +399,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 errorDiv.remove();
             }, 5000);
         }
-    });
+
+        // Call loadLifeAppProjects when LiFE App is selected
+        $('#dataset_source').on('change', function() {
+            if (this.value === 'life_app') {
+                loadLifeAppProjects();
+            }
+        });
+    } else {
+        console.error('jQuery is not loaded. Select2 initialization failed.');
+    }
 });
