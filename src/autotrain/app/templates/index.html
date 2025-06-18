@@ -563,7 +563,6 @@
                                     <select id="life_app_project" name="life_app_project" multiple
                                         class="block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 mb-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                                     </select>
-                                    <button id="load-scripts-btn" class="px-3 py-2 bg-blue-600 text-white rounded disabled:opacity-50" disabled>Load Scripts</button>
                                     <div id="life-app-project-tags" class="mb-2"></div>
                                 </div>
 
@@ -805,6 +804,37 @@
             datasetSource.addEventListener('change', toggleLifeAppSelection);
             // Initialize on page load
             toggleLifeAppSelection();
+        });
+    </script>
+    <script>
+        $(document).ready(function() {
+            // Initialize Select2 for all dropdowns
+            $('#life_app_project').select2({
+                placeholder: "Select LiFE App Project(s)",
+                allowClear: true,
+                multiple: true,
+                width: '100%',
+                maximumSelectionLength: 2,
+                tags: true
+            });
+            
+            $('#dataset_file').select2({
+                placeholder: "Select Dataset File",
+                allowClear: true,
+                width: '100%'
+            });
+            
+            // Handle dataset source change
+            $('#dataset_source').on('change', function() {
+                const lifeAppSelection = $('#life-app-selection');
+                if ($(this).val() === 'life_app') {
+                    lifeAppSelection.show();
+                    // Load projects when LiFE App is selected
+                    loadLifeAppProjects();
+                } else {
+                    lifeAppSelection.hide();
+                }
+            });
         });
     </script>
 </body>

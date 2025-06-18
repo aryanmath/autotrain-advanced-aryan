@@ -347,32 +347,23 @@ document.addEventListener('DOMContentLoaded', function () {
             // Add change event listener for Select2
             $(projectSelect).off('change').on('change', function() {
                 updateProjectTags();
-                // Enable/disable load scripts button based on selection
-                const selectedProjects = $(this).val();
-                $('#load-scripts-btn').prop('disabled', !(selectedProjects && selectedProjects.length > 0));
             });
         } catch (error) {
             console.error('Error loading projects:', error);
         }
     }
 
-    // Initialize script loading functionality
+    // Disable script dropdown initially
     $(document).ready(function() {
-        // Initialize script dropdown as disabled
-        $('#life_app_script').prop('disabled', true);
-        
-        // Initialize Select2 for script dropdown
-        $('#life_app_script').select2({
-            placeholder: "Select Script",
-            allowClear: true,
-            width: '100%'
-        });
+        $('#life_app_script').prop('disabled', true).empty();
 
-        // Handle load scripts button click
-        $('#load-scripts-btn').on('click', function() {
-            const selectedProjects = $('#life_app_project').val();
+        // On project selection, load scripts
+        $('#life_app_project').on('change', function() {
+            const selectedProjects = $(this).val();
             if (selectedProjects && selectedProjects.length > 0) {
                 loadLifeAppScripts(selectedProjects);
+            } else {
+                $('#life_app_script').prop('disabled', true).empty();
             }
         });
     });
@@ -381,56 +372,17 @@ document.addEventListener('DOMContentLoaded', function () {
         const scriptSelect = $('#life_app_script');
         scriptSelect.prop('disabled', false);
         scriptSelect.empty();
-        
         try {
-            // Show loading state
-            scriptSelect.prop('disabled', true);
-            
-            // Fetch scripts from backend
-            const response = await fetch('/ui/life_app_scripts', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ projects: selectedProjects })
-            });
-            
-            if (!response.ok) {
-                throw new Error('Failed to fetch scripts');
-            }
-            
+            const response = await fetch('/ui/life_app_scripts');
             const data = await response.json();
             const scripts = data.scripts || [];
-            
-            // Add options to select
             scripts.forEach(script => {
                 const option = new Option(script, script, false, false);
                 scriptSelect.append(option);
             });
-            
-            // Re-initialize Select2
-            if (scriptSelect.data('select2')) {
-                scriptSelect.select2('destroy');
-            }
-            scriptSelect.select2({
-                placeholder: "Select Script",
-                allowClear: true,
-                width: '100%'
-            });
-            
-            scriptSelect.prop('disabled', false);
             scriptSelect.trigger('change');
-            
-            // After script is selected, load dataset files
-            scriptSelect.on('change', function() {
-                if ($(this).val()) {
-                    loadDatasetFiles();
-                }
-            });
-            
         } catch (error) {
             console.error('Error loading scripts:', error);
-            scriptSelect.prop('disabled', false);
         }
     }
 
@@ -469,11 +421,4 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('Error loading dataset:', error);
             });
     }
-
-    $(document).on('click', '#load-scripts-btn', function() {
-        const selectedProjects = $('#life_app_project').val();
-        if (selectedProjects && selectedProjects.length > 0) {
-            loadLifeAppScripts(selectedProjects);
-        }
-    });
 });
