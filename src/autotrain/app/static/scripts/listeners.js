@@ -274,9 +274,21 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Initialize Choices.js for project and script dropdowns
+    // Debug: Check if elements exist
     const projectSelect = document.getElementById('life_app_project');
     const scriptSelect = document.getElementById('life_app_script');
+    console.log('projectSelect:', projectSelect);
+    console.log('scriptSelect:', scriptSelect);
+    if (!projectSelect) {
+        console.error('Element with id "life_app_project" not found!');
+        return;
+    }
+    if (!scriptSelect) {
+        console.error('Element with id "life_app_script" not found!');
+        return;
+    }
+
+    // Initialize Choices.js for project and script dropdowns
     const projectChoices = new Choices(projectSelect, { removeItemButton: true, placeholder: true, placeholderValue: 'Select Project(s)' });
     const scriptChoices = new Choices(scriptSelect, { removeItemButton: false, placeholder: true, placeholderValue: 'Select Script' });
 
