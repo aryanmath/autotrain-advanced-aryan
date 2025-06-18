@@ -1063,6 +1063,11 @@ async def get_life_app_dataset(authenticated: bool = Depends(user_authentication
 #     except Exception as e:
 #         raise HTTPException(status_code=500, detail=str(e))
 
+
+
+
+
+
 @ui_router.post("/project_selected", response_class=JSONResponse)
 async def handle_project_selection(request: Request, authenticated: bool = Depends(user_authentication)):
     """
@@ -1138,19 +1143,27 @@ async def handle_project_selection(request: Request, authenticated: bool = Depen
 #             status_code=500
 #         )
 
+
+
+
+
+
 @ui_router.post("/script_selected", response_class=JSONResponse)
 async def handle_script_selection(request: Request, authenticated: bool = Depends(user_authentication)):
     """
     Handle script selection and return corresponding datasets based on project-script-dataset mapping.
     """
     try:
+        # Parse request data
         data = await request.json()
         selected_projects = data.get('projects', [])
         selected_script = data.get('script', '')
 
+        # Log selected projects and script
         logger.info(f"Projects for script selection: {selected_projects}")
         logger.info(f"Script selected: {selected_script}")
 
+        # Load project-script-dataset mapping
         mapping_path = os.path.join(BASE_DIR, "static", "project_script_dataset_mapping.json")
         if not os.path.exists(mapping_path):
             logger.error("Project-script-dataset mapping file not found")
@@ -1159,14 +1172,23 @@ async def handle_script_selection(request: Request, authenticated: bool = Depend
         with open(mapping_path, "r", encoding="utf-8") as f:
             mapping = json.load(f)
 
+        # Collect available datasets for the selected script across all selected projects
         available_datasets = set()
         for project in selected_projects:
-            if project in mapping and selected_script in mapping[project]:
-                available_datasets.update(mapping[project][selected_script])
+            if project in mapping:
+                if selected_script in mapping[project]:
+                    logger.info(f"Project '{project}' has script '{selected_script}' with datasets: {mapping[project][selected_script]}")
+                    available_datasets.update(mapping[project][selected_script])
+                else:
+                    logger.info(f"Project '{project}' does NOT have script '{selected_script}'")
+            else:
+                logger.info(f"Project '{project}' not found in mapping")
 
+        # Deduplicate and convert to list
         datasets = list(available_datasets)
-        logger.info(f"Available datasets for projects {selected_projects} and script {selected_script}: {datasets}")
+        logger.info(f"Deduplicated available datasets for projects {selected_projects} and script {selected_script}: {datasets}")
 
+        # Return datasets
         return JSONResponse(content={
             "status": "success",
             "projects": selected_projects,
@@ -1176,7 +1198,8 @@ async def handle_script_selection(request: Request, authenticated: bool = Depend
     except Exception as e:
         logger.error(f"Error in script selection: {str(e)}")
         return JSONResponse(content={"error": str(e)}, status_code=500)
-
+    
+    
 @ui_router.post("/dataset_selected", response_class=JSONResponse)
 async def handle_dataset_selection(request: Request, authenticated: bool = Depends(user_authentication)):
     """
