@@ -1062,3 +1062,50 @@ async def get_life_app_datasets(project_ids: List[str], script_id: str):
         return {"datasets": datasets}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@ui_router.post("/project_selected", response_class=JSONResponse)
+async def handle_project_selection(request: Request, authenticated: bool = Depends(user_authentication)):
+    """
+    Handle project selection and return corresponding scripts based on project-script mapping.
+    """
+    try:
+        # Request se selected projects get karna
+        data = await request.json()
+        selected_projects = data.get('projects', [])
+        
+        # Log selected projects
+        logger.info(f"Projects selected: {selected_projects}")
+        
+        # Load project-script mapping
+        mapping_path = os.path.join(BASE_DIR, "static", "project_script_mapping.json")
+        if not os.path.exists(mapping_path):
+            logger.error("Project-script mapping file not found")
+            return JSONResponse(content={"scripts": []})
+            
+        with open(mapping_path, "r", encoding="utf-8") as f:
+            project_script_mapping = json.load(f)
+        
+        # Get scripts for selected projects
+        available_scripts = set()
+        for project in selected_projects:
+            if project in project_script_mapping:
+                available_scripts.update(project_script_mapping[project])
+        
+        # Convert set to list for JSON response
+        scripts = list(available_scripts)
+        
+        # Log available scripts
+        logger.info(f"Available scripts for projects {selected_projects}: {scripts}")
+        
+        # Return scripts
+        return JSONResponse(content={
+            "status": "success",
+            "projects": selected_projects,
+            "scripts": scripts
+        })
+    except Exception as e:
+        logger.error(f"Error in project selection: {str(e)}")
+        return JSONResponse(
+            content={"error": str(e)}, 
+            status_code=500
+        )

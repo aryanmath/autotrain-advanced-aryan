@@ -360,11 +360,30 @@ document.addEventListener('DOMContentLoaded', function () {
         // On project selection, load scripts
         $('#life_app_project').on('change', function() {
             const selectedProjects = $(this).val();
-            if (selectedProjects && selectedProjects.length > 0) {
-                loadLifeAppScripts(selectedProjects);
-            } else {
-                $('#life_app_script').prop('disabled', true).empty();
-            }
+            console.log('Selected Projects:', selectedProjects);  // Debug log
+            
+            // Turant backend ko inform karna
+            fetch('/ui/project_selected', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    projects: selectedProjects 
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Backend se scripts milne par UI update karna
+                if (data.scripts) {
+                    const scriptSelect = $('#life_app_script');
+                    scriptSelect.prop('disabled', false).empty();
+                    data.scripts.forEach(script => {
+                        scriptSelect.append(new Option(script, script));
+                    });
+                }
+            })
+            .catch(error => console.error('Error:', error));
         });
     });
 
