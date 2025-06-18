@@ -308,18 +308,26 @@ document.addEventListener('DOMContentLoaded', function () {
             loadLifeAppScripts();
             scriptSelect.disabled = false;
             $(scriptSelect).prop('disabled', false);
+            $(scriptSelect).select2();
+            $(scriptSelect).trigger('change.select2');
             datasetSelect.disabled = true;
             $(datasetSelect).prop('disabled', true);
+            $(datasetSelect).select2();
+            $(datasetSelect).trigger('change.select2');
             datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
             if ($(datasetSelect).data('select2')) { $(datasetSelect).val(null).trigger('change'); }
         } else {
             scriptSelect.innerHTML = '<option value="">Select Script</option>';
             scriptSelect.disabled = true;
             $(scriptSelect).prop('disabled', true);
+            $(scriptSelect).select2();
+            $(scriptSelect).trigger('change.select2');
             if ($(scriptSelect).data('select2')) { $(scriptSelect).val(null).trigger('change'); }
             datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
             datasetSelect.disabled = true;
             $(datasetSelect).prop('disabled', true);
+            $(datasetSelect).select2();
+            $(datasetSelect).trigger('change.select2');
             if ($(datasetSelect).data('select2')) { $(datasetSelect).val(null).trigger('change'); }
         }
     });
@@ -329,11 +337,15 @@ document.addEventListener('DOMContentLoaded', function () {
         if (this.value) {
             datasetSelect.disabled = false;
             $(datasetSelect).prop('disabled', false);
+            $(datasetSelect).select2();
+            $(datasetSelect).trigger('change.select2');
             loadDatasetFiles();
         } else {
             datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
             datasetSelect.disabled = true;
             $(datasetSelect).prop('disabled', true);
+            $(datasetSelect).select2();
+            $(datasetSelect).trigger('change.select2');
             if ($(datasetSelect).data('select2')) { $(datasetSelect).val(null).trigger('change'); }
         }
     });
@@ -402,6 +414,8 @@ document.addEventListener('DOMContentLoaded', function () {
             });
             scriptSelect.disabled = false;
             $(scriptSelect).prop('disabled', false);
+            $(scriptSelect).select2();
+            $(scriptSelect).trigger('change.select2');
         } catch (error) {
             console.error('Error loading scripts:', error);
             const errorDiv = document.createElement('div');
