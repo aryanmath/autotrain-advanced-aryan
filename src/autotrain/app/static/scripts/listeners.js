@@ -369,26 +369,30 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Script selection event
     $('#life_app_script').on('change', function() {
+        console.log('Script change event triggered');
         const selectedScript = $(this).val();
         const selectedProjects = $('#life_app_project').val();
         console.log('Script selected:', selectedScript);
         console.log('Selected projects:', selectedProjects);
         
         if (selectedScript && selectedProjects && selectedProjects.length > 0) {
+            console.log('Calling loadDatasetFiles with:', { script: selectedScript, projects: selectedProjects });
             loadDatasetFiles(selectedProjects, selectedScript);
         } else {
+            console.log('Script or projects not selected, disabling dataset dropdown');
             $('#dataset_file').prop('disabled', true).empty();
         }
     });
 
     // Function to load datasets
     async function loadDatasetFiles(selectedProjects, selectedScript) {
+        console.log('loadDatasetFiles called with:', { projects: selectedProjects, script: selectedScript });
         const datasetSelect = $('#dataset_file');
         datasetSelect.prop('disabled', false).empty();
         datasetSelect.append(new Option('Select Dataset', ''));
         
         try {
-            console.log('Fetching datasets for:', { projects: selectedProjects, script: selectedScript });
+            console.log('Making API request to /ui/life_app_dataset');
             const response = await fetch('/ui/life_app_dataset', {
                 method: 'POST',
                 headers: {

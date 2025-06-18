@@ -1113,7 +1113,10 @@ async def handle_project_selection(request: Request, authenticated: bool = Depen
 @ui_router.post("/life_app_dataset", response_class=JSONResponse)
 async def get_life_app_dataset(request: Request, authenticated: bool = Depends(user_authentication)):
     try:
+        logger.info("Received request to /ui/life_app_dataset")
         data = await request.json()
+        logger.info(f"Request data: {data}")
+        
         selected_projects = data.get('projects', [])
         selected_script = data.get('script', '')
         
@@ -1122,10 +1125,12 @@ async def get_life_app_dataset(request: Request, authenticated: bool = Depends(u
         logger.info(f"Script selected: {selected_script}")
         
         # Always return dataset.json
-        return JSONResponse(content={
+        response_data = {
             "status": "success",
             "datasets": ["dataset.json"]
-        })
+        }
+        logger.info(f"Sending response: {response_data}")
+        return JSONResponse(content=response_data)
     except Exception as e:
         logger.error(f"Error in dataset loading: {str(e)}")
         return JSONResponse(
