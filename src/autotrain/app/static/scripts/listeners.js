@@ -328,14 +328,22 @@ document.addEventListener('DOMContentLoaded', function () {
         projectSelect.innerHTML = '';
 
         try {
-            const response = await fetch('/static/projectList.json');
-            const projects = await response.json();
-            projects.forEach(project => {
+            const response = await fetch('/life_app_projects');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            if (!data.projects || !Array.isArray(data.projects)) {
+                throw new Error('Invalid response format');
+            }
+            
+            data.projects.forEach(project => {
                 const option = document.createElement('option');
                 option.value = project;
                 option.textContent = project;
                 projectSelect.appendChild(option);
             });
+            
             // Initialize Select2 after options are added
             $(projectSelect).select2({
                 placeholder: "Select LiFE App Project(s)",
@@ -346,6 +354,11 @@ document.addEventListener('DOMContentLoaded', function () {
             updateProjectTags(); // Update tags on initial load
         } catch (error) {
             console.error('Error loading projects:', error);
+            // Show error to user
+            const errorMessage = document.createElement('div');
+            errorMessage.className = 'text-red-500 text-sm mt-2';
+            errorMessage.textContent = 'Failed to load projects. Please try again.';
+            projectSelect.parentNode.appendChild(errorMessage);
         }
     }
 
