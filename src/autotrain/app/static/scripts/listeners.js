@@ -307,15 +307,19 @@ document.addEventListener('DOMContentLoaded', function () {
         if (this.selectedOptions.length > 0) {
             loadLifeAppScripts();
             scriptSelect.disabled = false;
+            $(scriptSelect).prop('disabled', false);
             datasetSelect.disabled = true;
+            $(datasetSelect).prop('disabled', true);
             datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
             if ($(datasetSelect).data('select2')) { $(datasetSelect).val(null).trigger('change'); }
         } else {
             scriptSelect.innerHTML = '<option value="">Select Script</option>';
             scriptSelect.disabled = true;
+            $(scriptSelect).prop('disabled', true);
             if ($(scriptSelect).data('select2')) { $(scriptSelect).val(null).trigger('change'); }
             datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
             datasetSelect.disabled = true;
+            $(datasetSelect).prop('disabled', true);
             if ($(datasetSelect).data('select2')) { $(datasetSelect).val(null).trigger('change'); }
         }
     });
@@ -324,10 +328,12 @@ document.addEventListener('DOMContentLoaded', function () {
         const datasetSelect = document.getElementById('dataset_file');
         if (this.value) {
             datasetSelect.disabled = false;
+            $(datasetSelect).prop('disabled', false);
             loadDatasetFiles();
         } else {
             datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
             datasetSelect.disabled = true;
+            $(datasetSelect).prop('disabled', true);
             if ($(datasetSelect).data('select2')) { $(datasetSelect).val(null).trigger('change'); }
         }
     });
@@ -377,6 +383,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const scriptSelect = document.getElementById('life_app_script');
         scriptSelect.innerHTML = '<option value="">Select Script</option>';
         scriptSelect.disabled = false;
+        $(scriptSelect).prop('disabled', false);
         try {
             const response = await fetch('/static/scriptList.json');
             if (!response.ok) {
@@ -393,6 +400,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 placeholder: "Select LiFE App Script",
                 width: '100%'
             });
+            scriptSelect.disabled = false;
+            $(scriptSelect).prop('disabled', false);
         } catch (error) {
             console.error('Error loading scripts:', error);
             const errorDiv = document.createElement('div');
