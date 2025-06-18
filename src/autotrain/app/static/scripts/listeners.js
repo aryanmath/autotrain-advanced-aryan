@@ -276,102 +276,43 @@ document.addEventListener('DOMContentLoaded', function () {
         return state.text;
     }
 
-    // Cache for fetched data
-    const dataCache = {
-        projects: null,
-        scripts: null,
-        datasets: null
-    };
-
-    // Show loading state
-    function showLoading(element) {
-        element.addClass('loading');
-        element.prop('disabled', true);
-    }
-
-    // Hide loading state
-    function hideLoading(element) {
-        element.removeClass('loading');
-        element.prop('disabled', false);
-    }
-
-    // Show error message
-    function showError(message) {
-        const errorDiv = $('<div class="text-red-500 text-sm mt-1"></div>').text(message);
-        $('#error-message').append(errorDiv);
-        setTimeout(() => errorDiv.remove(), 5000);
-    }
-
     // Initialize Select2 for LiFE App Project (multi-select, max 2)
     $(document).ready(function() {
-        console.log('Document ready, initializing Select2...');
-
-        // Project Multi-select with search and clear
         $('.js-example-basic-multiple-limit').select2({
             maximumSelectionLength: 2,
-            placeholder: 'Select Project(s)',
-            allowClear: true,
-            language: {
-                maximumSelected: function (e) {
-                    return 'You can only select 2 projects';
-                }
-            }
+            placeholder: 'Select Project(s)'
         });
-        
-        // Script and Dataset Dropdowns with search and clear
         $('.js-example-templating').select2({
-            placeholder: 'Select Script or Dataset',
-            allowClear: true
+            templateSelection: formatState,
+            placeholder: 'Select Script or Dataset'
         });
 
-        // Load projects
-        console.log('Loading projects...');
+        // Load projects into project select
         fetch('/static/projectList.json')
-            .then(res => {
-                console.log('Project response:', res);
-                if (!res.ok) throw new Error('Failed to fetch projects');
-                return res.json();
-            })
+            .then(res => res.json())
             .then(projects => {
-                console.log('Projects loaded:', projects);
                 const $project = $('#life_app_project');
                 $project.empty();
                 projects.forEach(p => {
                     $project.append(new Option(p, p));
                 });
                 $project.trigger('change.select2');
-            })
-            .catch(error => {
-                console.error('Error loading projects:', error);
-                showError('Error loading projects: ' + error.message);
             });
 
         // On project change, update script options
         $('#life_app_project').on('change', function() {
-            console.log('Project selection changed:', $(this).val());
             const selectedProjects = $(this).val() || [];
             const $script = $('#life_app_script');
             $script.empty();
-            
             if (selectedProjects.length > 0) {
-                console.log('Loading scripts for projects:', selectedProjects);
                 fetch('/static/scriptList.json')
-                    .then(res => {
-                        console.log('Script response:', res);
-                        if (!res.ok) throw new Error('Failed to fetch scripts');
-                        return res.json();
-                    })
+                    .then(res => res.json())
                     .then(scripts => {
-                        console.log('Scripts loaded:', scripts);
                         $script.append(new Option('Select Script', ''));
                         scripts.forEach(s => {
                             $script.append(new Option(s, s));
                         });
                         $script.val('').trigger('change.select2');
-                    })
-                    .catch(error => {
-                        console.error('Error loading scripts:', error);
-                        showError('Error loading scripts: ' + error.message);
                     });
             } else {
                 $script.append(new Option('Select Script', ''));
@@ -379,30 +320,18 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        // On script change, update dataset options
+        // On script change, update dataset options (dummy logic for now)
         $('#life_app_script').on('change', function() {
-            console.log('Script selection changed:', $(this).val());
             const selectedScript = $(this).val();
             const $dataset = $('#dataset_file');
             $dataset.empty();
-            
             if (selectedScript) {
-                console.log('Loading datasets for script:', selectedScript);
                 fetch('/static/dataset.json')
-                    .then(res => {
-                        console.log('Dataset response:', res);
-                        if (!res.ok) throw new Error('Failed to fetch datasets');
-                        return res.json();
-                    })
-                    .then(datasets => {
-                        console.log('Datasets loaded:', datasets);
+                    .then(res => res.json())
+                    .then(dataset => {
                         $dataset.append(new Option('Select Dataset', ''));
                         $dataset.append(new Option('Current Dataset', 'dataset.json'));
                         $dataset.val('').trigger('change.select2');
-                    })
-                    .catch(error => {
-                        console.error('Error loading datasets:', error);
-                        showError('Error loading datasets: ' + error.message);
                     });
             } else {
                 $dataset.append(new Option('Select Dataset', ''));
