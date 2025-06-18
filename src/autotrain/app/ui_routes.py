@@ -1067,7 +1067,6 @@ async def create_project(
     # ...other fields...
 ):
     # Save config with selected values
-    
     config = {
         "life_app_projects": life_app_projects,
         "life_app_script": life_app_script,
