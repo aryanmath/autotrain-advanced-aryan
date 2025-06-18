@@ -274,218 +274,126 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // --- Project multi-select tags update ---
-    function updateProjectTags() {
-        const projectSelect = document.getElementById('life_app_project');
-        const tagContainer = document.getElementById('life-app-project-tags');
-        if (!projectSelect || !tagContainer) return;
-
-        tagContainer.innerHTML = '';
-        Array.from(projectSelect.selectedOptions).forEach(option => {
-            const tag = document.createElement('span');
-            tag.className = 'bg-blue-200 text-blue-800 text-sm font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-900';
-            tag.textContent = option.textContent;
-            const removeBtn = document.createElement('button');
-            removeBtn.className = 'ml-1 text-blue-800 hover:text-blue-600 focus:outline-none';
-            removeBtn.innerHTML = '&times;';
-            removeBtn.onclick = () => {
-                option.selected = false;
-                updateProjectTags(); // Refresh tags after removal
-            };
-            tag.appendChild(removeBtn);
-            tagContainer.appendChild(tag);
+    // Initialize Select2 for all dropdowns
+    $(document).ready(function() {
+        // Initialize project dropdown with Select2
+        $('#life_app_project').select2({
+            placeholder: 'Select Project(s)',
+            allowClear: true,
+            multiple: true,
+            width: '100%'
         });
-    }
 
-    // Plain JS event for project dropdown (no Select2)
-    document.getElementById('life_app_project').addEventListener('change', function() {
-        updateProjectTags();
-        const scriptSelect = document.getElementById('life_app_script');
-        const selectedProjects = Array.from(this.selectedOptions).map(opt => opt.value);
-        scriptSelect.innerHTML = '<option value="">Select Script</option>';
-        if (selectedProjects.length > 0) {
-            scriptSelect.removeAttribute('disabled');
-            scriptSelect.disabled = false;
-            fetch('/static/scriptList.json')
-                .then(response => response.json())
-                .then(scripts => {
-                    scripts.forEach(script => {
-                        const option = document.createElement('option');
-                        option.value = script;
-                        option.textContent = script;
-                        scriptSelect.appendChild(option);
+        // Initialize script dropdown with Select2
+        $('#life_app_script').select2({
+            placeholder: 'Select Script',
+            allowClear: true,
+            width: '100%'
+        });
+
+        // Initialize dataset dropdown with Select2
+        $('#dataset_file').select2({
+            placeholder: 'Select Dataset',
+            allowClear: true,
+            width: '100%'
+        });
+
+        // Function to load projects
+        async function loadLifeAppProjects() {
+            try {
+                const response = await fetch('/ui/life_app_projects');
+                if (!response.ok) {
+                    throw new Error('Failed to load projects');
+                }
+                const data = await response.json();
+                const projects = data.projects;
+                
+                // Clear and populate project dropdown
+                $('#life_app_project').empty().append('<option></option>');
+                projects.forEach(project => {
+                    $('#life_app_project').append(new Option(project, project));
+                });
+            } catch (error) {
+                console.error('Error loading projects:', error);
+                showError('Failed to load projects. Please try again.');
+            }
+        }
+
+        // On project change, load scripts
+        $('#life_app_project').on('change', function() {
+            const selectedProjects = $(this).val();
+            if (selectedProjects && selectedProjects.length > 0) {
+                fetch('/ui/life_app_scripts')
+                    .then(res => res.json())
+                    .then(data => {
+                        const scripts = data.scripts;
+                        // Clear and populate script dropdown
+                        $('#life_app_script').empty().append('<option></option>');
+                        scripts.forEach(script => {
+                            $('#life_app_script').append(new Option(script, script));
+                        });
+                        $('#life_app_script').prop('disabled', false).trigger('change');
+                    })
+                    .catch(error => {
+                        console.error('Error loading scripts:', error);
+                        showError('Failed to load scripts. Please try again.');
                     });
-                });
-        } else {
-            scriptSelect.innerHTML = '<option value="">Select Script</option>';
-            scriptSelect.disabled = true;
-        }
-    });
-
-    document.getElementById('life_app_script').addEventListener('change', function() {
-        const datasetSelect = document.getElementById('dataset_file');
-        if (this.value) {
-            datasetSelect.disabled = false;
-            loadDatasetFiles();
-        } else {
-            datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
-            datasetSelect.disabled = true;
-        }
-    });
-
-    // Function to load projects
-    async function loadLifeAppProjects() {
-        const projectSelect = document.getElementById('life_app_project');
-        if (!projectSelect) return;
-        projectSelect.innerHTML = '';
-
-        try {
-            const response = await fetch('/ui/life_app_projects');
-            if (!response.ok) {
-                throw new Error('Failed to load projects');
+            } else {
+                $('#life_app_script').empty().append('<option></option>').prop('disabled', true).trigger('change');
             }
-            const data = await response.json();
-            const projects = data.projects;
-            
-            projects.forEach(project => {
-                const option = document.createElement('option');
-                option.value = project;
-                option.textContent = project;
-                projectSelect.appendChild(option);
-            });
-        } catch (error) {
-            console.error('Error loading projects:', error);
+        });
+
+        // On script change, load dataset files
+        $('#life_app_script').on('change', function() {
+            const datasetSelect = $('#dataset_file');
+            if (this.value) {
+                datasetSelect.prop('disabled', false);
+                loadDatasetFiles();
+            } else {
+                datasetSelect.empty().append('<option></option>').prop('disabled', true).trigger('change');
+            }
+        });
+
+        // Function to load dataset files
+        async function loadDatasetFiles() {
+            const datasetSelect = $('#dataset_file');
+            try {
+                const response = await fetch('/ui/life_app_dataset');
+                if (!response.ok) {
+                    throw new Error('Failed to load dataset');
+                }
+                const data = await response.json();
+                const dataset = data.dataset;
+                
+                // Clear and populate dataset dropdown
+                datasetSelect.empty().append('<option></option>');
+                datasetSelect.append(new Option('Current Dataset', 'dataset.json'));
+                datasetSelect.prop('disabled', false).trigger('change');
+            } catch (error) {
+                console.error('Error loading dataset:', error);
+                showError('Failed to load dataset. Please try again.');
+            }
+        }
+
+        // Helper function to show errors
+        function showError(message) {
             const errorDiv = document.createElement('div');
             errorDiv.className = 'text-red-500 text-sm mt-2';
-            errorDiv.textContent = 'Failed to load projects. Please try again.';
-            projectSelect.parentNode.appendChild(errorDiv);
-        }
-    }
-
-    // Function to load scripts
-    async function loadLifeAppScripts() {
-        // No-op for script dropdown, handled inline above
-    }
-
-    // Function to load dataset files
-    async function loadDatasetFiles() {
-        const container = document.getElementById('dataset_file_div');
-        const select = document.getElementById('dataset_file');
-        
-        if (!container || !select) {
-            console.error('Dataset elements not found');
-            return;
-        }
-
-        select.innerHTML = '';
-        try {
-            const response = await fetch('/ui/life_app_dataset');
-            if (!response.ok) {
-                throw new Error('Failed to load dataset');
-            }
-            const data = await response.json();
-            const dataset = data.dataset;
+            errorDiv.textContent = message;
             
-            select.innerHTML = `
-                <option value="">Select Dataset</option>
-                <option value="dataset.json">Current Dataset</option>
-            `;
-            container.style.display = 'block';
-        } catch (error) {
-            console.error('Error loading dataset:', error);
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'text-red-500 text-sm mt-2';
-            errorDiv.textContent = 'Failed to load dataset. Please try again.';
-            select.parentNode.appendChild(errorDiv);
-        }
-    }
-
-    // Add validation before form submission
-    function validateLifeAppData() {
-        const projectSelect = document.getElementById('life_app_project');
-        const scriptSelect = document.getElementById('life_app_script');
-        const datasetSelect = document.getElementById('dataset_file');
-        
-        // Check if project is selected
-        if (!projectSelect.value) {
-            showError('Please select at least one project');
-            return false;
-        }
-        
-        // Check if script is selected
-        if (!scriptSelect.value) {
-            showError('Please select a script');
-            return false;
-        }
-        
-        // Check if dataset is selected
-        if (!datasetSelect.value) {
-            showError('Please select a dataset');
-            return false;
-        }
-        
-        return true;
-    }
-
-    // Helper function to show errors
-    function showError(message) {
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'text-red-500 text-sm mt-2';
-        errorDiv.textContent = message;
-        
-        // Remove any existing error messages
-        const existingError = document.querySelector('.text-red-500');
-        if (existingError) {
-            existingError.remove();
-        }
-        
-        // Add new error message
-        document.getElementById('life-app-selection').appendChild(errorDiv);
-        
-        // Remove error after 5 seconds
-        setTimeout(() => {
-            errorDiv.remove();
-        }, 5000);
-    }
-
-    // On project change, load scripts
-    const projectSelect = document.getElementById('life_app_project');
-    const scriptSelect = document.getElementById('life_app_script');
-    const scriptChoices = new Choices(scriptSelect, {
-        removeItemButton: true,
-        maxItemCount: 10,
-        searchResultLimit: 10,
-        renderChoiceLimit: 10
-    });
-    const projectChoices = new Choices(projectSelect, {
-        removeItemButton: true,
-        maxItemCount: 10,
-        searchResultLimit: 10,
-        renderChoiceLimit: 10
-    });
-
-    projectSelect.addEventListener('change', function () {
-        const selectedProjects = projectChoices.getValue(true); // array of selected values
-        if (selectedProjects.length > 0) {
-            fetch('/ui/life_app_scripts')
-                .then(res => res.json())
-                .then(data => {
-                    const scripts = data.scripts;
-                    scriptChoices.clearChoices();
-                    scriptChoices.setChoices(scripts.map(s => ({ value: s, label: s })), 'value', 'label', false);
-                    scriptSelect.disabled = false;
-                })
-                .catch(error => {
-                    console.error('Error loading scripts:', error);
-                    const errorDiv = document.createElement('div');
-                    errorDiv.className = 'text-red-500 text-sm mt-2';
-                    errorDiv.textContent = 'Failed to load scripts. Please try again.';
-                    scriptSelect.parentNode.appendChild(errorDiv);
-                });
-        } else {
-            scriptChoices.clearChoices();
-            scriptChoices.setChoices([{ value: '', label: 'Select Script', disabled: true }], 'value', 'label', false);
-            scriptSelect.disabled = true;
+            // Remove any existing error messages
+            const existingError = document.querySelector('.text-red-500');
+            if (existingError) {
+                existingError.remove();
+            }
+            
+            // Add new error message
+            document.getElementById('life-app-selection').appendChild(errorDiv);
+            
+            // Remove error after 5 seconds
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 5000);
         }
     });
 });
