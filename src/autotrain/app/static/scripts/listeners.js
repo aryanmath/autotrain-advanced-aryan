@@ -398,8 +398,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 throw new Error('Failed to fetch dataset files');
             }
             const data = await response.json();
+            console.log('Dataset API response:', data);
             if (data.datasets && data.datasets.length > 0) {
                 data.datasets.forEach(dataset => {
+                    console.log('Adding option:', dataset);
                     datasetSelect.append(new Option(dataset, dataset));
                 });
             }
@@ -450,4 +452,6 @@ document.addEventListener('DOMContentLoaded', function () {
             tagContainer.appendChild(tag);
         });
     }
+
+    $('#dataset_file').find('option').each(function() { console.log($(this).val()); });
 });
