@@ -88,15 +88,9 @@ document.addEventListener('DOMContentLoaded', function () {
             scriptDiv.style.display = '';
             scriptSelect.innerHTML = '<option value="">Select Script</option>';
             scriptSelect.disabled = true;
-            $(scriptSelect).prop('disabled', true);
-            $(scriptSelect).select2();
-            $(scriptSelect).trigger('change.select2');
             datasetFileDiv.style.display = '';
             datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
             datasetSelect.disabled = true;
-            $(datasetSelect).prop('disabled', true);
-            $(datasetSelect).select2();
-            $(datasetSelect).trigger('change.select2');
             loadLifeAppProjects();
         } else if (dataSource.value === "huggingface") {
             if (hubDataTabContent) hubDataTabContent.style.display = "block";
@@ -296,7 +290,6 @@ document.addEventListener('DOMContentLoaded', function () {
             removeBtn.innerHTML = '&times;';
             removeBtn.onclick = () => {
                 option.selected = false;
-                $(projectSelect).trigger('change.select2'); // Re-trigger Select2 update for multi-select
                 updateProjectTags(); // Refresh tags after removal
             };
             tag.appendChild(removeBtn);
@@ -308,22 +301,22 @@ document.addEventListener('DOMContentLoaded', function () {
         updateProjectTags();
         const scriptSelect = document.getElementById('life_app_script');
         if (this.selectedOptions.length > 0) {
-            // Destroy select2 before updating options
-            if ($(scriptSelect).data('select2')) {
-                $(scriptSelect).select2('destroy');
-            }
+            scriptSelect.innerHTML = '<option value="">Select Script</option>';
             scriptSelect.disabled = false;
-            $(scriptSelect).prop('disabled', false);
-            loadLifeAppScripts(); // This will re-initialize select2 after loading
+            // Plain JS: load scripts instantly
+            fetch('/static/scriptList.json')
+                .then(response => response.json())
+                .then(scripts => {
+                    scripts.forEach(script => {
+                        const option = document.createElement('option');
+                        option.value = script;
+                        option.textContent = script;
+                        scriptSelect.appendChild(option);
+                    });
+                });
         } else {
-            if ($(scriptSelect).data('select2')) {
-                $(scriptSelect).select2('destroy');
-            }
             scriptSelect.innerHTML = '<option value="">Select Script</option>';
             scriptSelect.disabled = true;
-            $(scriptSelect).prop('disabled', true);
-            $(scriptSelect).select2();
-            $(scriptSelect).trigger('change.select2');
         }
     });
 
@@ -366,15 +359,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 option.textContent = project;
                 projectSelect.appendChild(option);
             });
-
-            // Initialize Select2
-            $(projectSelect).select2({
-                placeholder: "Select LiFE App Project(s)",
-                allowClear: true,
-                multiple: true,
-                width: '100%'
-            });
-            updateProjectTags(); // Update tags on initial load
         } catch (error) {
             console.error('Error loading projects:', error);
             // Show error to user
@@ -387,39 +371,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Function to load scripts
     async function loadLifeAppScripts() {
-        const scriptSelect = document.getElementById('life_app_script');
-        if ($(scriptSelect).data('select2')) {
-            $(scriptSelect).select2('destroy');
-        }
-        scriptSelect.innerHTML = '<option value="">Select Script</option>';
-        scriptSelect.disabled = false;
-        $(scriptSelect).prop('disabled', false);
-        try {
-            const response = await fetch('/static/scriptList.json');
-            if (!response.ok) {
-                throw new Error('Failed to load scripts');
-            }
-            const scripts = await response.json();
-            scripts.forEach(script => {
-                const option = document.createElement('option');
-                option.value = script;
-                option.textContent = script;
-                scriptSelect.appendChild(option);
-            });
-            $(scriptSelect).select2({
-                placeholder: "Select LiFE App Script",
-                width: '100%'
-            });
-            scriptSelect.disabled = false;
-            $(scriptSelect).prop('disabled', false);
-            $(scriptSelect).trigger('change.select2');
-        } catch (error) {
-            console.error('Error loading scripts:', error);
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'text-red-500 text-sm mt-2';
-            errorDiv.textContent = 'Failed to load scripts. Please try again.';
-            scriptSelect.parentNode.appendChild(errorDiv);
-        }
+        // No-op for script dropdown, handled inline above
     }
 
     // Function to load dataset files
