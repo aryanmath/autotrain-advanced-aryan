@@ -268,42 +268,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // --- Project multi-select tags update ---
-    function updateProjectTags() {
-        const projectSelect = document.getElementById('life_app_project');
-        const tagContainer = document.getElementById('life-app-project-tags');
-        if (!projectSelect || !tagContainer) return;
-        
-        // Clear existing tags
-        tagContainer.innerHTML = '';
-        
-        // Get selected options
-        const selectedOptions = $(projectSelect).select2('data');
-        
-        // Create tags for each selected option
-        selectedOptions.forEach(option => {
-            const tag = document.createElement('span');
-            tag.className = 'inline-flex items-center px-2 py-1 mr-2 mb-2 text-sm font-medium text-blue-800 bg-blue-100 rounded-full dark:bg-blue-900 dark:text-blue-300';
-            tag.textContent = option.text;
-            
-            const removeButton = document.createElement('button');
-            removeButton.className = 'ml-1 text-blue-800 hover:text-blue-600 dark:text-blue-300 dark:hover:text-blue-100';
-            removeButton.innerHTML = '×';
-            removeButton.onclick = () => {
-                const optionElement = Array.from(projectSelect.options).find(opt => opt.value === option.id);
-                if (optionElement) {
-                    optionElement.selected = false;
-                    $(projectSelect).trigger('change');
-                }
-            };
-            
-            tag.appendChild(removeButton);
-            tagContainer.appendChild(tag);
-        });
-    }
-
-    document.getElementById('life_app_project').addEventListener('change', updateProjectTags);
-
     // Function to load projects
     async function loadLifeAppProjects() {
         const projectSelect = document.getElementById('life_app_project');
@@ -390,6 +354,40 @@ document.addEventListener('DOMContentLoaded', function () {
         } catch (error) {
             console.error('Error loading scripts:', error);
         }
+    }
+
+    // Function to update project tags
+    function updateProjectTags() {
+        const projectSelect = document.getElementById('life_app_project');
+        const tagContainer = document.getElementById('life-app-project-tags');
+        if (!projectSelect || !tagContainer) return;
+        
+        // Clear existing tags
+        tagContainer.innerHTML = '';
+        
+        // Get selected options
+        const selectedOptions = $(projectSelect).select2('data');
+        
+        // Create tags for each selected option
+        selectedOptions.forEach(option => {
+            const tag = document.createElement('span');
+            tag.className = 'inline-flex items-center px-2 py-1 mr-2 mb-2 text-sm font-medium text-blue-800 bg-blue-100 rounded-full dark:bg-blue-900 dark:text-blue-300';
+            tag.textContent = option.text;
+            
+            const removeButton = document.createElement('button');
+            removeButton.className = 'ml-1 text-blue-800 hover:text-blue-600 dark:text-blue-300 dark:hover:text-blue-100';
+            removeButton.innerHTML = '×';
+            removeButton.onclick = () => {
+                const optionElement = Array.from(projectSelect.options).find(opt => opt.value === option.id);
+                if (optionElement) {
+                    optionElement.selected = false;
+                    $(projectSelect).trigger('change');
+                }
+            };
+            
+            tag.appendChild(removeButton);
+            tagContainer.appendChild(tag);
+        });
     }
 
     // Replace the loadDatasetFiles function with this version
