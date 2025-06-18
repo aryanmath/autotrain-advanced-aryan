@@ -401,17 +401,19 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log('Dataset API response:', data);
             if (data.datasets && data.datasets.length > 0) {
                 data.datasets.forEach(dataset => {
+                    console.log('Adding option:', dataset); // Debug
                     datasetSelect.append(new Option(dataset, dataset));
                 });
             }
-            // (Re)initialize Select2 if needed
-            if (!datasetSelect.data('select2')) {
-                datasetSelect.select2({
-                    placeholder: "Select Dataset File",
-                    allowClear: true,
-                    width: '100%'
-                });
+            // Always destroy and re-initialize Select2
+            if (datasetSelect.data('select2')) {
+                datasetSelect.select2('destroy');
             }
+            datasetSelect.select2({
+                placeholder: "Select Dataset File",
+                allowClear: true,
+                width: '100%'
+            });
             datasetSelect.trigger('change');
         } catch (error) {
             console.error('Error loading dataset files:', error);
