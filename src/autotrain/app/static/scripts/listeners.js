@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 lifeAppOption.style.display = "none"; // Hide option
                 // If LiFE App was selected, switch to local
-                if (dataSource.value === "life_app") {
+        if (dataSource.value === "life_app") {
                     dataSource.value = "local";
                 }
             }
@@ -88,12 +88,17 @@ document.addEventListener('DOMContentLoaded', function () {
             const $project = $('#life_app_project');
             showLoading($project[0]);
             
-            fetch('/life_app/projects')
+            fetch('/life_app_projects')  // Changed to use underscore instead of slash
                 .then(res => {
-                    if (!res.ok) throw new Error('Failed to fetch projects');
+                    if (!res.ok) {
+                        throw new Error(`HTTP error! status: ${res.status}`);
+                    }
                     return res.json();
                 })
                 .then(data => {
+                    if (!data || !data.projects) {
+                        throw new Error('Invalid response format from server');
+                    }
                     $project.empty();
                     data.projects.forEach(p => {
                         $project.append(new Option(p, p));
@@ -101,6 +106,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     $project.trigger('change.select2');
                 })
                 .catch(error => {
+                    console.error('Error fetching projects:', error);
                     const $container = $project.parent();
                     $container.append(showError('Failed to load projects: ' + error.message));
                 })

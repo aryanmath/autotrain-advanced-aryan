@@ -1002,63 +1002,42 @@ async def get_life_app_projects(authenticated: bool = Depends(user_authenticatio
     """
     Returns the list of projects from the local JSON file for LiFE App integration.
     """
-    project_list_path = os.path.join(BASE_DIR, "static", "projectList.json")
-    if not os.path.exists(project_list_path):
-        return JSONResponse(content={"projects": []})
-    with open(project_list_path, "r", encoding="utf-8") as f:
-        projects = json.load(f)
-    return {"projects": projects}
+    try:
+        project_list_path = os.path.join(BASE_DIR, "static", "projectList.json")
+        if not os.path.exists(project_list_path):
+            return JSONResponse(content={"projects": []})
+        with open(project_list_path, "r", encoding="utf-8") as f:
+            projects = json.load(f)
+        return {"projects": projects}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @ui_router.get("/life_app_scripts", response_class=JSONResponse)
 async def get_life_app_scripts(authenticated: bool = Depends(user_authentication)):
     """
     Returns the list of scripts from the local JSON file for LiFE App integration.
     """
-    script_list_path = os.path.join(BASE_DIR, "static", "scriptList.json")
-    if not os.path.exists(script_list_path):
-        return JSONResponse(content={"scripts": []})
-    with open(script_list_path, "r", encoding="utf-8") as f:
-        scripts = json.load(f)
-    return {"scripts": scripts}
+    try:
+        script_list_path = os.path.join(BASE_DIR, "static", "scriptList.json")
+        if not os.path.exists(script_list_path):
+            return JSONResponse(content={"scripts": []})
+        with open(script_list_path, "r", encoding="utf-8") as f:
+            scripts = json.load(f)
+        return {"scripts": scripts}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @ui_router.get("/life_app_dataset", response_class=JSONResponse)
 async def get_life_app_dataset(authenticated: bool = Depends(user_authentication)):
     """
     Returns the dataset from the local JSON file for LiFE App integration.
     """
-    dataset_path = os.path.join(BASE_DIR, "static", "dataset.json")
-    if not os.path.exists(dataset_path):
-        return JSONResponse(content={"dataset": []})
-    with open(dataset_path, "r", encoding="utf-8") as f:
-        dataset = json.load(f)
-    return {"dataset": dataset}
-
-@ui_router.get("/life_app/projects")
-async def get_life_app_projects():
-    try:
-        project_path = os.path.join(BASE_DIR, "static", "projectList.json")
-        with open(project_path, "r") as f:
-            projects = json.load(f)
-        return {"projects": projects}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@ui_router.get("/life_app/scripts")
-async def get_life_app_scripts(project_ids: List[str]):
-    try:
-        script_path = os.path.join(BASE_DIR, "static", "scriptList.json")
-        with open(script_path, "r") as f:
-            scripts = json.load(f)
-        return {"scripts": scripts}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@ui_router.get("/life_app/datasets")
-async def get_life_app_datasets(project_ids: List[str], script_id: str):
     try:
         dataset_path = os.path.join(BASE_DIR, "static", "dataset.json")
-        with open(dataset_path, "r") as f:
-            datasets = json.load(f)
-        return {"datasets": datasets}
+        if not os.path.exists(dataset_path):
+            return JSONResponse(content={"dataset": []})
+        with open(dataset_path, "r", encoding="utf-8") as f:
+            dataset = json.load(f)
+        return {"dataset": dataset}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
