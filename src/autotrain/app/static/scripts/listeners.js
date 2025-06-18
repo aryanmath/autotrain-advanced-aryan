@@ -371,6 +371,9 @@ document.addEventListener('DOMContentLoaded', function () {
     $('#life_app_script').on('change', function() {
         const selectedScript = $(this).val();
         const selectedProjects = $('#life_app_project').val();
+        console.log('Script selected:', selectedScript);
+        console.log('Selected projects:', selectedProjects);
+        
         if (selectedScript && selectedProjects && selectedProjects.length > 0) {
             loadDatasetFiles(selectedProjects, selectedScript);
         } else {
@@ -383,7 +386,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const datasetSelect = $('#dataset_file');
         datasetSelect.prop('disabled', false).empty();
         datasetSelect.append(new Option('Select Dataset', ''));
+        
         try {
+            console.log('Fetching datasets for:', { projects: selectedProjects, script: selectedScript });
             const response = await fetch('/ui/life_app_dataset', {
                 method: 'POST',
                 headers: {
@@ -394,17 +399,22 @@ document.addEventListener('DOMContentLoaded', function () {
                     script: selectedScript
                 })
             });
+            
             if (!response.ok) {
                 throw new Error('Failed to fetch dataset files');
             }
+            
             const data = await response.json();
             console.log('Dataset API response:', data);
+            
             if (data.datasets && data.datasets.length > 0) {
                 data.datasets.forEach(dataset => {
-                    console.log('Adding option:', dataset);
+                    console.log('Adding dataset option:', dataset);
                     datasetSelect.append(new Option(dataset, dataset));
                 });
             }
+            
+            // Reinitialize Select2
             if (datasetSelect.data('select2')) {
                 datasetSelect.select2('destroy');
             }
@@ -413,6 +423,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 allowClear: true,
                 width: '100%'
             });
+            
+            // Trigger change to update UI
             datasetSelect.trigger('change');
         } catch (error) {
             console.error('Error loading dataset files:', error);

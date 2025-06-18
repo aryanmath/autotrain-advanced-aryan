@@ -1116,8 +1116,11 @@ async def get_life_app_dataset(request: Request, authenticated: bool = Depends(u
         data = await request.json()
         selected_projects = data.get('projects', [])
         selected_script = data.get('script', '')
+        
+        # Log both project and script selection
         logger.info(f"Projects selected: {selected_projects}")
         logger.info(f"Script selected: {selected_script}")
+        
         # Always return dataset.json
         return JSONResponse(content={
             "status": "success",
