@@ -446,4 +446,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('Error loading dataset:', error);
             });
     }
+
+    $(document).on('click', '#load-scripts-btn', function() {
+        const selectedProjects = $('#life_app_project').val();
+        if (selectedProjects && selectedProjects.length > 0) {
+            loadLifeAppScripts(selectedProjects);
+        }
+    });
 });
