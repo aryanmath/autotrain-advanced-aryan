@@ -56,6 +56,9 @@ document.addEventListener('DOMContentLoaded', function () {
     function handleDataSource() {
         const lifeAppSelection = document.getElementById("life-app-selection");
         const datasetFileDiv = document.getElementById('dataset_file_div');
+        const scriptDiv = document.getElementById('life_app_script').parentElement;
+        const scriptSelect = document.getElementById('life_app_script');
+        const datasetSelect = document.getElementById('dataset_file');
         const taskValue = document.getElementById('task').value;
 
         // Hide all data source related sections by default
@@ -82,11 +85,16 @@ document.addEventListener('DOMContentLoaded', function () {
         // Show relevant section based on selected data source
         if (dataSource.value === "life_app" && taskValue === "automatic-speech-recognition") {
             if (lifeAppSelection) lifeAppSelection.style.display = "block";
-            // Only load projects initially, not scripts
+            // Always show script and dataset dropdowns, but disable them initially
+            scriptDiv.style.display = '';
+            scriptSelect.innerHTML = '<option value="">Select Script</option>';
+            scriptSelect.disabled = true;
+            if ($(scriptSelect).data('select2')) { $(scriptSelect).val(null).trigger('change'); }
+            datasetFileDiv.style.display = '';
+            datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
+            datasetSelect.disabled = true;
+            if ($(datasetSelect).data('select2')) { $(datasetSelect).val(null).trigger('change'); }
             loadLifeAppProjects();
-            // Hide script and dataset sections initially
-            document.getElementById('life_app_script').parentElement.style.display = 'none';
-            document.getElementById('dataset_file_div').style.display = 'none';
         } else if (dataSource.value === "huggingface") {
             if (hubDataTabContent) hubDataTabContent.style.display = "block";
         } else if (dataSource.value === "local") {
@@ -293,7 +301,36 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    document.getElementById('life_app_project').addEventListener('change', updateProjectTags);
+    document.getElementById('life_app_project').addEventListener('change', function() {
+        const scriptSelect = document.getElementById('life_app_script');
+        const datasetSelect = document.getElementById('dataset_file');
+        if (this.selectedOptions.length > 0) {
+            loadLifeAppScripts();
+            scriptSelect.disabled = false;
+            datasetSelect.disabled = true;
+            datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
+            if ($(datasetSelect).data('select2')) { $(datasetSelect).val(null).trigger('change'); }
+        } else {
+            scriptSelect.innerHTML = '<option value="">Select Script</option>';
+            scriptSelect.disabled = true;
+            if ($(scriptSelect).data('select2')) { $(scriptSelect).val(null).trigger('change'); }
+            datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
+            datasetSelect.disabled = true;
+            if ($(datasetSelect).data('select2')) { $(datasetSelect).val(null).trigger('change'); }
+        }
+    });
+
+    document.getElementById('life_app_script').addEventListener('change', function() {
+        const datasetSelect = document.getElementById('dataset_file');
+        if (this.value) {
+            datasetSelect.disabled = false;
+            loadDatasetFiles();
+        } else {
+            datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
+            datasetSelect.disabled = true;
+            if ($(datasetSelect).data('select2')) { $(datasetSelect).val(null).trigger('change'); }
+        }
+    });
 
     // Function to load projects
     async function loadLifeAppProjects() {
@@ -338,36 +375,26 @@ document.addEventListener('DOMContentLoaded', function () {
     // Function to load scripts
     async function loadLifeAppScripts() {
         const scriptSelect = document.getElementById('life_app_script');
-        if (!scriptSelect) return;
         scriptSelect.innerHTML = '<option value="">Select Script</option>';
-
+        scriptSelect.disabled = false;
         try {
-            // Simulate API call by loading from static file
             const response = await fetch('/static/scriptList.json');
             if (!response.ok) {
                 throw new Error('Failed to load scripts');
             }
             const scripts = await response.json();
-            
-            // Add scripts to select
             scripts.forEach(script => {
                 const option = document.createElement('option');
                 option.value = script;
                 option.textContent = script;
                 scriptSelect.appendChild(option);
             });
-
-            // Initialize Select2
             $(scriptSelect).select2({
                 placeholder: "Select LiFE App Script",
                 width: '100%'
             });
-
-            // Show script section
-            scriptSelect.parentElement.style.display = 'block';
         } catch (error) {
             console.error('Error loading scripts:', error);
-            // Show error to user
             const errorDiv = document.createElement('div');
             errorDiv.className = 'text-red-500 text-sm mt-2';
             errorDiv.textContent = 'Failed to load scripts. Please try again.';
@@ -472,29 +499,4 @@ document.addEventListener('DOMContentLoaded', function () {
             errorDiv.remove();
         }, 5000);
     }
-
-    // Add event listener for project selection
-    document.getElementById('life_app_project').addEventListener('change', function() {
-        const selectedProjects = Array.from(this.selectedOptions).map(option => option.value);
-        if (selectedProjects.length > 0) {
-            // Load scripts when projects are selected
-            loadLifeAppScripts();
-        } else {
-            // Hide script section if no projects are selected
-            document.getElementById('life_app_script').parentElement.style.display = 'none';
-            document.getElementById('dataset_file_div').style.display = 'none';
-        }
-    });
-
-    // Add event listener for script selection
-    document.getElementById('life_app_script').addEventListener('change', function() {
-        if (this.value) {
-            // Show dataset section when script is selected
-            document.getElementById('dataset_file_div').style.display = 'block';
-            loadDatasetFiles();
-        } else {
-            // Hide dataset section if no script is selected
-            document.getElementById('dataset_file_div').style.display = 'none';
-        }
-    });
 });
