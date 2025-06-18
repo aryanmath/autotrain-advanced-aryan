@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 lifeAppOption.style.display = "none"; // Hide option
                 // If LiFE App was selected, switch to local
-        if (dataSource.value === "life_app") {
+                if (dataSource.value === "life_app") {
                     dataSource.value = "local";
                 }
             }
@@ -83,9 +83,30 @@ document.addEventListener('DOMContentLoaded', function () {
         if (dataSource.value === "life_app" && taskValue === "automatic-speech-recognition") {
             if (lifeAppSelection) lifeAppSelection.style.display = "block";
             if (datasetFileDiv) datasetFileDiv.style.display = 'block';
-            loadLifeAppProjects();
-            loadLifeAppScripts();
-            loadDatasetFiles();
+            
+            // Fetch projects from backend when LiFE App is selected
+            const $project = $('#life_app_project');
+            showLoading($project[0]);
+            
+            fetch('/life_app/projects')
+                .then(res => {
+                    if (!res.ok) throw new Error('Failed to fetch projects');
+                    return res.json();
+                })
+                .then(data => {
+                    $project.empty();
+                    data.projects.forEach(p => {
+                        $project.append(new Option(p, p));
+                    });
+                    $project.trigger('change.select2');
+                })
+                .catch(error => {
+                    const $container = $project.parent();
+                    $container.append(showError('Failed to load projects: ' + error.message));
+                })
+                .finally(() => {
+                    hideLoading($project[0]);
+                });
         } else if (dataSource.value === "huggingface") {
             if (hubDataTabContent) hubDataTabContent.style.display = "block";
         } else if (dataSource.value === "local") {
