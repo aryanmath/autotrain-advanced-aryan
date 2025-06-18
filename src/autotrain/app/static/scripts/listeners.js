@@ -398,10 +398,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 throw new Error('Failed to fetch dataset files');
             }
             const data = await response.json();
-            console.log('Dataset API response:', data); // Debugging
-            if (data.datasets) {
+            console.log('Dataset API response:', data);
+            if (data.datasets && data.datasets.length > 0) {
                 data.datasets.forEach(dataset => {
                     datasetSelect.append(new Option(dataset, dataset));
+                });
+            }
+            // (Re)initialize Select2 if needed
+            if (!datasetSelect.data('select2')) {
+                datasetSelect.select2({
+                    placeholder: "Select Dataset File",
+                    allowClear: true,
+                    width: '100%'
                 });
             }
             datasetSelect.trigger('change');
