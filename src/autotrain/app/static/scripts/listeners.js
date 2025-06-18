@@ -401,7 +401,7 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log('Dataset API response:', data);
             if (data.datasets && data.datasets.length > 0) {
                 data.datasets.forEach(dataset => {
-                    console.log('Adding option:', dataset); // Debug
+                    console.log('Adding option:', dataset);
                     datasetSelect.append(new Option(dataset, dataset));
                 });
             }
