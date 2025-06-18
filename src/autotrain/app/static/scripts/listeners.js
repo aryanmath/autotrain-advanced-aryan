@@ -85,15 +85,18 @@ document.addEventListener('DOMContentLoaded', function () {
         // Show relevant section based on selected data source
         if (dataSource.value === "life_app" && taskValue === "automatic-speech-recognition") {
             if (lifeAppSelection) lifeAppSelection.style.display = "block";
-            // Always show script and dataset dropdowns, but disable them initially
             scriptDiv.style.display = '';
             scriptSelect.innerHTML = '<option value="">Select Script</option>';
             scriptSelect.disabled = true;
-            if ($(scriptSelect).data('select2')) { $(scriptSelect).val(null).trigger('change'); }
+            $(scriptSelect).prop('disabled', true);
+            $(scriptSelect).select2();
+            $(scriptSelect).trigger('change.select2');
             datasetFileDiv.style.display = '';
             datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
             datasetSelect.disabled = true;
-            if ($(datasetSelect).data('select2')) { $(datasetSelect).val(null).trigger('change'); }
+            $(datasetSelect).prop('disabled', true);
+            $(datasetSelect).select2();
+            $(datasetSelect).trigger('change.select2');
             loadLifeAppProjects();
         } else if (dataSource.value === "huggingface") {
             if (hubDataTabContent) hubDataTabContent.style.display = "block";
@@ -302,33 +305,25 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     document.getElementById('life_app_project').addEventListener('change', function() {
+        updateProjectTags();
         const scriptSelect = document.getElementById('life_app_script');
-        const datasetSelect = document.getElementById('dataset_file');
         if (this.selectedOptions.length > 0) {
-            loadLifeAppScripts();
+            // Destroy select2 before updating options
+            if ($(scriptSelect).data('select2')) {
+                $(scriptSelect).select2('destroy');
+            }
             scriptSelect.disabled = false;
             $(scriptSelect).prop('disabled', false);
-            $(scriptSelect).select2();
-            $(scriptSelect).trigger('change.select2');
-            datasetSelect.disabled = true;
-            $(datasetSelect).prop('disabled', true);
-            $(datasetSelect).select2();
-            $(datasetSelect).trigger('change.select2');
-            datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
-            if ($(datasetSelect).data('select2')) { $(datasetSelect).val(null).trigger('change'); }
+            loadLifeAppScripts(); // This will re-initialize select2 after loading
         } else {
+            if ($(scriptSelect).data('select2')) {
+                $(scriptSelect).select2('destroy');
+            }
             scriptSelect.innerHTML = '<option value="">Select Script</option>';
             scriptSelect.disabled = true;
             $(scriptSelect).prop('disabled', true);
             $(scriptSelect).select2();
             $(scriptSelect).trigger('change.select2');
-            if ($(scriptSelect).data('select2')) { $(scriptSelect).val(null).trigger('change'); }
-            datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
-            datasetSelect.disabled = true;
-            $(datasetSelect).prop('disabled', true);
-            $(datasetSelect).select2();
-            $(datasetSelect).trigger('change.select2');
-            if ($(datasetSelect).data('select2')) { $(datasetSelect).val(null).trigger('change'); }
         }
     });
 
@@ -393,6 +388,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Function to load scripts
     async function loadLifeAppScripts() {
         const scriptSelect = document.getElementById('life_app_script');
+        if ($(scriptSelect).data('select2')) {
+            $(scriptSelect).select2('destroy');
+        }
         scriptSelect.innerHTML = '<option value="">Select Script</option>';
         scriptSelect.disabled = false;
         $(scriptSelect).prop('disabled', false);
@@ -414,7 +412,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
             scriptSelect.disabled = false;
             $(scriptSelect).prop('disabled', false);
-            $(scriptSelect).select2();
             $(scriptSelect).trigger('change.select2');
         } catch (error) {
             console.error('Error loading scripts:', error);
