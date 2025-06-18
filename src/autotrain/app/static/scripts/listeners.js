@@ -297,13 +297,14 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    document.getElementById('life_app_project').addEventListener('change', function() {
+    // Use jQuery event for Select2 compatibility
+    $('#life_app_project').on('change', function() {
         updateProjectTags();
         const scriptSelect = document.getElementById('life_app_script');
-        if (this.selectedOptions.length > 0) {
+        const selectedOptions = Array.from(this.selectedOptions);
+        if (selectedOptions.length > 0) {
             scriptSelect.innerHTML = '<option value="">Select Script</option>';
             scriptSelect.disabled = false;
-            // Plain JS: load scripts instantly
             fetch('/static/scriptList.json')
                 .then(response => response.json())
                 .then(scripts => {
