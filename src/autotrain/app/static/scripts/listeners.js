@@ -347,55 +347,45 @@ document.addEventListener('DOMContentLoaded', function () {
             // Add change event listener for Select2
             $(projectSelect).off('change').on('change', function() {
                 updateProjectTags();
+                const selectedProjects = $(this).val();
+                if (selectedProjects && selectedProjects.length > 0) {
+                    loadScriptsForProjects(selectedProjects);
+                } else {
+                    $('#life_app_script').prop('disabled', true).empty();
+                }
             });
         } catch (error) {
             console.error('Error loading projects:', error);
         }
     }
 
-    // Project selection ka event listener
-    $('#life_app_project').on('change', function() {
-        const selectedProjects = $(this).val();
-        console.log('Selected Projects:', selectedProjects);  // Debug log
+    // Function to load scripts for selected projects
+    async function loadScriptsForProjects(selectedProjects) {
+        const scriptSelect = $('#life_app_script');
+        scriptSelect.prop('disabled', false).empty();
+        scriptSelect.append(new Option('Select Script', '')); // Default option
         
-        // Turant backend ko inform karna
-        fetch('/ui/project_selected', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ 
-                projects: selectedProjects 
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Backend se scripts milne par UI update karna
+        try {
+            const response = await fetch('/ui/project_selected', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    projects: selectedProjects 
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch scripts');
+            }
+            
+            const data = await response.json();
             if (data.scripts) {
-                const scriptSelect = $('#life_app_script');
-                scriptSelect.prop('disabled', false).empty();
-                scriptSelect.append(new Option('Select Script', '')); // Default option
                 data.scripts.forEach(script => {
                     scriptSelect.append(new Option(script, script));
                 });
-                scriptSelect.trigger('change');
             }
-        })
-        .catch(error => console.error('Error:', error));
-    });
-
-    async function loadLifeAppScripts(selectedProjects) {
-        const scriptSelect = $('#life_app_script');
-        scriptSelect.prop('disabled', false);
-        scriptSelect.empty();
-        try {
-            const response = await fetch('/ui/life_app_scripts');
-            const data = await response.json();
-            const scripts = data.scripts || [];
-            scripts.forEach(script => {
-                const option = new Option(script, script, false, false);
-                scriptSelect.append(option);
-            });
             scriptSelect.trigger('change');
         } catch (error) {
             console.error('Error loading scripts:', error);
