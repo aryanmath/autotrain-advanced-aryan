@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 lifeAppOption.style.display = "none"; // Hide option
                 // If LiFE App was selected, switch to local
-        if (dataSource.value === "life_app") {
+                if (dataSource.value === "life_app") {
                     dataSource.value = "local";
                 }
             }
@@ -82,10 +82,11 @@ document.addEventListener('DOMContentLoaded', function () {
         // Show relevant section based on selected data source
         if (dataSource.value === "life_app" && taskValue === "automatic-speech-recognition") {
             if (lifeAppSelection) lifeAppSelection.style.display = "block";
-            if (datasetFileDiv) datasetFileDiv.style.display = 'block';
+            // Only load projects initially, not scripts
             loadLifeAppProjects();
-            loadLifeAppScripts();
-            loadDatasetFiles();
+            // Hide script and dataset sections initially
+            document.getElementById('life_app_script').parentElement.style.display = 'none';
+            document.getElementById('dataset_file_div').style.display = 'none';
         } else if (dataSource.value === "huggingface") {
             if (hubDataTabContent) hubDataTabContent.style.display = "block";
         } else if (dataSource.value === "local") {
@@ -361,6 +362,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 placeholder: "Select LiFE App Script",
                 width: '100%'
             });
+
+            // Show script section
+            scriptSelect.parentElement.style.display = 'block';
         } catch (error) {
             console.error('Error loading scripts:', error);
             // Show error to user
@@ -468,4 +472,29 @@ document.addEventListener('DOMContentLoaded', function () {
             errorDiv.remove();
         }, 5000);
     }
+
+    // Add event listener for project selection
+    document.getElementById('life_app_project').addEventListener('change', function() {
+        const selectedProjects = Array.from(this.selectedOptions).map(option => option.value);
+        if (selectedProjects.length > 0) {
+            // Load scripts when projects are selected
+            loadLifeAppScripts();
+        } else {
+            // Hide script section if no projects are selected
+            document.getElementById('life_app_script').parentElement.style.display = 'none';
+            document.getElementById('dataset_file_div').style.display = 'none';
+        }
+    });
+
+    // Add event listener for script selection
+    document.getElementById('life_app_script').addEventListener('change', function() {
+        if (this.value) {
+            // Show dataset section when script is selected
+            document.getElementById('dataset_file_div').style.display = 'block';
+            loadDatasetFiles();
+        } else {
+            // Hide dataset section if no script is selected
+            document.getElementById('dataset_file_div').style.display = 'none';
+        }
+    });
 });
