@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 lifeAppOption.style.display = "none"; // Hide option
                 // If LiFE App was selected, switch to local
-        if (dataSource.value === "life_app") {
+                if (dataSource.value === "life_app") {
                     dataSource.value = "local";
                 }
             }
@@ -258,6 +258,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (!firstItem.audio || !firstItem.transcription) {
                         throw new Error('Each item must have audio and transcription fields');
                     }
+                    // Validate audio is base64 encoded
+                    try {
+                        atob(firstItem.audio);
+                    } catch (error) {
+                        throw new Error('Audio data must be base64 encoded');
+                    }
                     window.lifeAppData = data;
                 } catch (error) {
                     alert('Invalid JSON file: ' + error.message);
@@ -294,150 +300,120 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.getElementById('life_app_project').addEventListener('change', updateProjectTags);
 
-    // Function to load projects
+    // Project List Loading
     async function loadLifeAppProjects() {
+        const projectSelect = document.getElementById('life_app_project');
         try {
-            showLoading(true);
-            const response = await fetch('/life_app_projects');
-            if (!response.ok) {
-                throw new Error('Failed to load projects');
-            }
+            const response = await fetch('/life_app/projects');
             const data = await response.json();
-            const projectSelect = $('#life_app_projects');
-            projectSelect.empty();
-            data.projects.forEach(project => {
-                projectSelect.append(new Option(project, project));
-            });
-            projectSelect.trigger('change');
+            
+            if (data.projects && data.projects.length > 0) {
+                projectSelect.innerHTML = '';
+                data.projects.forEach(project => {
+                    const option = document.createElement('option');
+                    option.value = project;
+                    option.textContent = project;
+                    projectSelect.appendChild(option);
+                });
+                
+                $(projectSelect).select2({
+                    maximumSelectionLength: 2,
+                    placeholder: "Select Projects"
+                });
+            }
         } catch (error) {
             console.error('Error loading projects:', error);
-            showError('Failed to load projects. Please try again.');
-        } finally {
-            showLoading(false);
         }
     }
 
-    $('#life_app_projects').on('change', async function() {
+    // Script List Loading
+    async function loadLifeAppScripts() {
+        const scriptSelect = document.getElementById('life_app_script');
         try {
-            showLoading(true);
-            const selectedProjects = $(this).val();
-            const response = await fetch(`/life_app_scripts?project_ids=${JSON.stringify(selectedProjects)}`);
-            if (!response.ok) {
-                throw new Error('Failed to load scripts');
-            }
+            const response = await fetch('/life_app/scripts');
             const data = await response.json();
-            const scriptSelect = $('#life_app_script');
-            scriptSelect.empty();
-            data.scripts.forEach(script => {
-                scriptSelect.append(new Option(script, script));
-            });
-            scriptSelect.trigger('change');
+            
+            if (data.scripts && data.scripts.length > 0) {
+                scriptSelect.innerHTML = '<option value="">Select Script</option>';
+                data.scripts.forEach(script => {
+                    const option = document.createElement('option');
+                    option.value = script;
+                    option.textContent = script;
+                    scriptSelect.appendChild(option);
+                });
+                
+                $(scriptSelect).select2({
+                    placeholder: "Select Script"
+                });
+            }
         } catch (error) {
             console.error('Error loading scripts:', error);
-            showError('Failed to load scripts. Please try again.');
-        } finally {
-            showLoading(false);
         }
-    });
+    }
 
-    $('#life_app_script').on('change', async function() {
+    // Dataset List Loading
+    async function loadDatasetFiles() {
+        const datasetSelect = document.getElementById('dataset_file');
         try {
-            showLoading(true);
-            const selectedProjects = $('#life_app_projects').val();
-            const selectedScript = $(this).val();
-            const response = await fetch(`/life_app_dataset?project_ids=${JSON.stringify(selectedProjects)}&script_id=${selectedScript}`);
-            if (!response.ok) {
-                throw new Error('Failed to load dataset');
-            }
+            const response = await fetch('/life_app/datasets');
             const data = await response.json();
-            const datasetSelect = $('#life_app_dataset');
-            datasetSelect.empty();
-            data.datasets.forEach(dataset => {
-                datasetSelect.append(new Option(dataset.transcription, JSON.stringify(dataset)));
-            });
-        } catch (error) {
-            console.error('Error loading dataset:', error);
-            showError('Failed to load dataset. Please try again.');
-        } finally {
-            showLoading(false);
-        }
-    });
-
-    $('#dataset-source-select').on('change', function() {
-        if ($(this).val() === 'life_app') {
-            loadLifeAppProjects();
-            $('#life-app-selectors').show();
-        } else {
-            $('#life-app-selectors').hide();
-        }
-    });
-
-    // Replace the loadDatasetFiles function with this simplified version
-    function loadDatasetFiles() {
-        const container = document.getElementById('dataset_file_div');
-        const select = document.getElementById('dataset_file');
-
-        if (!container || !select) {
-            console.error('Dataset elements not found');
-            return;
-        }
-
-        // Destroy existing Select2 instance if it exists
-        if ($(select).data('select2')) {
-            $(select).select2('destroy');
-        }
-
-        // Clear current options
-        select.innerHTML = '';
-        
-        // Add options directly
-        select.innerHTML = `
-            <option value="">Select Dataset</option>
-            <option value="C:/Users/Aryan/Downloads/autotrain-advanced-aryan/src/autotrain/app/static/dataset.json">dataset.json</option>
-        `;
-
-        // Make sure container is visible
-        container.style.display = 'block';
-
-        // Reinitialize Select2
-        if ($.fn.select2) {
-            $(select).select2({
-                placeholder: "Select Dataset File",
-                width: '100%'
-            });
+            
+            if (data.datasets && data.datasets.length > 0) {
+                datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
+                data.datasets.forEach(dataset => {
+                    const option = document.createElement('option');
+                    option.value = dataset;
+                    option.textContent = dataset;
+                    datasetSelect.appendChild(option);
+                });
+                
+                $(datasetSelect).select2({
+                    placeholder: "Select Dataset File"
+                });
             }
-        }
-    });
-
-    function showError(message) {
-        const errorDiv = document.getElementById('error-message');
-        if (errorDiv) {
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-            setTimeout(() => {
-                errorDiv.style.display = 'none';
-            }, 5000);
+        } catch (error) {
+            console.error('Error loading datasets:', error);
         }
     }
 
-    function showLoading(show) {
-        const loadingSpinner = document.getElementById('loadingSpinner');
-        if (loadingSpinner) {
-            loadingSpinner.style.display = show ? 'flex' : 'none';
-        }
-    }
-
-    // Initialize Select2 dropdowns
-    $(document).ready(function() {
-        $('#life_app_projects').select2({
-            maximumSelectionLength: 2,
-            placeholder: "Select Projects"
-        });
-        $('#life_app_script').select2({
-            placeholder: "Select Script"
-        });
-        $('#life_app_dataset').select2({
-            placeholder: "Select Dataset"
+    // Event Listeners
+    document.addEventListener('DOMContentLoaded', function() {
+        const datasetSource = document.getElementById('dataset_source');
+        
+        datasetSource.addEventListener('change', function() {
+            if (this.value === 'life_app') {
+                loadLifeAppProjects();
+                loadLifeAppScripts();
+                loadDatasetFiles();
+            }
         });
     });
+
+    // Form Submission
+    async function submitForm() {
+        const formData = new FormData();
+        
+        const selectedProjects = $('#life_app_project').val();
+        const selectedScript = $('#life_app_script').val();
+        const selectedDataset = $('#dataset_file').val();
+        
+        formData.append('life_app_project', JSON.stringify(selectedProjects));
+        formData.append('life_app_script', selectedScript);
+        formData.append('dataset_file', selectedDataset);
+        
+        try {
+            const response = await fetch('/ui/create_project', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (response.ok) {
+                console.log('Training started successfully');
+            } else {
+                console.error('Error starting training');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
 });
