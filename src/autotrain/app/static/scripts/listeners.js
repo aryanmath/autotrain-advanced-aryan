@@ -274,40 +274,64 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Initialize Choices.js for project and script dropdowns
+    // --- Project multi-select tags update ---
+    function updateProjectTags() {
         const projectSelect = document.getElementById('life_app_project');
-    const scriptSelect = document.getElementById('life_app_script');
-    const projectChoices = new Choices(projectSelect, { removeItemButton: true, placeholder: true, placeholderValue: 'Select Project(s)' });
-    const scriptChoices = new Choices(scriptSelect, { removeItemButton: false, placeholder: true, placeholderValue: 'Select Script' });
+        const tagContainer = document.getElementById('life-app-project-tags');
+        if (!projectSelect || !tagContainer) return;
 
-    // Load projects
-    fetch('/static/projectList.json')
-        .then(res => res.json())
-        .then(projects => {
-            projectChoices.clearChoices();
-            projectChoices.setChoices(projects.map(p => ({ value: p, label: p })), 'value', 'label', false);
+        tagContainer.innerHTML = '';
+        Array.from(projectSelect.selectedOptions).forEach(option => {
+            const tag = document.createElement('span');
+            tag.className = 'bg-blue-200 text-blue-800 text-sm font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-900';
+            tag.textContent = option.textContent;
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'ml-1 text-blue-800 hover:text-blue-600 focus:outline-none';
+            removeBtn.innerHTML = '&times;';
+            removeBtn.onclick = () => {
+                option.selected = false;
+                updateProjectTags(); // Refresh tags after removal
+            };
+            tag.appendChild(removeBtn);
+            tagContainer.appendChild(tag);
         });
+    }
 
-    // On project change, load scripts (for now, all scripts)
-    projectSelect.addEventListener('change', function () {
-        const selectedProjects = projectChoices.getValue(true); // array of selected values
+    // Plain JS event for project dropdown (no Select2)
+    document.getElementById('life_app_project').addEventListener('change', function() {
+        updateProjectTags();
+        const scriptSelect = document.getElementById('life_app_script');
+        const selectedProjects = Array.from(this.selectedOptions).map(opt => opt.value);
+        scriptSelect.innerHTML = '<option value="">Select Script</option>';
         if (selectedProjects.length > 0) {
+            scriptSelect.removeAttribute('disabled');
+            scriptSelect.disabled = false;
             fetch('/static/scriptList.json')
-                .then(res => res.json())
+                .then(response => response.json())
                 .then(scripts => {
-                    scriptChoices.clearChoices();
-                    scriptChoices.setChoices(scripts.map(s => ({ value: s, label: s })), 'value', 'label', false);
-                    scriptSelect.disabled = false;
+                    scripts.forEach(script => {
+                        const option = document.createElement('option');
+                        option.value = script;
+                        option.textContent = script;
+                        scriptSelect.appendChild(option);
+                    });
                 });
         } else {
-            scriptChoices.clearChoices();
-            scriptChoices.setChoices([{ value: '', label: 'Select Script', disabled: true }], 'value', 'label', false);
+            scriptSelect.innerHTML = '<option value="">Select Script</option>';
             scriptSelect.disabled = true;
         }
     });
 
-    // Initially disable script dropdown
-    scriptSelect.disabled = true;
+    document.getElementById('life_app_script').addEventListener('change', function() {
+        const datasetSelect = document.getElementById('dataset_file');
+        if (this.value) {
+            datasetSelect.disabled = false;
+            loadDatasetFiles();
+        } else {
+            datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
+            datasetSelect.disabled = true;
+        }
+    });
 
     // Function to load projects
     async function loadLifeAppProjects() {
