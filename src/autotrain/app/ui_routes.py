@@ -1113,7 +1113,7 @@ async def handle_project_selection(request: Request, authenticated: bool = Depen
 @ui_router.post("/life_app_dataset", response_class=JSONResponse)
 async def get_life_app_dataset(request: Request, authenticated: bool = Depends(user_authentication)):
     """
-    Get dataset files for selected project(s) and script.
+    Always return dataset.json for any project and script selection.
     """
     try:
         data = await request.json()
@@ -1121,7 +1121,6 @@ async def get_life_app_dataset(request: Request, authenticated: bool = Depends(u
         selected_script = data.get('script', '')
         logger.info(f"Projects selected: {selected_projects}")
         logger.info(f"Script selected: {selected_script}")
-        # Future: mapping logic here
         return JSONResponse(content={
             "status": "success",
             "datasets": ["dataset.json"]
