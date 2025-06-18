@@ -437,40 +437,4 @@ document.addEventListener('DOMContentLoaded', function () {
             tagContainer.appendChild(tag);
         });
     }
-
-    // Replace the loadDatasetFiles function with this version
-    function loadDatasetFiles() {
-        const container = document.getElementById('dataset_file_div');
-        const select = document.getElementById('dataset_file');
-        if (!container || !select) {
-            console.error('Dataset elements not found');
-            return;
-        }
-        // Destroy existing Select2 instance if it exists
-        if ($(select).data('select2')) {
-            $(select).select2('destroy');
-        }
-        // Clear current options
-        select.innerHTML = '';
-        // Fetch from backend API instead of static file
-        fetch('/ui/life_app_dataset')
-            .then(response => response.json())
-            .then(data => {
-                select.innerHTML = `
-                    <option value="">Select Dataset</option>
-                    <option value="dataset.json">Current Dataset</option>
-                `;
-                container.style.display = 'block';
-                // Reinitialize Select2
-                if ($.fn.select2) {
-                    $(select).select2({
-                        placeholder: "Select Dataset File",
-                        width: '100%'
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Error loading dataset:', error);
-            });
-    }
 });
