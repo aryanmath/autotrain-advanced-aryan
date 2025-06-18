@@ -297,13 +297,13 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Use jQuery event for Select2 compatibility
-    $('#life_app_project').on('change', function() {
+    // Plain JS event for project dropdown (no Select2)
+    document.getElementById('life_app_project').addEventListener('change', function() {
         updateProjectTags();
         const scriptSelect = document.getElementById('life_app_script');
-        const selectedOptions = Array.from(this.selectedOptions);
-        if (selectedOptions.length > 0) {
-            scriptSelect.innerHTML = '<option value="">Select Script</option>';
+        const selectedProjects = Array.from(this.selectedOptions).map(opt => opt.value);
+        scriptSelect.innerHTML = '<option value="">Select Script</option>';
+        if (selectedProjects.length > 0) {
             scriptSelect.disabled = false;
             fetch('/static/scriptList.json')
                 .then(response => response.json())
@@ -316,7 +316,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     });
                 });
         } else {
-            scriptSelect.innerHTML = '<option value="">Select Script</option>';
             scriptSelect.disabled = true;
         }
     });
@@ -325,17 +324,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const datasetSelect = document.getElementById('dataset_file');
         if (this.value) {
             datasetSelect.disabled = false;
-            $(datasetSelect).prop('disabled', false);
-            $(datasetSelect).select2();
-            $(datasetSelect).trigger('change.select2');
             loadDatasetFiles();
         } else {
             datasetSelect.innerHTML = '<option value="">Select Dataset</option>';
             datasetSelect.disabled = true;
-            $(datasetSelect).prop('disabled', true);
-            $(datasetSelect).select2();
-            $(datasetSelect).trigger('change.select2');
-            if ($(datasetSelect).data('select2')) { $(datasetSelect).val(null).trigger('change'); }
         }
     });
 
@@ -385,36 +377,22 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        // Clear current options
+        select.innerHTML = '';
         try {
-            // Destroy existing Select2 instance if it exists
-            if ($(select).data('select2')) {
-                $(select).select2('destroy');
-            }
-
-            // Clear current options
-            select.innerHTML = '';
-            
             // Simulate API call by loading from static file
             const response = await fetch('/static/dataset.json');
             if (!response.ok) {
                 throw new Error('Failed to load dataset');
             }
             const dataset = await response.json();
-            
             // Add dataset option
             select.innerHTML = `
                 <option value="">Select Dataset</option>
                 <option value="dataset.json">Current Dataset</option>
             `;
-
             // Make sure container is visible
             container.style.display = 'block';
-
-            // Reinitialize Select2
-            $(select).select2({
-                placeholder: "Select Dataset File",
-                width: '100%'
-            });
         } catch (error) {
             console.error('Error loading dataset:', error);
             // Show error to user
