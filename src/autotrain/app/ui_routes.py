@@ -1033,12 +1033,6 @@ async def get_life_app_dataset(authenticated: bool = Depends(user_authentication
         dataset = json.load(f)
     return {"dataset": dataset}
 
-from fastapi import APIRouter, Form, Request
-from typing import List
-import json
-import os
-
-router = APIRouter()
 
 @router.get("/life_app_projects")
 async def get_life_app_projects():
