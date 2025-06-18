@@ -1063,11 +1063,6 @@ async def get_life_app_dataset(authenticated: bool = Depends(user_authentication
 #     except Exception as e:
 #         raise HTTPException(status_code=500, detail=str(e))
 
-
-
-
-
-
 @ui_router.post("/project_selected", response_class=JSONResponse)
 async def handle_project_selection(request: Request, authenticated: bool = Depends(user_authentication)):
     """
@@ -1115,107 +1110,30 @@ async def handle_project_selection(request: Request, authenticated: bool = Depen
             status_code=500
         )
 
-# @ui_router.post("/life_app_dataset", response_class=JSONResponse)
-# async def get_life_app_dataset(request: Request, authenticated: bool = Depends(user_authentication)):
-#     try:
-#         logger.info("Received request to /ui/life_app_dataset")
-#         data = await request.json()
-#         logger.info(f"Request data: {data}")
-        
-#         selected_projects = data.get('projects', [])
-#         selected_script = data.get('script', '')
-        
-#         # Log both project and script selection
-#         logger.info(f"Projects selected: {selected_projects}")
-#         logger.info(f"Script selected: {selected_script}")
-        
-#         # Always return dataset.json
-#         response_data = {
-#             "status": "success",
-#             "datasets": ["dataset.json"]
-#         }
-#         logger.info(f"Sending response: {response_data}")
-#         return JSONResponse(content=response_data)
-#     except Exception as e:
-#         logger.error(f"Error in dataset loading: {str(e)}")
-#         return JSONResponse(
-#             content={"error": str(e)},
-#             status_code=500
-#         )
-
-
-
-
-
-
-@ui_router.post("/script_selected", response_class=JSONResponse)
-async def handle_script_selection(request: Request, authenticated: bool = Depends(user_authentication)):
-    """
-    Handle script selection and return corresponding datasets based on project-script-dataset mapping.
-    """
+@ui_router.post("/life_app_dataset", response_class=JSONResponse)
+async def get_life_app_dataset(request: Request, authenticated: bool = Depends(user_authentication)):
     try:
-        # Parse request data
+        logger.info("Received request to /ui/life_app_dataset")
         data = await request.json()
+        logger.info(f"Request data: {data}")
+        
         selected_projects = data.get('projects', [])
         selected_script = data.get('script', '')
-
-        # Log selected projects and script
-        logger.info(f"Projects for script selection: {selected_projects}")
+        
+        # Log both project and script selection
+        logger.info(f"Projects selected: {selected_projects}")
         logger.info(f"Script selected: {selected_script}")
-
-        # Load project-script-dataset mapping
-        mapping_path = os.path.join(BASE_DIR, "static", "project_script_dataset_mapping.json")
-        if not os.path.exists(mapping_path):
-            logger.error("Project-script-dataset mapping file not found")
-            return JSONResponse(content={"datasets": []})
-
-        with open(mapping_path, "r", encoding="utf-8") as f:
-            mapping = json.load(f)
-
-        # Collect available datasets for the selected script across all selected projects
-        available_datasets = set()
-        for project in selected_projects:
-            if project in mapping:
-                if selected_script in mapping[project]:
-                    logger.info(f"Project '{project}' has script '{selected_script}' with datasets: {mapping[project][selected_script]}")
-                    available_datasets.update(mapping[project][selected_script])
-                else:
-                    logger.info(f"Project '{project}' does NOT have script '{selected_script}'")
-            else:
-                logger.info(f"Project '{project}' not found in mapping")
-
-        # Deduplicate and convert to list
-        datasets = list(available_datasets)
-        logger.info(f"Deduplicated available datasets for projects {selected_projects} and script {selected_script}: {datasets}")
-
-        # Return datasets
-        return JSONResponse(content={
+        
+        # Always return dataset.json
+        response_data = {
             "status": "success",
-            "projects": selected_projects,
-            "script": selected_script,
-            "datasets": datasets
-        })
+            "datasets": ["dataset.json"]
+        }
+        logger.info(f"Sending response: {response_data}")
+        return JSONResponse(content=response_data)
     except Exception as e:
-        logger.error(f"Error in script selection: {str(e)}")
-        return JSONResponse(content={"error": str(e)}, status_code=500)
-    
-    
-@ui_router.post("/dataset_selected", response_class=JSONResponse)
-async def handle_dataset_selection(request: Request, authenticated: bool = Depends(user_authentication)):
-    """
-    Log dataset selection.
-    """
-    try:
-        data = await request.json()
-        selected_projects = data.get('projects', [])
-        selected_script = data.get('script', '')
-        selected_dataset = data.get('dataset', '')
-
-        logger.info(f"Projects for dataset selection: {selected_projects}")
-        logger.info(f"Script for dataset selection: {selected_script}")
-        logger.info(f"Dataset selected: {selected_dataset}")
-
-        return JSONResponse(content={"status": "success"})
-    except Exception as e:
-        logger.error(f"Error in dataset selection: {str(e)}")
-        return JSONResponse(content={"error": str(e)}, status_code=500)
+        logger.error(f"Error in dataset loading: {str(e)}")
+        return JSONResponse(
+            content={"error": str(e)},
+            status_code=500
+        )

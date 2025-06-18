@@ -331,12 +331,18 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Script selection event - using both change and select2:select events
-    $('#life_app_script').off('change select2:select').on('change select2:select', function(e) {
+    $('#life_app_script').on('change select2:select', function(e) {
+        console.log('Script selection event triggered');
         const selectedScript = $(this).val();
         const selectedProjects = $('#life_app_project').val();
+        console.log('Script selected:', selectedScript);
+        console.log('Selected projects:', selectedProjects);
+        
         if (selectedScript && selectedProjects && selectedProjects.length > 0) {
-            loadDatasetsForScriptProject(selectedProjects, selectedScript);
+            console.log('Calling loadDatasetFiles with:', { script: selectedScript, projects: selectedProjects });
+            loadDatasetFiles(selectedProjects, selectedScript);
         } else {
+            console.log('Script or projects not selected, disabling dataset dropdown');
             $('#dataset_file').prop('disabled', true).empty();
         }
     });
@@ -396,58 +402,56 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Function to load datasets for selected script and projects
-    async function loadDatasetsForScriptProject(selectedProjects, selectedScript) {
+    // Function to load datasets
+    async function loadDatasetFiles(selectedProjects, selectedScript) {
+        console.log('loadDatasetFiles called with:', { projects: selectedProjects, script: selectedScript });
         const datasetSelect = $('#dataset_file');
         datasetSelect.prop('disabled', false).empty();
         datasetSelect.append(new Option('Select Dataset', ''));
+        
         try {
-            const response = await fetch('/ui/script_selected', {
+            console.log('Making API request to /ui/life_app_dataset');
+            const response = await fetch('/ui/life_app_dataset', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify({
                     projects: selectedProjects,
                     script: selectedScript
                 })
             });
-            if (!response.ok) throw new Error('Failed to fetch datasets');
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch dataset files');
+            }
+            
             const data = await response.json();
+            console.log('Dataset API response:', data);
+            
             if (data.datasets && data.datasets.length > 0) {
                 data.datasets.forEach(dataset => {
+                    console.log('Adding dataset option:', dataset);
                     datasetSelect.append(new Option(dataset, dataset));
                 });
             }
-            if (datasetSelect.data('select2')) datasetSelect.select2('destroy');
+            
+            // Reinitialize Select2
+            if (datasetSelect.data('select2')) {
+                datasetSelect.select2('destroy');
+            }
             datasetSelect.select2({
                 placeholder: "Select Dataset File",
                 allowClear: true,
                 width: '100%'
             });
+            
+            // Trigger change to update UI
             datasetSelect.trigger('change');
         } catch (error) {
-            console.error('Error loading datasets:', error);
+            console.error('Error loading dataset files:', error);
         }
     }
-
-    // Dataset selection event
-    $('#dataset_file').off('change').on('change', function() {
-        const selectedDataset = $(this).val();
-        const selectedProjects = $('#life_app_project').val();
-        const selectedScript = $('#life_app_script').val();
-        if (selectedDataset && selectedProjects && selectedScript) {
-            fetch('/ui/dataset_selected', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    projects: selectedProjects,
-                    script: selectedScript,
-                    dataset: selectedDataset
-                })
-            }).then(res => res.json()).then(data => {
-                console.log('Dataset selection logged:', data);
-            });
-        }
-    });
 
     // Function to update project tags
     function updateProjectTags() {
