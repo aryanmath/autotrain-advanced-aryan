@@ -16,6 +16,8 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 </head>
 
 <script>
@@ -560,8 +562,7 @@
                                 <div class="flex-1">
                                     <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">LiFE App Project(s)
                                     </label>
-                                    <select id="life_app_project" name="life_app_project" multiple
-                                        class="block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 mb-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <select id="life_app_project" name="life_app_project" multiple class="block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 mb-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                                     </select>
                                     <div id="life-app-project-tags" class="mb-2"></div>
                                 </div>
@@ -570,8 +571,7 @@
                                 <div class="flex-1">
                                     <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">LiFE App Script
                                     </label>
-                                    <select id="life_app_script" name="life_app_script"
-                                        class="block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 mb-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <select id="life_app_script" name="life_app_script" class="block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 mb-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                                         <option value="">Select Script</option>
                                     </select>
                                 </div>
@@ -808,10 +808,6 @@
     </script>
     <script>
         $(document).ready(function() {
-            $('#life_app_project').select2({
-                maximumSelectionLength: 2,
-                placeholder: "Select Projects"
-            });
             $('#dataset_file').select2({
                 placeholder: "Select Dataset File"
             });

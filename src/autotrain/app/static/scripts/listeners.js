@@ -340,14 +340,13 @@ document.addEventListener('DOMContentLoaded', function () {
         projectSelect.innerHTML = '';
 
         try {
-            // Simulate API call by loading from static file
-            const response = await fetch('/static/projectList.json');
+            const response = await fetch('/ui/life_app_projects');
             if (!response.ok) {
                 throw new Error('Failed to load projects');
             }
-            const projects = await response.json();
+            const data = await response.json();
+            const projects = data.projects;
             
-            // Add projects to select
             projects.forEach(project => {
                 const option = document.createElement('option');
                 option.value = project;
@@ -356,7 +355,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         } catch (error) {
             console.error('Error loading projects:', error);
-            // Show error to user
             const errorDiv = document.createElement('div');
             errorDiv.className = 'text-red-500 text-sm mt-2';
             errorDiv.textContent = 'Failed to load projects. Please try again.';
@@ -379,25 +377,22 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        // Clear current options
         select.innerHTML = '';
         try {
-            // Simulate API call by loading from static file
-            const response = await fetch('/static/dataset.json');
+            const response = await fetch('/ui/life_app_dataset');
             if (!response.ok) {
                 throw new Error('Failed to load dataset');
             }
-            const dataset = await response.json();
-            // Add dataset option
-        select.innerHTML = `
-            <option value="">Select Dataset</option>
+            const data = await response.json();
+            const dataset = data.dataset;
+            
+            select.innerHTML = `
+                <option value="">Select Dataset</option>
                 <option value="dataset.json">Current Dataset</option>
-        `;
-        // Make sure container is visible
-        container.style.display = 'block';
+            `;
+            container.style.display = 'block';
         } catch (error) {
             console.error('Error loading dataset:', error);
-            // Show error to user
             const errorDiv = document.createElement('div');
             errorDiv.className = 'text-red-500 text-sm mt-2';
             errorDiv.textContent = 'Failed to load dataset. Please try again.';
@@ -452,4 +447,45 @@ document.addEventListener('DOMContentLoaded', function () {
             errorDiv.remove();
         }, 5000);
     }
+
+    // On project change, load scripts
+    const projectSelect = document.getElementById('life_app_project');
+    const scriptSelect = document.getElementById('life_app_script');
+    const scriptChoices = new Choices(scriptSelect, {
+        removeItemButton: true,
+        maxItemCount: 10,
+        searchResultLimit: 10,
+        renderChoiceLimit: 10
+    });
+    const projectChoices = new Choices(projectSelect, {
+        removeItemButton: true,
+        maxItemCount: 10,
+        searchResultLimit: 10,
+        renderChoiceLimit: 10
+    });
+
+    projectSelect.addEventListener('change', function () {
+        const selectedProjects = projectChoices.getValue(true); // array of selected values
+        if (selectedProjects.length > 0) {
+            fetch('/ui/life_app_scripts')
+                .then(res => res.json())
+                .then(data => {
+                    const scripts = data.scripts;
+                    scriptChoices.clearChoices();
+                    scriptChoices.setChoices(scripts.map(s => ({ value: s, label: s })), 'value', 'label', false);
+                    scriptSelect.disabled = false;
+                })
+                .catch(error => {
+                    console.error('Error loading scripts:', error);
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'text-red-500 text-sm mt-2';
+                    errorDiv.textContent = 'Failed to load scripts. Please try again.';
+                    scriptSelect.parentNode.appendChild(errorDiv);
+                });
+        } else {
+            scriptChoices.clearChoices();
+            scriptChoices.setChoices([{ value: '', label: 'Select Script', disabled: true }], 'value', 'label', false);
+            scriptSelect.disabled = true;
+        }
+    });
 });
