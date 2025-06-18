@@ -296,61 +296,77 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Function to load projects
     async function loadLifeAppProjects() {
-        const projectSelect = document.getElementById('life_app_project');
-        if (!projectSelect) return;
-        projectSelect.innerHTML = '';
-
-        try {
-            const response = await fetch('/static/projectList.json');
-            const projects = await response.json();
-            projects.forEach(project => {
-                const option = document.createElement('option');
-                option.value = project;
-                option.textContent = project;
-                projectSelect.appendChild(option);
+        fetch('/life_app_projects')
+        .then(res => res.json())
+        .then(data => {
+            const projectSelect = $('#life-app-project-select');
+            projectSelect.empty();
+            // Remove duplicates
+            const uniqueProjects = [...new Set(data.projects)];
+            uniqueProjects.forEach(project => {
+                projectSelect.append(new Option(project, project));
             });
-            // Initialize Select2 after options are added
-            $(projectSelect).select2({
-                placeholder: "Select LiFE App Project(s)",
-                allowClear: true,
-                multiple: true,
-                width: '100%'
-            });
-            updateProjectTags(); // Update tags on initial load
-        } catch (error) {
-            console.error('Error loading projects:', error);
-        }
+            projectSelect.trigger('change');
+        });
     }
 
-    // Function to load scripts
-    async function loadLifeAppScripts() {
-        const scriptSelect = document.getElementById('life_app_script');
-        if (!scriptSelect) return;
-        scriptSelect.innerHTML = '<option value="">Select Script</option>';
-        try {
-            const response = await fetch('/static/scriptList.json');
-            const scripts = await response.json();
-            scripts.forEach(script => {
-                const option = document.createElement('option');
-                option.value = script;
-                option.textContent = script;
-                scriptSelect.appendChild(option);
+    $('#life-app-project-select').on('change', function() {
+        const selectedProjects = $(this).val();
+        fetch(`/life_app_scripts?project_ids=${JSON.stringify(selectedProjects)}`)
+            .then(res => res.json())
+            .then(data => {
+                const scriptSelect = $('#life-app-script-select');
+                scriptSelect.empty();
+                // Remove duplicates
+                const uniqueScripts = [...new Set(data.scripts)];
+                uniqueScripts.forEach(script => {
+                    scriptSelect.append(new Option(script, script));
+                });
+                scriptSelect.trigger('change');
             });
-            // Initialize Select2 for the script dropdown
-            $(scriptSelect).select2({
-                placeholder: "Select LiFE App Script",
-                width: '100%'
+    });
+
+    $('#life-app-script-select').on('change', function() {
+        const selectedProjects = $('#life-app-project-select').val();
+        const selectedScript = $(this).val();
+        fetch(`/life_app_dataset?project_ids=${JSON.stringify(selectedProjects)}&script_id=${selectedScript}`)
+            .then(res => res.json())
+            .then(data => {
+                const datasetSelect = $('#life-app-dataset-select');
+                datasetSelect.empty();
+                // Remove duplicates
+                const uniqueDatasets = [];
+                const seen = new Set();
+                data.datasets.forEach(dataset => {
+                    const key = JSON.stringify(dataset);
+                    if (!seen.has(key)) {
+                        uniqueDatasets.push(dataset);
+                        seen.add(key);
+                    }
+                });
+                uniqueDatasets.forEach(dataset => {
+                    // Show transcription as label, value as JSON string
+                    datasetSelect.append(new Option(dataset.transcription, JSON.stringify(dataset)));
+                });
             });
-        } catch (error) {
-            console.error('Error loading scripts:', error);
+    });
+
+    $('#dataset-source-select').on('change', function() {
+        if ($(this).val() === 'life_app') {
+            loadLifeAppProjects();
+            $('#life-app-selectors').show();
+        } else {
+            $('#life-app-selectors').hide();
         }
-    }
+    });
+
+
 
     // Replace the loadDatasetFiles function with this simplified version
     function loadDatasetFiles() {
         const container = document.getElementById('dataset_file_div');
         const select = document.getElementById('dataset_file');
-        
+
         if (!container || !select) {
             console.error('Dataset elements not found');
             return;

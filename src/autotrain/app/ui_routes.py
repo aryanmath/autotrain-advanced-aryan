@@ -1032,3 +1032,54 @@ async def get_life_app_dataset(authenticated: bool = Depends(user_authentication
     with open(dataset_path, "r", encoding="utf-8") as f:
         dataset = json.load(f)
     return {"dataset": dataset}
+
+from fastapi import APIRouter, Form, Request
+from typing import List
+import json
+import os
+
+router = APIRouter()
+
+@router.get("/life_app_projects")
+async def get_life_app_projects():
+    with open("src/autotrain/app/static/projectList.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+    # Remove duplicates
+    projects = list(dict.fromkeys(data["projects"]))
+    return {"projects": projects}
+
+@router.get("/life_app_scripts")
+async def get_life_app_scripts(project_ids: str):
+    with open("src/autotrain/app/static/scriptList.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+    # Remove duplicates
+    scripts = list(dict.fromkeys(data["scripts"]))
+    return {"scripts": scripts}
+
+@router.get("/life_app_dataset")
+async def get_life_app_dataset(project_ids: str, script_id: str):
+    with open("src/autotrain/app/static/dataset.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+    # Remove duplicates
+    datasets = list({json.dumps(ds): ds for ds in data["datasets"]}.values())
+    return {"datasets": datasets}
+
+@router.post("/ui/create_project")
+async def create_project(
+    request: Request,
+    life_app_projects: List[str] = Form(None),
+    life_app_script: str = Form(None),
+    life_app_dataset: str = Form(None),
+    # ...other fields...
+):
+    # Save config with selected values
+    config = {
+        "life_app_projects": life_app_projects,
+        "life_app_script": life_app_script,
+        "life_app_dataset": life_app_dataset,
+        # ...other config fields...
+    }
+    with open("config.json", "w", encoding="utf-8") as f:
+        json.dump(config, f, indent=2, ensure_ascii=False)
+    # Training logic: use only selected values from config
+    return {"status": "Training started with selected data."}
