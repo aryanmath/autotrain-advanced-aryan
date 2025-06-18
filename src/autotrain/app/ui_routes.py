@@ -997,75 +997,38 @@ async def handle_form(request: Request):
     return {"status": "error", "message": "Invalid task type"}
 
 
-@ui_router.get("/life_app_projects")
-async def get_life_app_projects():
-    """Returns the list of projects from the local JSON file for LiFE App integration."""
-    try:
-        project_list_path = os.path.join(BASE_DIR, "static", "projectList.json")
-        if not os.path.exists(project_list_path):
-            return JSONResponse(content={"projects": []})
-        with open(project_list_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        # Remove duplicates
-        projects = list(dict.fromkeys(data))
-        return {"projects": projects}
-    except Exception as e:
-        logger.error(f"Error loading projects: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to load projects")
+@ui_router.get("/life_app_projects", response_class=JSONResponse)
+async def get_life_app_projects(authenticated: bool = Depends(user_authentication)):
+    """
+    Returns the list of projects from the local JSON file for LiFE App integration.
+    """
+    project_list_path = os.path.join(BASE_DIR, "static", "projectList.json")
+    if not os.path.exists(project_list_path):
+        return JSONResponse(content={"projects": []})
+    with open(project_list_path, "r", encoding="utf-8") as f:
+        projects = json.load(f)
+    return {"projects": projects}
 
-@ui_router.get("/life_app_scripts")
-async def get_life_app_scripts(project_ids: str):
-    """Returns the list of scripts from the local JSON file for LiFE App integration."""
-    try:
-        script_list_path = os.path.join(BASE_DIR, "static", "scriptList.json")
-        if not os.path.exists(script_list_path):
-            return JSONResponse(content={"scripts": []})
-        with open(script_list_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        # Remove duplicates
-        scripts = list(dict.fromkeys(data))
-        return {"scripts": scripts}
-    except Exception as e:
-        logger.error(f"Error loading scripts: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to load scripts")
+@ui_router.get("/life_app_scripts", response_class=JSONResponse)
+async def get_life_app_scripts(authenticated: bool = Depends(user_authentication)):
+    """
+    Returns the list of scripts from the local JSON file for LiFE App integration.
+    """
+    script_list_path = os.path.join(BASE_DIR, "static", "scriptList.json")
+    if not os.path.exists(script_list_path):
+        return JSONResponse(content={"scripts": []})
+    with open(script_list_path, "r", encoding="utf-8") as f:
+        scripts = json.load(f)
+    return {"scripts": scripts}
 
-@ui_router.get("/life_app_dataset")
-async def get_life_app_dataset(project_ids: str, script_id: str):
-    """Returns the dataset from the local JSON file for LiFE App integration."""
-    try:
-        dataset_path = os.path.join(BASE_DIR, "static", "dataset.json")
-        if not os.path.exists(dataset_path):
-            return JSONResponse(content={"datasets": []})
-        with open(dataset_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        # Remove duplicates
-        datasets = list({json.dumps(ds): ds for ds in data}.values())
-        return {"datasets": datasets}
-    except Exception as e:
-        logger.error(f"Error loading dataset: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to load dataset")
-
-@ui_router.post("/ui/create_project")
-async def create_project(
-    request: Request,
-    life_app_projects: List[str] = Form(None),
-    life_app_script: str = Form(None),
-    life_app_dataset: str = Form(None),
-    # ...other fields...
-):
-    """Creates a new project with LiFE App data."""
-    try:
-        # Save config with selected values
-        config = {
-            "life_app_projects": life_app_projects,
-            "life_app_script": life_app_script,
-            "life_app_dataset": life_app_dataset,
-            # ...other config fields...
-        }
-        with open("config.json", "w", encoding="utf-8") as f:
-            json.dump(config, f, indent=2, ensure_ascii=False)
-        # Training logic: use only selected values from config
-        return {"status": "Training started with selected data."}
-    except Exception as e:
-        logger.error(f"Error creating project: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to create project")
+@ui_router.get("/life_app_dataset", response_class=JSONResponse)
+async def get_life_app_dataset(authenticated: bool = Depends(user_authentication)):
+    """
+    Returns the dataset from the local JSON file for LiFE App integration.
+    """
+    dataset_path = os.path.join(BASE_DIR, "static", "dataset.json")
+    if not os.path.exists(dataset_path):
+        return JSONResponse(content={"dataset": []})
+    with open(dataset_path, "r", encoding="utf-8") as f:
+        dataset = json.load(f)
+    return {"dataset": dataset}
