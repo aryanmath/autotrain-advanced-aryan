@@ -416,7 +416,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ script: selectedScript })
+                body: JSON.stringify({ 
+                    script: selectedScript 
+                })
             });
     
             if (!response.ok) {
