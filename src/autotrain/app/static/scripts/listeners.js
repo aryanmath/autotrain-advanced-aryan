@@ -336,8 +336,8 @@ document.addEventListener('DOMContentLoaded', function () {
     async function loadScriptsForProjects(selectedProjects) {
         const scriptSelect = $('#life_app_script');
         scriptSelect.prop('disabled', false).empty();
-        scriptSelect.append(new Option('Select Script', '')); // Default option
-        
+        scriptSelect.append(new Option('Select Script', ''));
+
         try {
             const response = await fetch('/ui/project_selected', {
                 method: 'POST',
@@ -348,18 +348,18 @@ document.addEventListener('DOMContentLoaded', function () {
                     projects: selectedProjects 
                 })
             });
-            
+
             if (!response.ok) {
                 throw new Error('Failed to fetch scripts');
             }
-            
+
             const data = await response.json();
             if (data.scripts) {
                 data.scripts.forEach(script => {
                     scriptSelect.append(new Option(script, script));
                 });
             }
-            
+
             // Reinitialize Select2 after adding options
             if (scriptSelect.data('select2')) {
                 scriptSelect.select2('destroy');
@@ -369,7 +369,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 allowClear: true,
                 width: '100%'
             });
-            
+
+            // Always re-attach the change handler after Select2 re-init
+            scriptSelect.off('change').on('change', function() {
+                console.log('[SCRIPT HANDLER] #life_app_script changed:', $(this).val());
+                const selectedScript = $(this).val();
+                if (selectedScript) {
+                    console.log('[SCRIPT HANDLER] Calling loadDatasetsForScript with:', selectedScript);
+                    loadDatasetsForScript(selectedScript);
+                } else {
+                    $('#dataset_file').prop('disabled', true).empty();
+                }
+            });
+            // Optionally, trigger change to update UI
             scriptSelect.trigger('change');
         } catch (error) {
             console.error('Error loading scripts:', error);
@@ -433,17 +445,6 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error('Error loading datasets:', error);
         }
     }
-
-    $('#life_app_script').on('change', function() {
-        console.log('[SCRIPT HANDLER] #life_app_script changed:', $(this).val());
-        const selectedScript = $(this).val();
-        if (selectedScript) {
-            console.log('[SCRIPT HANDLER] Calling loadDatasetsForScript with:', selectedScript);
-            loadDatasetsForScript(selectedScript);
-        } else {
-            $('#dataset_file').prop('disabled', true).empty();
-        }
-    });
 
     // Function to update project tags
     function updateProjectTags() {
