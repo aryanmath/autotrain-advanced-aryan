@@ -434,7 +434,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    $('#life_app_script').off('change').on('change', function() {
+    $('#life_app_script').on('change', function() {
         console.log('[SCRIPT HANDLER] #life_app_script changed:', $(this).val());
         const selectedScript = $(this).val();
         if (selectedScript) {
