@@ -330,22 +330,22 @@ document.addEventListener('DOMContentLoaded', function () {
         width: '100%'
     });
 
-    // Script selection event - using both change and select2:select events
-    $('#life_app_script').on('change select2:select', function(e) {
-        console.log('Script selection event triggered');
-        const selectedScript = $(this).val();
-        const selectedProjects = $('#life_app_project').val();
-        console.log('Script selected:', selectedScript);
-        console.log('Selected projects:', selectedProjects);
+    // // Script selection event - using both change and select2:select events
+    // $('#life_app_script').on('change select2:select', function(e) {
+    //     console.log('Script selection event triggered');
+    //     const selectedScript = $(this).val();
+    //     const selectedProjects = $('#life_app_project').val();
+    //     console.log('Script selected:', selectedScript);
+    //     console.log('Selected projects:', selectedProjects);
         
-        if (selectedScript && selectedProjects && selectedProjects.length > 0) {
-            console.log('Calling loadDatasetFiles with:', { script: selectedScript, projects: selectedProjects });
-            loadDatasetFiles(selectedProjects, selectedScript);
-        } else {
-            console.log('Script or projects not selected, disabling dataset dropdown');
-            $('#dataset_file').prop('disabled', true).empty();
-        }
-    });
+    //     if (selectedScript && selectedProjects && selectedProjects.length > 0) {
+    //         console.log('Calling loadDatasetFiles with:', { script: selectedScript, projects: selectedProjects });
+    //         loadDatasetFiles(selectedProjects, selectedScript);
+    //     } else {
+    //         console.log('Script or projects not selected, disabling dataset dropdown');
+    //         $('#dataset_file').prop('disabled', true).empty();
+    //     }
+    // });
 
     // Function to load scripts for selected projects
     async function loadScriptsForProjects(selectedProjects) {
