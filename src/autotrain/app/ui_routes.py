@@ -1118,7 +1118,8 @@ async def handle_script_selection(request: Request, authenticated: bool = Depend
     try:
         data = await request.json()
         selected_script = data.get('script', '')
-        logger.info(f"Script selected: {selected_script}")
+        logger.info(f"Script selected (received from frontend): {selected_script}")
+        print(f"[BACKEND] Script selected (received from frontend): {selected_script}")
 
         mapping_path = os.path.join(BASE_DIR, "static", "script_dataset_mapping.json")
         if not os.path.exists(mapping_path):
@@ -1129,7 +1130,8 @@ async def handle_script_selection(request: Request, authenticated: bool = Depend
             script_dataset_mapping = json.load(f)
 
         datasets = script_dataset_mapping.get(selected_script, [])
-        logger.info(f"Available datasets for script {selected_script}: {datasets}")
+        logger.info(f"Datasets fetched for script {selected_script}: {datasets}")
+        print(f"[BACKEND] Datasets fetched for script {selected_script}: {datasets}")
 
         return JSONResponse(content={
             "status": "success",

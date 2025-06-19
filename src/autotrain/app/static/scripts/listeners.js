@@ -390,6 +390,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     async function loadDatasetsForScript(selectedScript) {
+        console.log('[FRONTEND] Sending selected script to backend:', selectedScript);
         const datasetSelect = $('#dataset_file');
         datasetSelect.prop('disabled', false).empty();
         datasetSelect.append(new Option('Select Dataset', ''));
@@ -410,6 +411,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
     
             const data = await response.json();
+            console.log('[FRONTEND] Datasets received from backend for script', selectedScript, ':', data.datasets);
             if (data.datasets && data.datasets.length > 0) {
                 data.datasets.forEach(dataset => {
                     datasetSelect.append(new Option(dataset, dataset));
