@@ -1109,10 +1109,8 @@ async def handle_project_selection(request: Request, authenticated: bool = Depen
             content={"error": str(e)}, 
             status_code=500
         )
-        
-        
-        
-        @ui_router.post("/script_selected", response_class=JSONResponse)
+
+@ui_router.post("/script_selected", response_class=JSONResponse)
 async def handle_script_selection(request: Request, authenticated: bool = Depends(user_authentication)):
     """
     Handle script selection and return corresponding datasets based on script-dataset mapping.
