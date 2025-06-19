@@ -402,56 +402,56 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Function to load datasets
-    async function loadDatasetFiles(selectedProjects, selectedScript) {
-        console.log('loadDatasetFiles called with:', { projects: selectedProjects, script: selectedScript });
-        const datasetSelect = $('#dataset_file');
-        datasetSelect.prop('disabled', false).empty();
-        datasetSelect.append(new Option('Select Dataset', ''));
+    // // Function to load datasets
+    // async function loadDatasetFiles(selectedProjects, selectedScript) {
+    //     console.log('loadDatasetFiles called with:', { projects: selectedProjects, script: selectedScript });
+    //     const datasetSelect = $('#dataset_file');
+    //     datasetSelect.prop('disabled', false).empty();
+    //     datasetSelect.append(new Option('Select Dataset', ''));
         
-        try {
-            console.log('Making API request to /ui/life_app_dataset');
-            const response = await fetch('/ui/life_app_dataset', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    projects: selectedProjects,
-                    script: selectedScript
-                })
-            });
+    //     try {
+    //         console.log('Making API request to /ui/life_app_dataset');
+    //         const response = await fetch('/ui/life_app_dataset', {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify({
+    //                 projects: selectedProjects,
+    //                 script: selectedScript
+    //             })
+    //         });
             
-            if (!response.ok) {
-                throw new Error('Failed to fetch dataset files');
-            }
+    //         if (!response.ok) {
+    //             throw new Error('Failed to fetch dataset files');
+    //         }
             
-            const data = await response.json();
-            console.log('Dataset API response:', data);
+    //         const data = await response.json();
+    //         console.log('Dataset API response:', data);
             
-            if (data.datasets && data.datasets.length > 0) {
-                data.datasets.forEach(dataset => {
-                    console.log('Adding dataset option:', dataset);
-                    datasetSelect.append(new Option(dataset, dataset));
-                });
-            }
+    //         if (data.datasets && data.datasets.length > 0) {
+    //             data.datasets.forEach(dataset => {
+    //                 console.log('Adding dataset option:', dataset);
+    //                 datasetSelect.append(new Option(dataset, dataset));
+    //             });
+    //         }
             
-            // Reinitialize Select2
-            if (datasetSelect.data('select2')) {
-                datasetSelect.select2('destroy');
-            }
-            datasetSelect.select2({
-                placeholder: "Select Dataset File",
-                allowClear: true,
-                width: '100%'
-            });
+    //         // Reinitialize Select2
+    //         if (datasetSelect.data('select2')) {
+    //             datasetSelect.select2('destroy');
+    //         }
+    //         datasetSelect.select2({
+    //             placeholder: "Select Dataset File",
+    //             allowClear: true,
+    //             width: '100%'
+    //         });
             
-            // Trigger change to update UI
-            datasetSelect.trigger('change');
-        } catch (error) {
-            console.error('Error loading dataset files:', error);
-        }
-    }
+    //         // Trigger change to update UI
+    //         datasetSelect.trigger('change');
+    //     } catch (error) {
+    //         console.error('Error loading dataset files:', error);
+    //     }
+    // }
 
     // Function to update project tags
     function updateProjectTags() {

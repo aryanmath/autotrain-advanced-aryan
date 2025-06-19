@@ -1109,6 +1109,41 @@ async def handle_project_selection(request: Request, authenticated: bool = Depen
             content={"error": str(e)}, 
             status_code=500
         )
+        
+        
+        
+        @ui_router.post("/script_selected", response_class=JSONResponse)
+async def handle_script_selection(request: Request, authenticated: bool = Depends(user_authentication)):
+    """
+    Handle script selection and return corresponding datasets based on script-dataset mapping.
+    """
+    try:
+        data = await request.json()
+        selected_script = data.get('script', '')
+        logger.info(f"Script selected: {selected_script}")
+
+        mapping_path = os.path.join(BASE_DIR, "static", "script_dataset_mapping.json")
+        if not os.path.exists(mapping_path):
+            logger.error("Script-dataset mapping file not found")
+            return JSONResponse(content={"datasets": []})
+
+        with open(mapping_path, "r", encoding="utf-8") as f:
+            script_dataset_mapping = json.load(f)
+
+        datasets = script_dataset_mapping.get(selected_script, [])
+        logger.info(f"Available datasets for script {selected_script}: {datasets}")
+
+        return JSONResponse(content={
+            "status": "success",
+            "script": selected_script,
+            "datasets": datasets
+        })
+    except Exception as e:
+        logger.error(f"Error in script selection: {str(e)}")
+        return JSONResponse(
+            content={"error": str(e)},
+            status_code=500
+        )
 
 # @ui_router.post("/life_app_dataset", response_class=JSONResponse)
 # async def get_life_app_dataset(request: Request, authenticated: bool = Depends(user_authentication)):
