@@ -310,9 +310,11 @@ document.addEventListener('DOMContentLoaded', function () {
             
             // Add change event listener for Select2
             $(projectSelect).off('change').on('change', function() {
+                console.log('[DYNAMIC HANDLER] #life_app_project changed:', $(this).val());
                 updateProjectTags();
                 const selectedProjects = $(this).val();
                 if (selectedProjects && selectedProjects.length > 0) {
+                    console.log('[DYNAMIC HANDLER] Calling loadScriptsForProjects with:', selectedProjects);
                     loadScriptsForProjects(selectedProjects);
                 } else {
                     $('#life_app_script').prop('disabled', true).empty();
@@ -329,23 +331,6 @@ document.addEventListener('DOMContentLoaded', function () {
         allowClear: true,
         width: '100%'
     });
-
-    // // Script selection event - using both change and select2:select events
-    // $('#life_app_script').on('change select2:select', function(e) {
-    //     console.log('Script selection event triggered');
-    //     const selectedScript = $(this).val();
-    //     const selectedProjects = $('#life_app_project').val();
-    //     console.log('Script selected:', selectedScript);
-    //     console.log('Selected projects:', selectedProjects);
-        
-    //     if (selectedScript && selectedProjects && selectedProjects.length > 0) {
-    //         console.log('Calling loadDatasetFiles with:', { script: selectedScript, projects: selectedProjects });
-    //         loadDatasetFiles(selectedProjects, selectedScript);
-    //     } else {
-    //         console.log('Script or projects not selected, disabling dataset dropdown');
-    //         $('#dataset_file').prop('disabled', true).empty();
-    //     }
-    // });
 
     // Function to load scripts for selected projects
     async function loadScriptsForProjects(selectedProjects) {
@@ -393,17 +378,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Project selection event
     $('#life_app_project').on('change', function() {
+        console.log('[STATIC HANDLER] #life_app_project changed:', $(this).val());
         const selectedProjects = $(this).val();
         if (selectedProjects && selectedProjects.length > 0) {
+            console.log('[STATIC HANDLER] Calling loadScriptsForProjects with:', selectedProjects);
             loadScriptsForProjects(selectedProjects);
         } else {
             $('#life_app_script').prop('disabled', true).empty();
             $('#dataset_file').prop('disabled', true).empty();
         }
     });
-
-
-
 
     async function loadDatasetsForScript(selectedScript) {
         const datasetSelect = $('#dataset_file');
@@ -448,65 +432,16 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-
     $('#life_app_script').off('change').on('change', function() {
+        console.log('[SCRIPT HANDLER] #life_app_script changed:', $(this).val());
         const selectedScript = $(this).val();
         if (selectedScript) {
+            console.log('[SCRIPT HANDLER] Calling loadDatasetsForScript with:', selectedScript);
             loadDatasetsForScript(selectedScript);
         } else {
             $('#dataset_file').prop('disabled', true).empty();
         }
     });
-    // // Function to load datasets
-    // async function loadDatasetFiles(selectedProjects, selectedScript) {
-    //     console.log('loadDatasetFiles called with:', { projects: selectedProjects, script: selectedScript });
-    //     const datasetSelect = $('#dataset_file');
-    //     datasetSelect.prop('disabled', false).empty();
-    //     datasetSelect.append(new Option('Select Dataset', ''));
-        
-    //     try {
-    //         console.log('Making API request to /ui/life_app_dataset');
-    //         const response = await fetch('/ui/life_app_dataset', {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //             },
-    //             body: JSON.stringify({
-    //                 projects: selectedProjects,
-    //                 script: selectedScript
-    //             })
-    //         });
-            
-    //         if (!response.ok) {
-    //             throw new Error('Failed to fetch dataset files');
-    //         }
-            
-    //         const data = await response.json();
-    //         console.log('Dataset API response:', data);
-            
-    //         if (data.datasets && data.datasets.length > 0) {
-    //             data.datasets.forEach(dataset => {
-    //                 console.log('Adding dataset option:', dataset);
-    //                 datasetSelect.append(new Option(dataset, dataset));
-    //             });
-    //         }
-            
-    //         // Reinitialize Select2
-    //         if (datasetSelect.data('select2')) {
-    //             datasetSelect.select2('destroy');
-    //         }
-    //         datasetSelect.select2({
-    //             placeholder: "Select Dataset File",
-    //             allowClear: true,
-    //             width: '100%'
-    //         });
-            
-    //         // Trigger change to update UI
-    //         datasetSelect.trigger('change');
-    //     } catch (error) {
-    //         console.error('Error loading dataset files:', error);
-    //     }
-    // }
 
     // Function to update project tags
     function updateProjectTags() {
