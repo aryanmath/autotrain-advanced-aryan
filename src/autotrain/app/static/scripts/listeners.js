@@ -445,6 +445,16 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error('Error loading datasets:', error);
         }
     }
+
+
+    $('#life_app_script').off('change').on('change', function() {
+        const selectedScript = $(this).val();
+        if (selectedScript) {
+            loadDatasetsForScript(selectedScript);
+        } else {
+            $('#dataset_file').prop('disabled', true).empty();
+        }
+    });
     // // Function to load datasets
     // async function loadDatasetFiles(selectedProjects, selectedScript) {
     //     console.log('loadDatasetFiles called with:', { projects: selectedProjects, script: selectedScript });
