@@ -402,6 +402,49 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+
+
+
+    async function loadDatasetsForScript(selectedScript) {
+        const datasetSelect = $('#dataset_file');
+        datasetSelect.prop('disabled', false).empty();
+        datasetSelect.append(new Option('Select Dataset', ''));
+    
+        try {
+            const response = await fetch('/ui/script_selected', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ script: selectedScript })
+            });
+    
+            if (!response.ok) {
+                throw new Error('Failed to fetch datasets');
+            }
+    
+            const data = await response.json();
+            if (data.datasets && data.datasets.length > 0) {
+                data.datasets.forEach(dataset => {
+                    datasetSelect.append(new Option(dataset, dataset));
+                });
+            }
+    
+            // Reinitialize Select2
+            if (datasetSelect.data('select2')) {
+                datasetSelect.select2('destroy');
+            }
+            datasetSelect.select2({
+                placeholder: "Select Dataset File",
+                allowClear: true,
+                width: '100%'
+            });
+    
+            datasetSelect.trigger('change');
+        } catch (error) {
+            console.error('Error loading datasets:', error);
+        }
+    }
     // // Function to load datasets
     // async function loadDatasetFiles(selectedProjects, selectedScript) {
     //     console.log('loadDatasetFiles called with:', { projects: selectedProjects, script: selectedScript });
