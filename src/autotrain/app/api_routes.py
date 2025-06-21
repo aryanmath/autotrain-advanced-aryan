@@ -28,6 +28,8 @@ from autotrain.trainers.automatic_speech_recognition.params import AutomaticSpee
 
 FIELDS_TO_EXCLUDE = HIDDEN_PARAMS + ["push_to_hub"]
 
+_VERIFIED_API_TOKEN = None
+
 
 def create_api_base_model(base_class, class_name):
     """
@@ -633,13 +635,17 @@ def api_auth(request: Request):
     Raises:
         HTTPException: If the token is invalid, expired, or missing.
     """
+    global _VERIFIED_API_TOKEN
     authorization = request.headers.get("Authorization")
     if authorization:
         schema, _, token = authorization.partition(" ")
         if schema.lower() == "bearer":
             token = token.strip()
+            if _VERIFIED_API_TOKEN == token:
+                return token
             try:
                 _ = token_verification(token=token)
+                _VERIFIED_API_TOKEN = token
                 return token
             except Exception as e:
                 logger.error(f"Failed to verify token: {e}")
