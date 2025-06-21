@@ -6,8 +6,11 @@ from typing import Optional
 from autotrain import logger
 from autotrain.cli.run import AutoTrainCLI
 from autotrain.cli.utils import get_field_info
+from autotrain.project import AutoTrainProject
 from autotrain.trainers.automatic_speech_recognition import __main__ as trainer
 from autotrain.trainers.automatic_speech_recognition.params import AutomaticSpeechRecognitionParams
+
+from . import BaseAutoTrainCommand
 
 
 def run_automatic_speech_recognition_command_factory(args):
