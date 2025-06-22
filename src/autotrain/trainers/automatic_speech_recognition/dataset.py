@@ -50,7 +50,9 @@ class AutomaticSpeechRecognitionDataset:
         logger.info(f"Detected model type: {self.model_type}")
         
         # Verify audio files exist and can be loaded
+        logger.info("Verifying audio files...")
         self._verify_audio_files()
+        logger.info("Audio files verified.")
         
     def _get_model_type(self) -> str:
         """
@@ -125,6 +127,8 @@ class AutomaticSpeechRecognitionDataset:
         Returns:
             dict: Processed item with input features and labels
         """
+        if idx % 100 == 0:
+            logger.info("Processing dataset item %d/%d", idx, len(self._data))
         try:
             item = self._data[idx]
             

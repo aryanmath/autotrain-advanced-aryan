@@ -195,7 +195,8 @@ def load_model_and_processor(params):
     """
     try:
         # Load processor
-        logger.info(f"Loading processor: {params.model}")
+        # logger.info(f"Loading processor: {params.model}")
+        logger.info("Starting processor load for: %s", params.model)
         try:
             processor = AutoProcessor.from_pretrained(
                 params.model,
@@ -262,7 +263,9 @@ def load_model_and_processor(params):
         
         # Move model to device
         device = "cuda" if torch.cuda.is_available() else "cpu"
+        logger.info("Moving model to device: %s", device)
         model = model.to(device)
+        logger.info("Model moved to device: %s", device)
         
         # Log model configuration
         logger.info(f"Model type: {model.__class__.__name__}")
@@ -452,7 +455,6 @@ def train(config: Dict[str, Any]):
             remove_unused_columns=False,
             fp16=params.mixed_precision == "fp16",
             bf16=params.mixed_precision == "bf16",
-            # Add more robust training arguments
             dataloader_num_workers=4,
             dataloader_pin_memory=True,
             gradient_checkpointing=True,
