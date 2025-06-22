@@ -292,115 +292,48 @@ def load_model_and_processor(params):
 
 @monitor
 def train(config: Dict[str, Any]):
-    """
-    Train ASR model.
-    
-    Args:
-        config: Training configuration
-    """
     try:
-        # Parse parameters
-        params = AutomaticSpeechRecognitionParams(**config)
-
         # Setup detailed logging
-        training_logger = get_training_logger(params.output_dir)
-        training_logger.info("Initializing ASR training...")
-
-        # Fix data path if needed
-        if not params.using_hub_dataset:
-            # Set the correct data path
-            data_path = r"C:\Users\Aryan\Downloads\archive"
-            training_logger.info(f"Using fixed data path: {data_path}")
-
-            # Verify paths exist
-            csv_path = os.path.join(data_path, "dataset.csv")
-            audio_path = os.path.join(data_path, "audio")
-
-            if not os.path.exists(csv_path):
-                raise ValueError(f"CSV file not found at: {csv_path}")
-            if not os.path.exists(audio_path):
-                raise ValueError(f"Audio folder not found at: {audio_path}")
-
-            # Update data path
-            params.data_path = data_path
-            training_logger.info(f"CSV file path: {csv_path}")
-            training_logger.info(f"Audio folder path: {audio_path}")
-
-        # Validate parameters
-        params.validate_params()
-
-        # Log parameters
-        training_logger.info("Training parameters:")
-        training_logger.info(json.dumps(params.model_dump(), indent=2))
-
-        # Set device
+        training_logger = get_training_logger(config.get('output_dir', '.'))
+        training_logger.info("[LIVE] Initializing ASR training pipeline...")
+        params = AutomaticSpeechRecognitionParams(**config)
+        training_logger.info("[LIVE] Parameters parsed.")
         device = "cuda" if torch.cuda.is_available() else "cpu"
-        training_logger.info(f"Using device: {device}")
-        training_logger.info(f"CUDA available: {torch.cuda.is_available()}")
-        if torch.cuda.is_available():
-            training_logger.info(f"CUDA device: {torch.cuda.get_device_name(0)}")
-            training_logger.info(f"CUDA memory allocated: {torch.cuda.memory_allocated(0) / 1024**2:.2f} MB")
-            training_logger.info(f"CUDA memory cached: {torch.cuda.memory_reserved(0) / 1024**2:.2f} MB")
+        training_logger.info("[LIVE] Using device: %s", device)
+
+        # Log the actual data_path and column mapping being used
+        training_logger.info("[LIVE] Using data_path: %s", params.data_path)
+        training_logger.info("[LIVE] Using audio_column: %s", getattr(params, 'audio_column', None))
+        training_logger.info("[LIVE] Using text_column: %s", getattr(params, 'text_column', None))
 
         # Load dataset
-        training_logger.info("Loading dataset...")
-        training_logger.info(f"Dataset path: {params.data_path}")
-        training_logger.info(f"Using hub dataset: {params.using_hub_dataset}")
-
-        if params.using_hub_dataset:
-            # Load from HuggingFace Hub
-            training_logger.info("Loading dataset from HuggingFace Hub...")
-            dataset = load_data(params)
-            training_logger.info(f"Successfully loaded {len(dataset)} examples from hub")
-        else:
-            # Load from local directory
-            training_logger.info("Loading dataset from local directory...")
-            dataset = load_data(params)
-            training_logger.info(f"Successfully loaded {len(dataset)} examples from local directory")
-
-            # Verify dataset structure
-            if len(dataset) == 0:
-                raise ValueError("Dataset is empty")
-
-            # Log first few examples
-            training_logger.info("First few examples in dataset:")
-            for i in range(min(3, len(dataset))):
-                training_logger.info(f"Example {i}:")
-                training_logger.info(f"  Audio path: {dataset[i]['audio']}")
-                training_logger.info(f"  Transcription: {dataset[i]['transcription']}")
-
-        # Load validation dataset if available
+        training_logger.info("[LIVE] Loading dataset...")
+        dataset = load_data(params)
+        training_logger.info("[LIVE] Dataset loaded with %d examples.", len(dataset))
         if params.valid_split:
-            training_logger.info(f"Loading validation dataset: {params.valid_split}")
+            training_logger.info("[LIVE] Loading validation dataset...")
             valid_dataset = load_data(params, is_validation=True)
-            training_logger.info(f"Successfully loaded {len(valid_dataset)} validation examples")
+            training_logger.info("[LIVE] Validation dataset loaded with %d examples.", len(valid_dataset))
         else:
-            training_logger.info("No validation file found")
             valid_dataset = None
-
-        # Load model and processor
-        training_logger.info(f"Loading model and processor: {params.model}")
+        training_logger.info("[LIVE] Loading model and processor...")
         model, processor = load_model_and_processor(params)
-
-        # Log model info
-        training_logger.info("Successfully loaded model: " + model.__class__.__name__)
-        training_logger.info("Successfully loaded processor: " + processor.__class__.__name__)
-
-        # Log model configuration
-        training_logger.info("Model configuration:")
-        training_logger.info(f"Model type: {model.__class__.__name__}")
-        training_logger.info(f"Number of parameters: {sum(p.numel() for p in model.parameters())}")
-        training_logger.info(f"Model device: {next(model.parameters()).device}")
-
-        # Create training dataset
-        training_logger.info("Creating training dataset...")
-        training_logger.info(f"Dataset columns before creation: {dataset.column_names}")
-        if len(dataset) > 0:
-            training_logger.info(f"First example before creation: {dataset[0]}")
-
-        try:
-            train_dataset = AutomaticSpeechRecognitionDataset(
-                data=dataset,
+        training_logger.info("[LIVE] Model and processor loaded.")
+        training_logger.info("[LIVE] Creating training dataset object...")
+        train_dataset = AutomaticSpeechRecognitionDataset(
+            data=dataset,
+            processor=processor,
+            config=params,
+            audio_column=params.audio_column,
+            text_column=params.text_column,
+            max_duration=params.max_duration,
+            sampling_rate=params.sampling_rate,
+        )
+        training_logger.info("[LIVE] Training dataset object created with %d examples.", len(train_dataset))
+        if valid_dataset is not None:
+            training_logger.info("[LIVE] Creating validation dataset object...")
+            valid_dataset_obj = AutomaticSpeechRecognitionDataset(
+                data=valid_dataset,
                 processor=processor,
                 config=params,
                 audio_column=params.audio_column,
@@ -408,32 +341,8 @@ def train(config: Dict[str, Any]):
                 max_duration=params.max_duration,
                 sampling_rate=params.sampling_rate,
             )
-            training_logger.info(f"Successfully created training dataset with {len(train_dataset)} examples")
-            # Log first example
-            training_logger.info(f"First example after creation: {train_dataset[0]}")
-        except Exception as e:
-            training_logger.error(f"Error creating dataset: {str(e)}")
-            raise
-
-        # Create validation dataset if available
-        if valid_dataset is not None:
-            training_logger.info("Creating validation dataset...")
-            try:
-                valid_dataset = AutomaticSpeechRecognitionDataset(
-                    data=valid_dataset,
-                    processor=processor,
-                    config=params,
-                    audio_column=params.audio_column,
-                    text_column=params.text_column,
-                    max_duration=params.max_duration,
-                    sampling_rate=params.sampling_rate,
-                )
-                training_logger.info(f"Successfully created validation dataset with {len(valid_dataset)} examples")
-            except Exception as e:
-                training_logger.error(f"Error creating validation dataset: {str(e)}")
-                raise
-
-        # Create training arguments
+            training_logger.info("[LIVE] Validation dataset object created with %d examples.", len(valid_dataset_obj))
+        training_logger.info("[LIVE] Initializing Trainer...")
         training_args = TrainingArguments(
             output_dir=params.output_dir,
             per_device_train_batch_size=params.batch_size,
@@ -466,48 +375,26 @@ def train(config: Dict[str, Any]):
             report_to="tensorboard",
             seed=42,
         )
-
-        # Create trainer with detailed logging callback
+        training_logger.info("[LIVE] Trainer arguments set. Initializing Trainer...")
         trainer = Trainer(
             model=model,
             args=training_args,
             train_dataset=train_dataset,
-            eval_dataset=valid_dataset,
-            tokenizer=processor,
-            compute_metrics=compute_metrics,
+            eval_dataset=valid_dataset_obj if valid_dataset is not None else None,
             callbacks=[
-                EarlyStoppingCallback(early_stopping_patience=3),
                 LossLoggingCallback(),
                 TrainStartCallback(),
-                UploadLogs(),
+                PrinterCallback(),
                 DetailedTrainingCallback(),
+                EarlyStoppingCallback(early_stopping_patience=3) if valid_dataset is not None else None,
+                UploadLogs(params) if params.push_to_hub else None,
             ],
         )
-
-        # Train model
-        training_logger.info("Starting training...")
+        training_logger.info("[LIVE] Trainer initialized. Starting training...")
         trainer.train()
-        
-        # Save model
-        training_logger.info("Saving model...")
-        trainer.save_model(params.output_dir)
-        processor.save_pretrained(params.output_dir)
-
-        # Create model card
-        training_logger.info("Creating model card...")
-        model_card = create_model_card(params, trainer)
-        with open(os.path.join(params.output_dir, "README.md"), "w") as f:
-            f.write(model_card)
-
-        # Push to hub if requested
-        if params.push_to_hub:
-            training_logger.info("Pushing model to hub...")
-            trainer.push_to_hub()
-
-        training_logger.info("Training completed successfully!")
-
+        training_logger.info("[LIVE] Training complete.")
     except Exception as e:
-        training_logger.error(f"Error during training: {str(e)}")
+        training_logger.error("[LIVE] Error in training pipeline: %s", str(e))
         logger.error(traceback.format_exc())
         raise
 
