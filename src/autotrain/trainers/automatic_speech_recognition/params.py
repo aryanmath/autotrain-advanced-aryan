@@ -36,6 +36,16 @@ class AutomaticSpeechRecognitionParams(AutoTrainParams):
         push_to_hub (bool): Whether to push the model to the HuggingFace Hub.
         hub_model_id (Optional[str]): ID of the model on the HuggingFace Hub.
         log (str): Logging method for experiment tracking.
+        logging_steps (int): Number of steps between logging.
+        save_total_limit (int): Maximum number of checkpoints to keep.
+        warmup_ratio (float): Warmup ratio for learning rate scheduler.
+        weight_decay (float): Weight decay for the optimizer.
+        max_grad_norm (float): Maximum gradient norm for clipping.
+        seed (int): Random seed for reproducibility.
+        early_stopping_patience (int): Number of epochs with no improvement for early stopping.
+        early_stopping_threshold (float): Threshold for early stopping improvement.
+        auto_find_batch_size (bool): Automatically find optimal batch size.
+        eval_strategy (str): Evaluation strategy during training.
     """
     # Base fields
     project_name: str
@@ -72,6 +82,18 @@ class AutomaticSpeechRecognitionParams(AutoTrainParams):
     
     # Logging field
     log: str = Field("tensorboard", title="Logging method for experiment tracking")
+    
+    # New fields
+    logging_steps: int = Field(10, title="Number of steps between logging")
+    save_total_limit: int = Field(2, title="Maximum number of checkpoints to keep")
+    warmup_ratio: float = Field(0.1, title="Warmup ratio for learning rate scheduler")
+    weight_decay: float = Field(0.01, title="Weight decay for the optimizer")
+    max_grad_norm: float = Field(1.0, title="Maximum gradient norm for clipping")
+    seed: int = Field(42, title="Random seed for reproducibility")
+    early_stopping_patience: int = Field(3, title="Number of epochs with no improvement for early stopping")
+    early_stopping_threshold: float = Field(0.01, title="Threshold for early stopping improvement")
+    auto_find_batch_size: bool = Field(False, title="Automatically find optimal batch size")
+    eval_strategy: str = Field("epoch", title="Evaluation strategy during training")
     
     def validate_params(self):
         """Validate parameters."""
