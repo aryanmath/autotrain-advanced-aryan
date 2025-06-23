@@ -223,34 +223,27 @@ document.addEventListener('DOMContentLoaded', function () {
     observeParamChanges();
     updateTextarea();
 
-    // LiFE App Source Selection Logic
-    const lifeAppSource = document.getElementById('life-app-source');
-    const lifeAppApiContainer = document.getElementById('life-app-api-container');
-    const lifeAppJsonContainer = document.getElementById('life-app-json-container');
-    const lifeAppJsonFile = document.getElementById('life-app-json-file');
-    const lifeAppJsonStatus = document.getElementById('life-app-json-status');
-
-    if (lifeAppSource && lifeAppApiContainer && lifeAppJsonContainer) {
-        function toggleLifeAppSourceUI() {
-            if (lifeAppSource.value === 'json') {
-                lifeAppApiContainer.style.display = 'none';
-                lifeAppJsonContainer.style.display = '';
-            } else {
-                lifeAppApiContainer.style.display = '';
-                lifeAppJsonContainer.style.display = 'none';
-                window.lifeAppData = undefined;
-                if (lifeAppJsonStatus) lifeAppJsonStatus.textContent = '';
-            }
+    // LiFE App Dataset Selection (API vs JSON)
+    document.getElementById('life-app-source').addEventListener('change', function() {
+        const apiContainer = document.getElementById('life-app-api-container');
+        const jsonContainer = document.getElementById('life-app-json-container');
+        
+        if (this.value === 'api') {
+            apiContainer.style.display = 'block';
+            jsonContainer.style.display = 'none';
+        } else if (this.value === 'json') {
+            apiContainer.style.display = 'none';
+            jsonContainer.style.display = 'block';
+        } else {
+            apiContainer.style.display = 'none';
+            jsonContainer.style.display = 'none';
         }
-        lifeAppSource.addEventListener('change', toggleLifeAppSourceUI);
-        // Set initial state
-        toggleLifeAppSourceUI();
-    }
+    });
 
-    if (lifeAppJsonFile) {
-        lifeAppJsonFile.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
+    // Handle JSON file selection
+    document.getElementById('life-app-json-file').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
@@ -262,20 +255,18 @@ document.addEventListener('DOMContentLoaded', function () {
                         throw new Error('JSON array is empty');
                     }
                     const firstItem = data[0];
-                    if (!('audio' in firstItem) || !('transcription' in firstItem)) {
+                    if (!firstItem.audio || !firstItem.transcription) {
                         throw new Error('Each item must have audio and transcription fields');
                     }
                     window.lifeAppData = data;
-                    if (lifeAppJsonStatus) lifeAppJsonStatus.textContent = 'JSON loaded successfully!';
                 } catch (error) {
-                    window.lifeAppData = undefined;
-                    if (lifeAppJsonStatus) lifeAppJsonStatus.textContent = 'Invalid JSON file: ' + error.message;
+                    alert('Invalid JSON file: ' + error.message);
                     e.target.value = '';
                 }
             };
             reader.readAsText(file);
-        });
-    }
+        }
+    });
 
     // Function to load projects
     async function loadLifeAppProjects() {

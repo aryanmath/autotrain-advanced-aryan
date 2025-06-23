@@ -555,51 +555,36 @@
 
                         <!-- Move LiFE App selection here, just after hub-data-tab-content -->
                         <div id="life-app-selection" style="display:none;" class="w-full px-4 mb-4">
-                            <!-- LiFE App Source Selection Dropdown -->
-                            <div class="mb-2">
-                                <label for="life-app-source" class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">LiFE App Source</label>
-                                <select id="life-app-source" name="life-app-source" class="block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 mb-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                                    <option value="api" selected>API</option>
-                                    <option value="json">JSON File</option>
-                                </select>
-                            </div>
-                            <!-- API Container: Existing LiFE App UI -->
-                            <div id="life-app-api-container">
-                                <div class="flex flex-wrap gap-4">
-                                    <!-- Projects Multi-select -->
-                                    <div class="flex-1">
-                                        <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">LiFE App Project(s)
-                                        </label>
-                                        <select id="life_app_project" name="life_app_project" multiple
-                                            class="block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 mb-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                                        </select>
-                                        <div id="life-app-project-tags" class="mb-2"></div>
-                                    </div>
-                                    <!-- Script Dropdown -->
-                                    <div class="flex-1">
-                                        <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">LiFE App Script
-                                        </label>
-                                        <select id="life_app_script" name="life_app_script"
-                                            class="block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 mb-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                                            <option value="">Select Script</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <!-- Dataset File Dropdown -->
-                                <div id="dataset_file_div">
-                                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">Dataset File
+                            <div class="flex flex-wrap gap-4">
+                                <!-- Projects Multi-select -->
+                                <div class="flex-1">
+                                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">LiFE App Project(s)
                                     </label>
-                                    <select id="dataset_file" name="dataset_file"
-                                        class="js-example-basic-single block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 mb-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                                        <option value="">Select Dataset</option>
+                                    <select id="life_app_project" name="life_app_project" multiple
+                                        class="block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 mb-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    </select>
+                                    <div id="life-app-project-tags" class="mb-2"></div>
+                                </div>
+
+                                <!-- Script Dropdown -->
+                                <div class="flex-1">
+                                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">LiFE App Script
+                                    </label>
+                                    <select id="life_app_script" name="life_app_script"
+                                        class="block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 mb-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                        <option value="">Select Script</option>
                                     </select>
                                 </div>
                             </div>
-                            <!-- JSON File Upload Container (hidden by default) -->
-                            <div id="life-app-json-container" style="display:none;">
-                                <label for="life-app-json-file" class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">Upload LiFE App JSON File</label>
-                                <input type="file" id="life-app-json-file" accept=".json" class="block w-full text-sm text-gray-700 dark:text-gray-300 mb-2" />
-                                <div id="life-app-json-status" class="text-xs text-gray-500 dark:text-gray-400"></div>
+
+                            <!-- Dataset File Dropdown -->
+                            <div id="dataset_file_div">
+                                <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">Dataset File
+                                </label>
+                                <select id="dataset_file" name="dataset_file"
+                                    class="js-example-basic-single block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 mb-2 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="">Select Dataset</option>
+                                </select>
                             </div>
                         </div>
                     </div>
