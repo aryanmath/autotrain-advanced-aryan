@@ -3,10 +3,11 @@ from pydantic import BaseModel, Field
 from autotrain.app.models import fetch_models
 import os
 import logging
+from autotrain.trainers.common import AutoTrainParams
 
 logger = logging.getLogger(__name__)
 
-class AutomaticSpeechRecognitionParams(BaseModel):
+class AutomaticSpeechRecognitionParams(AutoTrainParams):
     """
     Parameters for automatic speech recognition training.
 
@@ -34,6 +35,7 @@ class AutomaticSpeechRecognitionParams(BaseModel):
         mixed_precision (str): Mixed precision training type.
         push_to_hub (bool): Whether to push the model to the HuggingFace Hub.
         hub_model_id (Optional[str]): ID of the model on the HuggingFace Hub.
+        log (str): Logging method for experiment tracking.
     """
     # Base fields
     project_name: str
@@ -67,6 +69,9 @@ class AutomaticSpeechRecognitionParams(BaseModel):
     # Hub fields
     push_to_hub: bool = False
     hub_model_id: Optional[str] = None
+    
+    # Logging field
+    log: str = Field("tensorboard", title="Logging method for experiment tracking")
     
     def validate_params(self):
         """Validate parameters."""
