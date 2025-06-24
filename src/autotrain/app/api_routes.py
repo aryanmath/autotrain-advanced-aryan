@@ -235,22 +235,22 @@ class AutomaticSpeechRecognitionColumnMapping(BaseModel):
     text_column: str
 
 
-class AutomaticSpeechRecognitionParamsAPI(BaseModel):
-    mixed_precision: str = Field(default="fp16", description="Mixed precision training")
-    log: str = Field(default="tensorboard", description="Logging method")
-    max_duration: float = Field(default=30.0, description="Maximum audio duration in seconds")
-    sampling_rate: int = Field(default=16000, description="Audio sampling rate")
-    audio_column: str = Field(default="audio", description="Column name for audio data")
-    text_column: str = Field(default="transcription", description="Column name for transcription text")
-    max_grad_norm: float = Field(default=1.0, description="Maximum gradient norm")
-    weight_decay: float = Field(default=0.01, description="Weight decay")
-    warmup_ratio: float = Field(default=0.1, description="Warmup ratio")
-    early_stopping_patience: int = Field(default=3, description="Early stopping patience")
-    early_stopping_threshold: float = Field(default=0.01, description="Early stopping threshold")
-    eval_strategy: str = Field(default="epoch", description="Evaluation strategy")
-    save_total_limit: int = Field(default=1, description="Total number of checkpoints to save")
-    auto_find_batch_size: bool = Field(default=False, description="Auto find batch size")
-    logging_steps: int = Field(default=-1, description="Logging steps")
+# class AutomaticSpeechRecognitionParamsAPI(BaseModel):
+#     mixed_precision: str = Field(default="fp16", description="Mixed precision training")
+#     log: str = Field(default="tensorboard", description="Logging method")
+#     max_duration: float = Field(default=30.0, description="Maximum audio duration in seconds")
+#     sampling_rate: int = Field(default=16000, description="Audio sampling rate")
+#     audio_column: str = Field(default="audio", description="Column name for audio data")
+#     text_column: str = Field(default="transcription", description="Column name for transcription text")
+#     max_grad_norm: float = Field(default=1.0, description="Maximum gradient norm")
+#     weight_decay: float = Field(default=0.01, description="Weight decay")
+#     warmup_ratio: float = Field(default=0.1, description="Warmup ratio")
+#     early_stopping_patience: int = Field(default=3, description="Early stopping patience")
+#     early_stopping_threshold: float = Field(default=0.01, description="Early stopping threshold")
+#     eval_strategy: str = Field(default="epoch", description="Evaluation strategy")
+#     save_total_limit: int = Field(default=1, description="Total number of checkpoints to save")
+#     auto_find_batch_size: bool = Field(default=False, description="Auto find batch size")
+#     logging_steps: int = Field(default=-1, description="Logging steps")
 
 
 class APICreateProjectModel(BaseModel):
