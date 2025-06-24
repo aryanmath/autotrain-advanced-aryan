@@ -197,7 +197,16 @@ class AutomaticSpeechRecognitionDataset:
                 raise ValueError(f"Invalid text in row {idx}: {text}")
 
             # Process target text (transcription)
-            if self.model_type == "ctc" and hasattr(self.processor, "as_target_processor"):
+            if self.model_type == "ctc":
+                # For CTC models, use the tokenizer directly for text
+                target = self.processor.tokenizer(
+                    text,
+                    truncation=True,
+                    max_length=self.max_seq_length,
+                    return_tensors="pt",
+                )
+            elif self.model_type == "seq2seq" and hasattr(self.processor, "as_target_processor"):
+                # For seq2seq models (Whisper, MMS, etc.), use as_target_processor
                 with self.processor.as_target_processor():
                     target = self.processor(
                         text,
