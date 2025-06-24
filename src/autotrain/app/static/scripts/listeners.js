@@ -374,9 +374,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Always re-attach the change handler after Select2 re-init
             scriptSelect.off('change').on('change', function() {
                 const selectedScript = $(this).val();
-                window.selectedScript = selectedScript; // Store globally
-                // Force Select2 to update UI immediately
-                scriptSelect.val(selectedScript).trigger('change.select2');
+                window.selectedScript = selectedScript;
                 if (selectedScript) {
                     loadDatasetsForScript(selectedScript);
                 } else {
