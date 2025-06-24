@@ -442,9 +442,13 @@ class DetailedTrainingCallback(TrainerCallback):
             remaining_steps = state.max_steps - state.global_step
             eta = remaining_steps / steps_per_second if steps_per_second > 0 else 0
             
-            # Get current metrics
-            current_loss = state.log_history[-1].get('loss', 'N/A')
-            current_lr = state.log_history[-1].get('learning_rate', 'N/A')
+            # Get current metrics - add safety check for empty log_history
+            if state.log_history:
+                current_loss = state.log_history[-1].get('loss', 'N/A')
+                current_lr = state.log_history[-1].get('learning_rate', 'N/A')
+            else:
+                current_loss = 'N/A'
+                current_lr = 'N/A'
             
             # Update best loss
             if isinstance(current_loss, (int, float)) and current_loss < self.best_loss:
@@ -452,8 +456,27 @@ class DetailedTrainingCallback(TrainerCallback):
             
             # Log progress
             logger.info(f"⏳ Progress: {progress:.1f}% ({state.global_step}/{state.max_steps})")
-            logger.info(f"📈 Loss: {current_loss:.4f} (Best: {self.best_loss:.4f})")
-            logger.info(f"📊 Learning Rate: {current_lr:.2e}")
+            
+            # Handle loss formatting - check if it's a number or string
+            if isinstance(current_loss, (int, float)):
+                loss_str = f"{current_loss:.4f}"
+            else:
+                loss_str = str(current_loss)
+            
+            if isinstance(self.best_loss, (int, float)) and self.best_loss != float('inf'):
+                best_loss_str = f"{self.best_loss:.4f}"
+            else:
+                best_loss_str = "N/A"
+            
+            logger.info(f"📈 Loss: {loss_str} (Best: {best_loss_str})")
+            
+            # Handle learning rate formatting
+            if isinstance(current_lr, (int, float)):
+                lr_str = f"{current_lr:.2e}"
+            else:
+                lr_str = str(current_lr)
+            
+            logger.info(f"📊 Learning Rate: {lr_str}")
             logger.info(f"⏱️ Elapsed: {elapsed}")
             logger.info(f"⏳ ETA: {timedelta(seconds=int(eta))}")
             
@@ -467,9 +490,25 @@ class DetailedTrainingCallback(TrainerCallback):
         """Called at the end of an epoch."""
         logger.info("=" * 80)
         logger.info(f"✅ Epoch {self.current_epoch} completed")
-        logger.info(f"📊 Average loss: {state.log_history[-1].get('loss', 'N/A'):.4f}")
-        if 'eval_loss' in state.log_history[-1]:
-            logger.info(f"📊 Validation loss: {state.log_history[-1]['eval_loss']:.4f}")
+        
+        # Add safety check for empty log_history
+        if state.log_history:
+            current_loss = state.log_history[-1].get('loss', 'N/A')
+            if isinstance(current_loss, (int, float)):
+                loss_str = f"{current_loss:.4f}"
+            else:
+                loss_str = str(current_loss)
+            logger.info(f"📊 Average loss: {loss_str}")
+            
+            if 'eval_loss' in state.log_history[-1]:
+                eval_loss = state.log_history[-1]['eval_loss']
+                if isinstance(eval_loss, (int, float)):
+                    eval_loss_str = f"{eval_loss:.4f}"
+                else:
+                    eval_loss_str = str(eval_loss)
+                logger.info(f"📊 Validation loss: {eval_loss_str}")
+        else:
+            logger.info("📊 Average loss: N/A")
         logger.info("=" * 80)
         
     def on_train_end(self, args, state, control, **kwargs):
@@ -480,8 +519,29 @@ class DetailedTrainingCallback(TrainerCallback):
         logger.info("🎉 Training Completed")
         logger.info("=" * 80)
         logger.info(f"⏱️ Total training time: {total_time}")
-        logger.info(f"📊 Final loss: {state.log_history[-1].get('loss', 'N/A'):.4f}")
-        if 'eval_loss' in state.log_history[-1]:
-            logger.info(f"📊 Final validation loss: {state.log_history[-1]['eval_loss']:.4f}")
-        logger.info(f"🏆 Best loss: {self.best_loss:.4f}")
+        
+        # Add safety check for empty log_history
+        if state.log_history:
+            current_loss = state.log_history[-1].get('loss', 'N/A')
+            if isinstance(current_loss, (int, float)):
+                loss_str = f"{current_loss:.4f}"
+            else:
+                loss_str = str(current_loss)
+            logger.info(f"📊 Final loss: {loss_str}")
+            
+            if 'eval_loss' in state.log_history[-1]:
+                eval_loss = state.log_history[-1]['eval_loss']
+                if isinstance(eval_loss, (int, float)):
+                    eval_loss_str = f"{eval_loss:.4f}"
+                else:
+                    eval_loss_str = str(eval_loss)
+                logger.info(f"📊 Final validation loss: {eval_loss_str}")
+        else:
+            logger.info("📊 Final loss: N/A")
+        
+        if isinstance(self.best_loss, (int, float)) and self.best_loss != float('inf'):
+            best_loss_str = f"{self.best_loss:.4f}"
+        else:
+            best_loss_str = "N/A"
+        logger.info(f"🏆 Best loss: {best_loss_str}")
         logger.info("=" * 80)

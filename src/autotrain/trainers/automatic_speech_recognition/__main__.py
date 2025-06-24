@@ -54,15 +54,19 @@ def dynamic_padding_collator(batch):
     input_features = [item['input_features'] for item in batch]
     labels = [item['labels'] for item in batch]
     
-    # Find max length in this batch
-    max_length = max(feat.shape[1] for feat in input_features)
+    # For Whisper models, ensure all features are padded to 3000 frames
+    target_length = 3000  # Whisper expects 3000 frames
     
-    # Pad all features to max length in batch
+    # Pad all features to target length
     padded_features = []
     for feat in input_features:
-        if feat.shape[1] < max_length:
-            padding = torch.zeros(80, max_length - feat.shape[1])
+        if feat.shape[1] < target_length:
+            # Pad with zeros to reach target_length
+            padding = torch.zeros(80, target_length - feat.shape[1])
             padded_feat = torch.cat([feat, padding], dim=1)
+        elif feat.shape[1] > target_length:
+            # Truncate if longer than target_length
+            padded_feat = feat[:, :target_length]
         else:
             padded_feat = feat
         padded_features.append(padded_feat)

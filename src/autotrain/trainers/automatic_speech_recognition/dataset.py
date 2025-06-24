@@ -131,8 +131,7 @@ class AutomaticSpeechRecognitionDataset:
                         audio,
                         sampling_rate=self.sampling_rate,
                         return_tensors="pt",
-                        padding="max_length",  # Always pad
-                        max_length=3000,        # Whisper expects 3000 frames
+                        padding=False,  # No padding here - will be done at batch level
                         truncation=True,
                     )
                     input_features = inputs.input_features[0]
