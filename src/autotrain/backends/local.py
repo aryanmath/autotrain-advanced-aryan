@@ -105,7 +105,7 @@ class LocalRunner(BaseBackend):
                 json.dump(config_dict, f, indent=2)
             
             # Construct the training command
-            command = f"python -m autotrain.trainers.ASR.__main__ --training_config {config_path}"
+            command = f"python -m autotrain.trainers.automatic_speech_recognition.__main__ --training_config {config_path}"
             
             # Run the training
             logger.info(f"Running ASR command: {command}")
