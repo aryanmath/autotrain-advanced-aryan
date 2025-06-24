@@ -1,255 +1,3 @@
-# import argparse
-# import json
-# import os
-# from accelerate.state import PartialState
-# from datasets import load_dataset, load_from_disk, Dataset
-# from huggingface_hub import HfApi
-# from transformers import (
-#     AutoConfig,
-#     AutoModelForSpeechSeq2Seq,
-#     AutoModelForCTC,
-#     AutoProcessor,
-#     EarlyStoppingCallback,
-#     Trainer,
-#     TrainingArguments,
-# )
-# from transformers.trainer_callback import PrinterCallback
-
-# from autotrain import logger
-# from autotrain.trainers.common import (
-#     ALLOW_REMOTE_CODE,
-#     LossLoggingCallback,
-#     TrainStartCallback,
-#     UploadLogs,
-#     monitor,
-#     pause_space,
-#     remove_autotrain_data,
-#     save_training_params,
-# )
-# from autotrain.trainers.automatic_speech_recognition.params import AutomaticSpeechRecognitionParams
-# from autotrain.trainers.automatic_speech_recognition.dataset import AutomaticSpeechRecognitionDataset
-# from autotrain.trainers.automatic_speech_recognition.utils import compute_metrics, create_model_card
-
-# CACHE_DIR = r"C:/Users/Aryan/.cache/huggingface/hub/"
-
-# print(">>> RUNNING __main__.py FROM:", __file__)
-
-# def parse_args():
-#     parser = argparse.ArgumentParser()
-#     parser.add_argument("--training_config", type=str, required=True)
-#     return parser.parse_args()
-
-
-# def load_data(config):
-#     # Support local CSV/JSON, local folder, or hub dataset
-#     if config.using_hub_dataset:
-#         logger.info("Loading dataset from HuggingFace Hub...")
-#         train_data = load_dataset(
-#             config.data_path,
-#             split=config.train_split,
-#             token=config.token,
-#             trust_remote_code=ALLOW_REMOTE_CODE,
-#         )
-#         valid_data = load_dataset(
-#             config.data_path,
-#             split=config.valid_split,
-#             token=config.token,
-#             trust_remote_code=ALLOW_REMOTE_CODE,
-#         ) if config.valid_split else None
-#     elif os.path.isdir(config.data_path):
-#         logger.info("Loading dataset from disk...")
-#         ds = load_from_disk(config.data_path)
-#         train_data = ds["train"] if "train" in ds else ds[0]
-#         valid_data = ds["validation"] if "validation" in ds else (ds["test"] if "test" in ds else None)
-#     elif config.data_path.endswith(".csv"):
-#         logger.info("Loading dataset from CSV file...")
-#         ds = Dataset.from_csv(config.data_path)
-#         train_data, valid_data = None, None
-#         if "split" in ds.column_names:
-#             train_data = ds.filter(lambda x: x["split"] == "train")
-#             valid_data = ds.filter(lambda x: x["split"] == "validation")
-#         else:
-#             ds = ds.train_test_split(test_size=0.2, seed=config.seed)
-#             train_data = ds["train"]
-#             valid_data = ds["test"]
-#     elif config.data_path.endswith(".json"):
-#         logger.info("Loading dataset from JSON file...")
-#         ds = Dataset.from_json(config.data_path)
-#         ds = ds.train_test_split(test_size=0.2, seed=config.seed)
-#         train_data = ds["train"]
-#         valid_data = ds["test"]
-#     else:
-#         raise ValueError(f"Unsupported data format: {config.data_path}")
-
-#     required_columns = [config.audio_column, config.text_column]
-#     missing_columns = [col for col in required_columns if col not in ds.column_names]
-#     if missing_columns:
-#         raise ValueError(f"Missing required columns in CSV: {missing_columns}. Available columns: {ds.column_names}")
-
-#     return train_data, valid_data
-
-
-# @monitor
-# def train(config):
-#     logger.info("[DEBUG] Entered train() function.")
-#     if isinstance(config, dict):
-#         config = AutomaticSpeechRecognitionParams(**config)
-#     config.validate_params()
-
-#     logger.info("Loading data...")
-#     train_data, valid_data = load_data(config)
-
-#     logger.info("Loading processor...")
-#     try:
-#         processor = AutoProcessor.from_pretrained(
-#             config.model,
-#             token=config.token,
-#             trust_remote_code=ALLOW_REMOTE_CODE,
-#         )
-#     except Exception as e:
-#         logger.error(f"Failed to load processor: {e}")
-#         raise
-
-#     logger.info("Loading model...")
-#     model_type = None
-#     try:
-#         # Try Seq2Seq first (Whisper, MMS, etc.)
-#         model = AutoModelForSpeechSeq2Seq.from_pretrained(
-#             config.model,
-#             token=config.token,
-#             trust_remote_code=ALLOW_REMOTE_CODE,
-#         )
-#         model_type = "seq2seq"
-#         logger.info("Loaded model as Seq2Seq.")
-#     except Exception:
-#         try:
-#             # Try CTC (Wav2Vec2, Hubert, etc.)
-#             model = AutoModelForCTC.from_pretrained(
-#                 config.model,
-#                 token=config.token,
-#                 trust_remote_code=ALLOW_REMOTE_CODE,
-#             )
-#             model_type = "ctc"
-#             logger.info("Loaded model as CTC.")
-#         except Exception as e:
-#             logger.error(f"Failed to load model as Seq2Seq or CTC: {e}")
-#             raise
-
-#     logger.info("Setting up training arguments...")
-#     training_args = TrainingArguments(
-#         output_dir=config.project_name,
-#         per_device_train_batch_size=config.batch_size,
-#         per_device_eval_batch_size=2 * config.batch_size,
-#         learning_rate=config.lr,
-#         num_train_epochs=config.epochs,
-#         logging_steps=config.logging_steps,
-#         save_total_limit=config.save_total_limit,
-#         fp16=config.mixed_precision == "fp16",
-#         bf16=config.mixed_precision == "bf16",
-#         evaluation_strategy=config.eval_strategy if valid_data is not None else "no",
-#         save_strategy=config.eval_strategy if valid_data is not None else "no",
-#         load_best_model_at_end=True if valid_data is not None else False,
-#         report_to=config.log,
-#         auto_find_batch_size=config.auto_find_batch_size,
-#         lr_scheduler_type=config.scheduler,
-#         optim=config.optimizer,
-#         warmup_ratio=config.warmup_ratio,
-#         weight_decay=config.weight_decay,
-#         max_grad_norm=config.max_grad_norm,
-#         ddp_find_unused_parameters=False,
-#         push_to_hub=False,
-#         seed=config.seed,
-#     )
-
-#     logger.info("Setting up callbacks...")
-#     callbacks = [UploadLogs(config=config), LossLoggingCallback(), TrainStartCallback()]
-#     if valid_data is not None:
-#         callbacks.append(EarlyStoppingCallback(
-#             early_stopping_patience=config.early_stopping_patience,
-#             early_stopping_threshold=config.early_stopping_threshold,
-#         ))
-#     callbacks.append(PrinterCallback())
-
-#     logger.info("Preparing datasets...")
-#     logger.info(f"[DEBUG] Passing model_type to dataset: {model_type}")
-#     train_dataset = AutomaticSpeechRecognitionDataset(
-#         data=train_data,
-#         processor=processor,
-#         config=config,
-#         audio_column=config.audio_column,
-#         text_column=config.text_column,
-#         max_duration=config.max_duration,
-#         sampling_rate=config.sampling_rate,
-#         model_type=model_type,  # <-- pass correct model_type
-#     )
-#     valid_dataset = None
-#     if valid_data is not None:
-#         logger.info(f"[DEBUG] Passing model_type to valid dataset: {model_type}")
-#         valid_dataset = AutomaticSpeechRecognitionDataset(
-#             data=valid_data,
-#             processor=processor,
-#             config=config,
-#             audio_column=config.audio_column,
-#             text_column=config.text_column,
-#             max_duration=config.max_duration,
-#             sampling_rate=config.sampling_rate,
-#             model_type=model_type,  # <-- pass correct model_type
-#         )
-
-#     logger.info("Initializing Trainer...")
-#     trainer = Trainer(
-#         model=model,
-#         args=training_args,
-#         train_dataset=train_dataset,
-#         eval_dataset=valid_dataset,
-#         tokenizer=processor,
-#         callbacks=callbacks,
-#         compute_metrics=compute_metrics if valid_dataset is not None else None,
-#     )
-
-#     logger.info("Starting training...")
-#     trainer.remove_callback(PrinterCallback)
-#     trainer.train()
-#     logger.info("[DEBUG] Finished trainer.train() call.")
-
-#     logger.info("Saving model and processor...")
-#     trainer.save_model(config.project_name)
-#     processor.save_pretrained(config.project_name)
-
-#     logger.info("Creating model card...")
-#     model_card = create_model_card(config, trainer)
-#     with open(f"{config.project_name}/README.md", "w") as f:
-#         f.write(model_card)
-
-#     if config.push_to_hub:
-#         if PartialState().process_index == 0:
-#             remove_autotrain_data(config)
-#             save_training_params(config)
-#             logger.info("Pushing model to hub...")
-#             api = HfApi(token=config.token)
-#             api.create_repo(
-#                 repo_id=f"{config.username}/{config.project_name}", repo_type="model", private=True, exist_ok=True
-#             )
-#             api.upload_folder(
-#                 folder_path=config.project_name,
-#                 repo_id=f"{config.username}/{config.project_name}",
-#                 repo_type="model",
-#             )
-#     if PartialState().process_index == 0:
-#         pause_space(config)
-
-
-# if __name__ == "__main__":
-#     args = parse_args()
-#     with open(args.training_config, "r") as f:
-#         training_config = json.load(f)
-#     config = AutomaticSpeechRecognitionParams(**training_config)
-#     train(config)
-
-
-
-
-
 import argparse
 import json
 import os
@@ -638,6 +386,48 @@ def train(config: Dict[str, Any]):
             seed=42,
         )
         training_logger.info("[LIVE] Trainer arguments set. Initializing Trainer...")
+        
+        # Create custom data collator for dynamic padding
+        def dynamic_padding_collator(batch):
+            """Custom collator that handles dynamic padding for different audio lengths."""
+            # Separate input_features and labels
+            input_features = [item['input_features'] for item in batch]
+            labels = [item['labels'] for item in batch]
+            
+            # Find max length in this batch
+            max_length = max(feat.shape[1] for feat in input_features)
+            
+            # Pad all features to max length in batch
+            padded_features = []
+            for feat in input_features:
+                if feat.shape[1] < max_length:
+                    padding = torch.zeros(80, max_length - feat.shape[1])
+                    padded_feat = torch.cat([feat, padding], dim=1)
+                else:
+                    padded_feat = feat
+                padded_features.append(padded_feat)
+            
+            # Stack features
+            input_features = torch.stack(padded_features)
+            
+            # Pad labels
+            max_label_length = max(len(label) for label in labels)
+            padded_labels = []
+            for label in labels:
+                if len(label) < max_label_length:
+                    padding = torch.full((max_label_length - len(label),), -100)  # -100 is ignore_index
+                    padded_label = torch.cat([label, padding])
+                else:
+                    padded_label = label
+                padded_labels.append(padded_label)
+            
+            labels = torch.stack(padded_labels)
+            
+            return {
+                'input_features': input_features,
+                'labels': labels,
+            }
+        
         callbacks = [
             LossLoggingCallback(),
             TrainStartCallback(),
@@ -654,6 +444,7 @@ def train(config: Dict[str, Any]):
             train_dataset=train_dataset,
             eval_dataset=valid_dataset_obj if valid_dataset is not None else None,
             callbacks=callbacks,
+            data_collator=dynamic_padding_collator,  # Use custom collator
         )
         training_logger.info("[LIVE] Trainer initialized. Starting training...")
         trainer.train()

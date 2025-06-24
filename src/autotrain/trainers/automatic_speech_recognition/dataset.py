@@ -116,7 +116,7 @@ class AutomaticSpeechRecognitionDataset:
             # Load audio
             audio, sr = librosa.load(audio_path, sr=self.sampling_rate)
             
-            # Check duration
+            # Check duration and truncate if needed
             duration = len(audio) / sr
             if duration > self.max_duration:
                 logger.warning(f"Audio duration {duration:.2f}s exceeds max_duration {self.max_duration}s, truncating")
@@ -131,10 +131,11 @@ class AutomaticSpeechRecognitionDataset:
                         audio,
                         sampling_rate=self.sampling_rate,
                         return_tensors="pt",
-                        padding=True,
+                        padding=False,  # No padding here - will be done at batch level
                         truncation=True,
                     )
                     input_features = inputs.input_features[0]
+                    
                 except Exception as e:
                     logger.warning(f"Seq2Seq audio processing failed: {e}")
                     # Fallback: use raw audio
@@ -147,10 +148,11 @@ class AutomaticSpeechRecognitionDataset:
                         audio,
                         sampling_rate=self.sampling_rate,
                         return_tensors="pt",
-                        padding=True,
+                        padding=False,  # No padding here - will be done at batch level
                         truncation=True,
                     )
                     input_features = inputs.input_values[0]
+                        
                 except Exception as e:
                     logger.warning(f"CTC audio processing failed: {e}")
                     # Fallback: use raw audio
@@ -163,7 +165,7 @@ class AutomaticSpeechRecognitionDataset:
                         audio,
                         sampling_rate=self.sampling_rate,
                         return_tensors="pt",
-                        padding=True,
+                        padding=False,  # No padding here - will be done at batch level
                         truncation=True,
                     )
                     if hasattr(inputs, 'input_features'):
@@ -172,6 +174,7 @@ class AutomaticSpeechRecognitionDataset:
                         input_features = inputs.input_values[0]
                     else:
                         input_features = torch.tensor(audio, dtype=torch.float32)
+                            
                 except Exception as e:
                     logger.warning(f"Generic audio processing failed: {e}")
                     input_features = torch.tensor(audio, dtype=torch.float32)
@@ -199,7 +202,10 @@ class AutomaticSpeechRecognitionDataset:
         except Exception as e:
             logger.error(f"Error processing item {idx}: {str(e)}")
             # Return dummy data to prevent training from crashing
-            dummy_audio = torch.zeros(1000, dtype=torch.float32)
+            if self.model_type == 'seq2seq':
+                dummy_audio = torch.zeros(80, 100, dtype=torch.float32)  # Small dummy size
+            else:
+                dummy_audio = torch.zeros(1000, dtype=torch.float32)  # Small dummy size
             dummy_labels = torch.tensor([0], dtype=torch.long)
             
             if self.model_type == 'seq2seq':
