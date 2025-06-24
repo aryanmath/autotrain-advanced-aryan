@@ -23,6 +23,44 @@ def detect_model_type(model):
     # Add more as needed
     return "ctc"  # Default fallback
 
+def safe_tokenize_text(processor, text, max_seq_length=128):
+    # Try as_target_processor context if available
+    if hasattr(processor, "as_target_processor"):
+        try:
+            with processor.as_target_processor():
+                return processor(
+                    text,
+                    truncation=True,
+                    max_length=max_seq_length,
+                    return_tensors="pt",
+                ).input_ids.squeeze(0)
+        except Exception:
+            pass
+    # Try processor.tokenizer if available
+    if hasattr(processor, "tokenizer"):
+        try:
+            return processor.tokenizer(
+                text,
+                truncation=True,
+                max_length=max_seq_length,
+                return_tensors="pt",
+                add_special_tokens=True,
+            ).input_ids.squeeze(0)
+        except Exception:
+            pass
+    # Try processor directly
+    try:
+        return processor(
+            text,
+            truncation=True,
+            max_length=max_seq_length,
+            return_tensors="pt",
+        ).input_ids.squeeze(0)
+    except Exception:
+        pass
+    # Fallback: raise error
+    raise ValueError("Could not tokenize text with any known method for this processor.")
+
 class AutomaticSpeechRecognitionDataset:
     """
     Dataset for automatic speech recognition.
@@ -219,42 +257,18 @@ class AutomaticSpeechRecognitionDataset:
 
             # Process target text (transcription)
             logger.info(f"Tokenizing text for model_type {self.model_type}: {text}")
-            if self.model_type == "ctc":
-                # For CTC models (like wav2vec2), DO NOT pass return_attention_mask for text
-                target = self.processor.tokenizer(
-                    text,
-                    return_tensors="pt",
-                    add_special_tokens=True,
-                )
-                labels = target.input_ids.squeeze(0)
-            elif self.model_type == "seq2seq" and hasattr(self.processor, "as_target_processor"):
-                # For seq2seq models (Whisper, MMS, etc.), use as_target_processor
-                with self.processor.as_target_processor():
-                    target = self.processor(
-                        text,
-                        truncation=True,
-                        max_length=self.max_seq_length,
-                        return_tensors="pt",
-                    )
-                labels = target.input_ids.squeeze(0)
-            else:
-                target = self.processor.tokenizer(
-                    text,
-                    return_tensors="pt",
-                    add_special_tokens=True,
-                )
-                labels = target.input_ids.squeeze(0)
+            labels = safe_tokenize_text(self.processor, text, self.max_seq_length)
             
             # Return features based on model type
             if self.model_type == 'seq2seq':
                 return {
                     "input_features": input_features,
-                    "labels": target.input_ids,
+                    "labels": labels,
                 }
             else:
                 return {
                     "input_values": input_features,
-                    "labels": target.input_ids,
+                    "labels": labels,
                 }
 
         except Exception as e:
