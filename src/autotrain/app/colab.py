@@ -78,7 +78,7 @@ def colab_app():
         "ST Pair Scoring": "st:pair_score",
         "ST Triplet": "st:triplet",
         "ST Question Answering": "st:qa",
-        "Automatic Speech Recognition": "automatic-speech-recognition",
+        "Automatic Speech Recognition": "automatic_speech_recognition",
         "text_classification": "text_classification",
         "seq2seq": "seq2seq",
         "dreambooth": "dreambooth",
