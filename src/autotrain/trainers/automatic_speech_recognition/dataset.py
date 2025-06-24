@@ -48,10 +48,12 @@ class AutomaticSpeechRecognitionDataset:
         self.sampling_rate = sampling_rate
         
         # Determine model type
+        logger.info(f"[DEBUG] Received model_type argument: {model_type}")
         if model_type is not None:
             self.model_type = model_type
         else:
             self.model_type = self._get_model_type()
+        logger.info(f"[DEBUG] Final self.model_type in dataset: {self.model_type}")
         logger.info(f"Detected model type: {self.model_type}")
         
         # Verify audio files exist and can be loaded

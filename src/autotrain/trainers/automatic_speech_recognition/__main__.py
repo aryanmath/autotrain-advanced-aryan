@@ -117,6 +117,7 @@ def train(config):
                 trust_remote_code=ALLOW_REMOTE_CODE,
             )
             model_type = "seq2seq"
+            logger.info(f"[DEBUG] model_type set to: {model_type}")
         except Exception:
             model = AutoModelForCTC.from_pretrained(
                 config.model,
@@ -124,6 +125,7 @@ def train(config):
                 trust_remote_code=ALLOW_REMOTE_CODE,
             )
             model_type = "ctc"
+            logger.info(f"[DEBUG] model_type set to: {model_type}")
     except Exception as e:
         logger.error(f"Failed to load model: {e}")
         raise
@@ -164,6 +166,7 @@ def train(config):
     callbacks.append(PrinterCallback())
 
     logger.info("Preparing datasets...")
+    logger.info(f"[DEBUG] Passing model_type to dataset: {model_type}")
     train_dataset = AutomaticSpeechRecognitionDataset(
         data=train_data,
         processor=processor,
@@ -176,6 +179,7 @@ def train(config):
     )
     valid_dataset = None
     if valid_data is not None:
+        logger.info(f"[DEBUG] Passing model_type to valid dataset: {model_type}")
         valid_dataset = AutomaticSpeechRecognitionDataset(
             data=valid_data,
             processor=processor,
