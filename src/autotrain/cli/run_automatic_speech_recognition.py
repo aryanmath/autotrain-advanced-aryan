@@ -7,8 +7,8 @@ from autotrain import logger
 from autotrain.cli.run import AutoTrainCLI
 from autotrain.cli.utils import get_field_info
 from autotrain.project import AutoTrainProject
-from autotrain.trainers.ASR import __main__ as trainer
-from autotrain.trainers.ASR.params import AutomaticSpeechRecognitionParams
+from autotrain.trainers.automatic_speech_recognition import __main__ as trainer
+from autotrain.trainers.automatic_speech_recognition.params import AutomaticSpeechRecognitionParams
 
 from . import BaseAutoTrainCommand
 

@@ -38,9 +38,9 @@ from autotrain.trainers.common import (
     save_training_params,
     DetailedTrainingCallback,
 )
-from autotrain.trainers.ASR.dataset import AutomaticSpeechRecognitionDataset
-from autotrain.trainers.ASR.params import AutomaticSpeechRecognitionParams
-from autotrain.trainers.ASR.utils import compute_metrics
+from autotrain.trainers.automatic_speech_recognition.dataset import AutomaticSpeechRecognitionDataset
+from autotrain.trainers.automatic_speech_recognition.params import AutomaticSpeechRecognitionParams
+from autotrain.trainers.automatic_speech_recognition.utils import compute_metrics
 from autotrain.logger import get_training_logger
 
 def parse_args():

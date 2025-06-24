@@ -30,7 +30,7 @@ from autotrain.preprocessor.vision import (
     ObjectDetectionPreprocessor,
 )
 from autotrain.preprocessor.vlm import VLMPreprocessor
-from autotrain.preprocessor.ASR import AutomaticSpeechRecognitionPreprocessor
+from autotrain.preprocessor.automatic_speech_recognition import AutomaticSpeechRecognitionPreprocessor
 
 
 def remove_non_image_files(folder):

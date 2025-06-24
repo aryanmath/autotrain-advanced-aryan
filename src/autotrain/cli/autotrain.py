@@ -18,7 +18,7 @@ from autotrain.cli.run_text_regression import RunAutoTrainTextRegressionCommand
 from autotrain.cli.run_token_classification import RunAutoTrainTokenClassificationCommand
 from autotrain.cli.run_tools import RunAutoTrainToolsCommand
 from autotrain.parser import AutoTrainConfigParser
-from autotrain.cli.run_ASR import RunAutoTrainAutomaticSpeechRecognitionCommand
+from autotrain.cli.run_automatic_speech_recognition import RunAutoTrainAutomaticSpeechRecognitionCommand
 from autotrain import logger
 
 

@@ -23,7 +23,7 @@ from autotrain.trainers.text_classification.params import TextClassificationPara
 from autotrain.trainers.text_regression.params import TextRegressionParams
 from autotrain.trainers.token_classification.params import TokenClassificationParams
 from autotrain.trainers.vlm.params import VLMTrainingParams
-from autotrain.trainers.ASR.params import AutomaticSpeechRecognitionParams
+from autotrain.trainers.automatic_speech_recognition.params import AutomaticSpeechRecognitionParams
 
 
 FIELDS_TO_EXCLUDE = HIDDEN_PARAMS + ["push_to_hub"]
