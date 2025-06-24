@@ -199,23 +199,34 @@ class AutomaticSpeechRecognitionDataset:
             if not text or not isinstance(text, str):
                 raise ValueError(f"Invalid text in row {idx}: {text}")
 
-            # Process text with processor
-            try:
+            # Process target text (transcription)
+            if hasattr(self.processor, "as_target_processor"):
                 with self.processor.as_target_processor():
-                    labels = self.processor(text).input_ids
-            except Exception as e:
-                raise ValueError(f"Error processing text with processor: {str(e)}")
+                    target = self.processor(
+                        text,
+                        truncation=True,
+                        max_length=self.max_seq_length,
+                        return_tensors="pt",
+                    )
+            else:
+                # For WhisperProcessor and others without as_target_processor
+                target = self.processor(
+                    text,
+                    truncation=True,
+                    max_length=self.max_seq_length,
+                    return_tensors="pt",
+                )
             
             # Return features based on model type
             if self.model_type == 'seq2seq':
                 return {
                     "input_features": input_features,
-                    "labels": labels,
+                    "labels": target.input_ids,
                 }
             else:
                 return {
                     "input_values": input_features,
-                    "labels": labels,
+                    "labels": target.input_ids,
                 }
 
         except Exception as e:
