@@ -638,19 +638,22 @@ def train(config: Dict[str, Any]):
             seed=42,
         )
         training_logger.info("[LIVE] Trainer arguments set. Initializing Trainer...")
+        callbacks = [
+            LossLoggingCallback(),
+            TrainStartCallback(),
+            PrinterCallback(),
+            DetailedTrainingCallback(),
+            EarlyStoppingCallback(early_stopping_patience=3) if valid_dataset is not None else None,
+            UploadLogs(params) if params.push_to_hub else None,
+        ]
+        callbacks = [cb for cb in callbacks if cb is not None]
+
         trainer = Trainer(
             model=model,
             args=training_args,
             train_dataset=train_dataset,
             eval_dataset=valid_dataset_obj if valid_dataset is not None else None,
-            callbacks=[
-                LossLoggingCallback(),
-                TrainStartCallback(),
-                PrinterCallback(),
-                DetailedTrainingCallback(),
-                EarlyStoppingCallback(early_stopping_patience=3) if valid_dataset is not None else None,
-                UploadLogs(params) if params.push_to_hub else None,
-            ],
+            callbacks=callbacks,
         )
         training_logger.info("[LIVE] Trainer initialized. Starting training...")
         trainer.train()
