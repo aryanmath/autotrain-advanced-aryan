@@ -330,12 +330,12 @@ if __name__ == "__main__":
 #             logger.info(f"Number of examples: {len(df)}")
             
 #             # Map column names if needed
-#             if 'autotrain_audio' in df.columns:
-#                 logger.info("Mapping autotrain_audio to audio")
-#                 df = df.rename(columns={'autotrain_audio': 'audio'})
-#             if 'autotrain_transcription' in df.columns:
-#                 logger.info("Mapping autotrain_transcription to transcription")
-#                 df = df.rename(columns={'autotrain_transcription': 'transcription'})
+#             if 'audio' in df.columns:
+#                 logger.info("Mapping audio to audio")
+#                 df = df.rename(columns={'audio': 'audio'})
+#             if 'transcription' in df.columns:
+#                 logger.info("Mapping transcription to transcription")
+#                 df = df.rename(columns={'transcription': 'transcription'})
             
 #             # Verify required columns
 #             required_columns = ['audio', 'transcription']

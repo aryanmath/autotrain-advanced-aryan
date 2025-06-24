@@ -472,8 +472,8 @@ def asr_munge_data(params, local):
         )
         params.data_path = dset.prepare()
         params.valid_split = "validation"
-        params.audio_column = "autotrain_audio"
-        params.text_column = "autotrain_transcription"
+        params.audio_column = "audio"
+        params.text_column = "transcription"
     # Add support for LiFE App dataset
     if hasattr(params, "data_path") and params.data_path == "life_app_data":
         params.text_column = "transcription"

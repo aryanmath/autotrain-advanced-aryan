@@ -6,7 +6,7 @@ from datasets import Dataset, DatasetDict
 from sklearn.model_selection import train_test_split
 from autotrain import logger
 
-RESERVED_COLUMNS = ["autotrain_audio", "autotrain_transcription", "autotrain_duration"]
+RESERVED_COLUMNS = ["audio", "transcription", "duration"]
 
 @dataclass
 class AutomaticSpeechRecognitionPreprocessor:
@@ -72,12 +72,12 @@ class AutomaticSpeechRecognitionPreprocessor:
     def prepare_columns(self, train_df, valid_df):
         # Rename columns to standard names
         train_df = train_df.rename(columns={
-            self.audio_column: "autotrain_audio",
-            self.text_column: "autotrain_transcription"
+            self.audio_column: "audio",
+            self.text_column: "transcription"
         })
         valid_df = valid_df.rename(columns={
-            self.audio_column: "autotrain_audio",
-            self.text_column: "autotrain_transcription"
+            self.audio_column: "audio",
+            self.text_column: "transcription"
         })
         # If duration column exists, rename it
         if self.duration_column and self.duration_column in train_df.columns:
@@ -88,7 +88,7 @@ class AutomaticSpeechRecognitionPreprocessor:
 
     def check_audio_files(self, df):
         missing = []
-        for idx, path in enumerate(df["autotrain_audio"]):
+        for idx, path in enumerate(df["audio"]):
             if not os.path.exists(path):
                 missing.append((idx, path))
         if missing:
@@ -98,7 +98,7 @@ class AutomaticSpeechRecognitionPreprocessor:
             raise ValueError(msg)
 
     def normalize_text(self, df):
-        df["autotrain_transcription"] = df["autotrain_transcription"].astype(str).str.strip().str.lower()
+        df["transcription"] = df["transcription"].astype(str).str.strip().str.lower()
         return df
 
     def prepare(self):
@@ -236,12 +236,12 @@ class AutomaticSpeechRecognitionPreprocessor:
 #         """Prepare columns for training."""
 #         # Rename columns to standard names that the trainer expects
 #         train_df = train_df.rename(columns={
-#             self.audio_column: "autotrain_audio",
-#             self.text_column: "autotrain_transcription"
+#             self.audio_column: "audio",
+#             self.text_column: "transcription"
 #         })
 #         valid_df = valid_df.rename(columns={
-#             self.audio_column: "autotrain_audio",
-#             self.text_column: "autotrain_transcription"
+#             self.audio_column: "audio",
+#             self.text_column: "transcription"
 #         })
 #         return train_df, valid_df
 

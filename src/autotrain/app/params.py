@@ -514,8 +514,8 @@ class AppParams:
         if "log" not in _params:
             _params["log"] = "tensorboard"
         if not self.using_hub_dataset:
-            _params["audio_column"] = "autotrain_audio"
-            _params["text_column"] = "autotrain_transcription"
+            _params["audio_column"] = "audio"
+            _params["text_column"] = "transcription"
             _params["valid_split"] = "validation"
         else:
             _params["audio_column"] = self.column_mapping.get("audio" if not self.api else "audio_column", "audio")
