@@ -83,6 +83,7 @@ def load_data(config):
 
 @monitor
 def train(config):
+    logger.info("[DEBUG] Entered train() function.")
     if isinstance(config, dict):
         config = AutomaticSpeechRecognitionParams(**config)
     config.validate_params()
@@ -190,6 +191,7 @@ def train(config):
     logger.info("Starting training...")
     trainer.remove_callback(PrinterCallback)
     trainer.train()
+    logger.info("[DEBUG] Finished trainer.train() call.")
 
     logger.info("Saving model and processor...")
     trainer.save_model(config.project_name)
