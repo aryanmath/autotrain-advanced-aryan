@@ -78,6 +78,12 @@ def load_data(config):
         valid_data = ds["test"]
     else:
         raise ValueError(f"Unsupported data format: {config.data_path}")
+
+    required_columns = [config.audio_column, config.text_column]
+    missing_columns = [col for col in required_columns if col not in ds.column_names]
+    if missing_columns:
+        raise ValueError(f"Missing required columns in CSV: {missing_columns}. Available columns: {ds.column_names}")
+
     return train_data, valid_data
 
 
