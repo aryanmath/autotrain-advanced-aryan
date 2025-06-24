@@ -206,12 +206,13 @@ class AutomaticSpeechRecognitionDataset:
 
             # Process target text (transcription)
             if self.model_type == "ctc":
-                # For CTC models, use the tokenizer directly for text
+                # For CTC models (like wav2vec2), DO NOT pass return_attention_mask for text
                 target = self.processor.tokenizer(
                     text,
                     return_tensors="pt",
                     add_special_tokens=True,
                 )
+                labels = target.input_ids.squeeze(0)
             elif self.model_type == "seq2seq" and hasattr(self.processor, "as_target_processor"):
                 # For seq2seq models (Whisper, MMS, etc.), use as_target_processor
                 with self.processor.as_target_processor():
@@ -221,6 +222,7 @@ class AutomaticSpeechRecognitionDataset:
                         max_length=self.max_seq_length,
                         return_tensors="pt",
                     )
+                labels = target.input_ids.squeeze(0)
             else:
                 target = self.processor(
                     text,
@@ -228,6 +230,7 @@ class AutomaticSpeechRecognitionDataset:
                     max_length=self.max_seq_length,
                     return_tensors="pt",
                 )
+                labels = target.input_ids.squeeze(0)
             
             # Return features based on model type
             if self.model_type == 'seq2seq':
