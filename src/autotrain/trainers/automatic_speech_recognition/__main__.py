@@ -414,8 +414,8 @@ def train(config: Dict[str, Any]):
             remove_unused_columns=False,
             fp16=params.mixed_precision == "fp16",
             bf16=params.mixed_precision == "bf16",
-            dataloader_num_workers=4,
-            dataloader_pin_memory=True,
+            dataloader_num_workers=0,  # Disable multiprocessing to avoid pickle issues
+            dataloader_pin_memory=False,  # Disable pin memory since we're using CPU
             gradient_checkpointing=True,
             optim="adamw_torch",
             lr_scheduler_type="linear",
