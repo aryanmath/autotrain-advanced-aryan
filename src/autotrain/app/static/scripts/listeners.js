@@ -341,27 +341,16 @@ document.addEventListener('DOMContentLoaded', function () {
         try {
             const response = await fetch('/ui/project_selected', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ 
-                    projects: selectedProjects 
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ projects: selectedProjects })
             });
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch scripts');
-            }
-
+            if (!response.ok) throw new Error('Failed to fetch scripts');
             const data = await response.json();
             if (data.scripts) {
                 data.scripts.forEach(script => {
                     scriptSelect.append(new Option(script, script));
                 });
             }
-
-            // Save previously selected script if any
-            let prevSelected = scriptSelect.val();
 
             // Reinitialize Select2 after adding options
             if (scriptSelect.data('select2')) {
@@ -373,21 +362,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 width: '100%'
             });
 
-            // If only one script, select it automatically
-            if (data.scripts && data.scripts.length === 1) {
+            // Restore previous selection if possible
+            if (window.selectedScript && data.scripts.includes(window.selectedScript)) {
+                scriptSelect.val(window.selectedScript).trigger('change');
+            } else if (data.scripts && data.scripts.length === 1) {
                 scriptSelect.val(data.scripts[0]).trigger('change');
-            } else if (prevSelected && data.scripts.includes(prevSelected)) {
-                scriptSelect.val(prevSelected).trigger('change');
             } else {
                 scriptSelect.val('').trigger('change');
             }
 
             // Always re-attach the change handler after Select2 re-init
             scriptSelect.off('change').on('change', function() {
-                console.log('[SCRIPT HANDLER] #life_app_script changed:', $(this).val());
                 const selectedScript = $(this).val();
+                window.selectedScript = selectedScript; // Store globally
                 if (selectedScript) {
-                    console.log('[SCRIPT HANDLER] Calling loadDatasetsForScript with:', selectedScript);
                     loadDatasetsForScript(selectedScript);
                 } else {
                     $('#dataset_file').prop('disabled', true).empty();
