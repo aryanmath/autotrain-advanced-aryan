@@ -478,8 +478,8 @@ async def fetch_model_choices(
         hub_models = MODEL_CHOICE["vlm"]
     elif task == "extractive-qa":
         hub_models = MODEL_CHOICE["extractive-qa"]
-    elif task == "automatic-speech-recognition":
-        hub_models = MODEL_CHOICE["automatic-speech-recognition"]
+    elif task == "automatic_speech_recognition":
+        hub_models = MODEL_CHOICE["automatic_speech_recognition"]
     else:
         raise NotImplementedError
 
@@ -559,7 +559,7 @@ async def handle_form(
         selected_script = "autotrain_dummy_script"
         logger.info(f"TEMPORARY BYPASS ACTIVE: Project set to '{selected_project}', Script set to '{selected_script}'")
 
-        if task != "automatic-speech-recognition":
+        if task != "automatic_speech_recognition":
             raise HTTPException(
                 status_code=400,
                 detail="LiFE app datasets can only be used with Automatic Speech Recognition tasks"
@@ -749,7 +749,7 @@ async def handle_form(
                 dset_task = "text_token_classification"
             elif task == "extractive-qa":
                 dset_task = "text_extractive_question_answering"
-            elif task == "automatic-speech-recognition":
+            elif task == "automatic_speech_recognition":
                 dset_task = "automatic_speech_recognition"
             else:
                 raise NotImplementedError

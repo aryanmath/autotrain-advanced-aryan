@@ -304,7 +304,7 @@ class APICreateProjectModel(BaseModel):
         "vlm:vqa",
         "extractive-question-answering",
         "image-object-detection",
-        "automatic-speech-recognition",
+        "automatic_speech_recognition",
     ]
     base_model: str
     hardware: Literal[
@@ -565,11 +565,11 @@ class APICreateProjectModel(BaseModel):
             if not values.get("column_mapping").get("objects_column"):
                 raise ValueError("objects_column is required for image-object-detection")
             values["column_mapping"] = ObjectDetectionColumnMapping(**values["column_mapping"])
-        elif values.get("task") == "automatic-speech-recognition":
+        elif values.get("task") == "automatic_speech_recognition":
             if not values.get("column_mapping"):
-                raise ValueError("column_mapping is required for automatic-speech-recognition")
+                raise ValueError("column_mapping is required for automatic_speech_recognition")
             if not values.get("column_mapping").get("text_column"):
-                raise ValueError("text_column is required for automatic-speech-recognition")
+                raise ValueError("text_column is required for automatic_speech_recognition")
             values["column_mapping"] = AutomaticSpeechRecognitionColumnMapping(**values["column_mapping"])
         return values
 
@@ -610,7 +610,7 @@ class APICreateProjectModel(BaseModel):
             values["params"] = ExtractiveQuestionAnsweringParamsAPI(**values["params"])
         elif values.get("task") == "image-object-detection":
             values["params"] = ObjectDetectionParamsAPI(**values["params"])
-        elif values.get("task") == "automatic-speech-recognition":
+        elif values.get("task") == "automatic_speech_recognition":
             values["params"] = AutomaticSpeechRecognitionParamsAPI(**values["params"])
         return values
 

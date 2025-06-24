@@ -326,7 +326,7 @@ def colab_app():
             col_mapping.value = '{"sentence1": "query", "sentence1": "answer"}'
             dataset_source_dropdown.disabled = False
             valid_split.disabled = False
-        elif task == "automatic-speech-recognition":
+        elif task == "automatic_speech_recognition":
             col_mapping.value = '{"audio": "audio", "transcription": "transcription"}'
             dataset_source_dropdown.disabled = False
             valid_split.disabled = False
@@ -354,8 +354,8 @@ def colab_app():
             base_model.value = MODEL_CHOICES["image-object-detection"][0]
         elif TASK_MAP[task_dropdown.value].startswith("st:"):
             base_model.value = MODEL_CHOICES["sentence-transformers"][0]
-        elif TASK_MAP[task_dropdown.value] == "automatic-speech-recognition":
-            base_model.value = MODEL_CHOICES["automatic-speech-recognition"][0]
+        elif TASK_MAP[task_dropdown.value] == "automatic_speech_recognition":
+            base_model.value = MODEL_CHOICES["automatic_speech_recognition"][0]
         else:
             base_model.value = "Enter base model..."
 

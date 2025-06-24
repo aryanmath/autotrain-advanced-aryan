@@ -343,7 +343,7 @@ def _fetch_asr_models():
     # Get models sorted by downloads
     hub_models = list(
         list_models(
-            task="automatic-speech-recognition",
+            task="automatic_speech_recognition",
             library="transformers",
             sort="downloads",
             direction=-1,
@@ -356,7 +356,7 @@ def _fetch_asr_models():
     # Get trending models
     trending_models = list(
         list_models(
-            task="automatic-speech-recognition",
+            task="automatic_speech_recognition",
             library="transformers",
             sort="likes7d",
             direction=-1,
@@ -385,7 +385,7 @@ def fetch_models():
     _mc["sentence-transformers"] = _fetch_st_models()
     _mc["vlm"] = _fetch_vlm_models()
     _mc["extractive-qa"] = _fetch_text_classification_models()
-    _mc["automatic-speech-recognition"] = _fetch_asr_models()
+    _mc["automatic_speech_recognition"] = _fetch_asr_models()
 
     # tabular-classification
     _mc["tabular-classification"] = [

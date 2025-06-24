@@ -229,7 +229,7 @@ class BaseBackend:
 
     def _get_task_specific_requirements(self):
         """Get task-specific requirements."""
-        if self.task == "automatic-speech-recognition":
+        if self.task == "automatic_speech_recognition":
             return [
                 "librosa>=0.10.0",
                 "soundfile>=0.12.1",

@@ -156,7 +156,7 @@ class AutoTrainConfigParser:
             "ext-qa": "text_extractive_question_answering",
             "extractive-qa": "text_extractive_question_answering",
             "automatic_speech_recognition": "automatic_speech_recognition",
-            "automatic-speech-recognition": "automatic_speech_recognition",
+            "automatic_speech_recognition": "automatic_speech_recognition",
             "asr": "automatic_speech_recognition",
         }
         task = self.config.get("task")
@@ -236,7 +236,7 @@ class AutoTrainConfigParser:
         logger.info(f"Job ID: {job_id}")
 
 def _get_task_specific_imports(task: str) -> str:
-    if task == "automatic-speech-recognition":
+    if task == "automatic_speech_recognition":
         return "from autotrain.trainers.automatic_speech_recognition import AutomaticSpeechRecognitionTrainer"
     elif task == "text-classification":
         return "from autotrain.trainers.text_classification import TextClassificationTrainer"
@@ -262,7 +262,7 @@ def _get_task_specific_imports(task: str) -> str:
         raise ValueError(f"Unsupported task: {task}")
 
 def _get_task_specific_train_call(task: str) -> str:
-    if task == "automatic-speech-recognition":
+    if task == "automatic_speech_recognition":
         return "trainer = AutomaticSpeechRecognitionTrainer(config)"
     elif task == "text-classification":
         return "trainer = TextClassificationTrainer(config)"

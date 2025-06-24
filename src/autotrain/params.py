@@ -136,7 +136,7 @@ PARAMS["extractive-qa"] = ExtractiveQuestionAnsweringParams(
     max_seq_length=512,
     max_doc_stride=128,
 ).model_dump()
-PARAMS["automatic-speech-recognition"] = AutomaticSpeechRecognitionParams(
+PARAMS["automatic_speech_recognition"] = AutomaticSpeechRecognitionParams(
     log="tensorboard",
     mixed_precision="fp16"
 ).model_dump()
@@ -222,7 +222,7 @@ class AppParams:
             return self._munge_params_vlm()
         elif self.task == "extractive-qa":
             return self._munge_params_extractive_qa()
-        elif self.task == "automatic-speech-recognition":
+        elif self.task == "automatic_speech_recognition":
             return self._munge_params_automatic_speech_recognition()
         else:
             raise ValueError(f"Unknown task: {self.task}")
@@ -759,7 +759,7 @@ def get_task_params(task, param_type):
             "early_stopping_threshold",
         ]
         task_params = {k: v for k, v in task_params.items() if k not in more_hidden_params}
-    if task == "automatic-speech-recognition" and param_type == "basic":
+    if task == "automatic_speech_recognition" and param_type == "basic":
         # Optionally filter out advanced ASR params if needed
         pass
 

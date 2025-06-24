@@ -48,7 +48,7 @@ class RunAutoTrainAutomaticSpeechRecognitionCommand(AutoTrainCLI):
             },
         ] + arg_list
         run_parser = parser.add_parser(
-            "automatic-speech-recognition",
+            "automatic_speech_recognition",
             description="✨ Run AutoTrain Automatic Speech Recognition"
         )
         for arg in arg_list:
@@ -114,7 +114,7 @@ class RunAutoTrainAutomaticSpeechRecognitionCommand(AutoTrainCLI):
         
         # Create training config
         training_config = {
-            "task": "automatic-speech-recognition",
+            "task": "automatic_speech_recognition",
             "model": self.args.model,
             "train_data": self.args.train_data,
             "valid_data": self.args.valid_data,

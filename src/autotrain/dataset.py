@@ -809,7 +809,7 @@ class AutoTrainDataset:
                 local=self.local,
             )
             return preprocessor.prepare()
-        elif self.task in ["automatic-speech-recognition", "automatic_speech_recognition"]:
+        elif self.task in ["automatic_speech_recognition", "automatic_speech_recognition"]:
             audio_column = self.column_mapping["audio"]
             # Handle both 'text' and 'transcription' as valid column names
             text_column = self.column_mapping.get("text") or self.column_mapping.get("transcription")

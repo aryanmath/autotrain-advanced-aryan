@@ -553,7 +553,7 @@ def launch_command(params):
 
 def _get_task_specific_commands(self):
     """Get task-specific commands."""
-    if self.task == "automatic-speech-recognition":
+    if self.task == "automatic_speech_recognition":
         return [
             "pip install librosa>=0.10.0 soundfile>=0.12.1",
         ]
