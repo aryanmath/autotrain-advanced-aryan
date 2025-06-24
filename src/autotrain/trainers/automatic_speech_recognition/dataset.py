@@ -24,7 +24,32 @@ def detect_model_type(model):
     return "ctc"  # Default fallback
 
 def safe_tokenize_text(processor, text, max_seq_length=128):
-    # Try as_target_processor context if available
+    """
+    Safely tokenize text using various processor types.
+    
+    Args:
+        processor: The processor/tokenizer to use
+        text: Text to tokenize
+        max_seq_length: Maximum sequence length
+        
+    Returns:
+        torch.Tensor: Tokenized input IDs
+    """
+    # For WhisperProcessor, use the tokenizer directly
+    if hasattr(processor, 'tokenizer') and hasattr(processor.tokenizer, 'encode'):
+        try:
+            # Use the tokenizer's encode method for Whisper
+            input_ids = processor.tokenizer.encode(
+                text,
+                max_length=max_seq_length,
+                truncation=True,
+                return_tensors="pt"
+            )
+            return input_ids.squeeze(0)
+        except Exception as e:
+            logger.warning(f"Failed to tokenize with Whisper tokenizer: {e}")
+    
+    # Try as_target_processor context if available (for other processors)
     if hasattr(processor, "as_target_processor"):
         try:
             with processor.as_target_processor():
@@ -34,8 +59,9 @@ def safe_tokenize_text(processor, text, max_seq_length=128):
                     max_length=max_seq_length,
                     return_tensors="pt",
                 ).input_ids.squeeze(0)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"Failed to tokenize with as_target_processor: {e}")
+    
     # Try processor.tokenizer if available
     if hasattr(processor, "tokenizer"):
         try:
@@ -46,8 +72,9 @@ def safe_tokenize_text(processor, text, max_seq_length=128):
                 return_tensors="pt",
                 add_special_tokens=True,
             ).input_ids.squeeze(0)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"Failed to tokenize with processor.tokenizer: {e}")
+    
     # Try processor directly
     try:
         return processor(
@@ -56,10 +83,11 @@ def safe_tokenize_text(processor, text, max_seq_length=128):
             max_length=max_seq_length,
             return_tensors="pt",
         ).input_ids.squeeze(0)
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning(f"Failed to tokenize with processor directly: {e}")
+    
     # Fallback: raise error
-    raise ValueError("Could not tokenize text with any known method for this processor.")
+    raise ValueError(f"Could not tokenize text with any known method for this processor. Processor type: {type(processor)}")
 
 class AutomaticSpeechRecognitionDataset:
     """
@@ -92,7 +120,6 @@ class AutomaticSpeechRecognitionDataset:
         self._data = data
         self.processor = processor
         self.model = model
-        self.model_type = detect_model_type(model)
         self.max_seq_length = getattr(self, "max_seq_length", 128)
         self.audio_column = audio_column
         self.text_column = text_column
@@ -104,7 +131,15 @@ class AutomaticSpeechRecognitionDataset:
         if model_type is not None:
             self.model_type = model_type
         else:
-            self.model_type = self._get_model_type()
+            # Detect model type from model class
+            model_class = type(model).__name__
+            if 'Whisper' in model_class or 'Seq2Seq' in model_class:
+                self.model_type = 'seq2seq'
+            elif 'CTC' in model_class or 'Wav2Vec' in model_class:
+                self.model_type = 'ctc'
+            else:
+                self.model_type = 'generic'
+        
         logger.info(f"[DEBUG] Final self.model_type in dataset: {self.model_type}")
         logger.info(f"Detected model type: {self.model_type}")
         
@@ -112,36 +147,6 @@ class AutomaticSpeechRecognitionDataset:
         logger.info("Verifying audio files...")
         self._verify_audio_files()
         logger.info("Audio files verified.")
-        
-    def _get_model_type(self) -> str:
-        """
-        Determine the type of ASR model being used.
-        
-        Returns:
-            str: Model type ('seq2seq', 'ctc', or 'generic')
-        """
-        
-        ALLOW_REMOTE_CODE = True 
-        try:
-            # Try loading as Seq2Seq model first
-            AutoModelForSpeechSeq2Seq.from_pretrained(
-                self.config.model,
-                token=self.config.token if self.config.token else None,
-                trust_remote_code=ALLOW_REMOTE_CODE,
-            )
-            return 'seq2seq'
-        except Exception:
-            try:
-                # Try loading as CTC model
-                AutoModelForCTC.from_pretrained(
-                    self.config.model,
-                    token=self.config.token if self.config.token else None,
-                    trust_remote_code=ALLOW_REMOTE_CODE,
-                )
-                return 'ctc'
-            except Exception:
-                # If both fail, return generic
-                return 'generic'
         
     def _verify_audio_files(self):
         """
