@@ -48,6 +48,46 @@ def parse_args():
     parser.add_argument("--training_config", type=str, required=True)
     return parser.parse_args()
 
+def dynamic_padding_collator(batch):
+    """Custom collator that handles dynamic padding for different audio lengths."""
+    # Separate input_features and labels
+    input_features = [item['input_features'] for item in batch]
+    labels = [item['labels'] for item in batch]
+    
+    # Find max length in this batch
+    max_length = max(feat.shape[1] for feat in input_features)
+    
+    # Pad all features to max length in batch
+    padded_features = []
+    for feat in input_features:
+        if feat.shape[1] < max_length:
+            padding = torch.zeros(80, max_length - feat.shape[1])
+            padded_feat = torch.cat([feat, padding], dim=1)
+        else:
+            padded_feat = feat
+        padded_features.append(padded_feat)
+    
+    # Stack features
+    input_features = torch.stack(padded_features)
+    
+    # Pad labels
+    max_label_length = max(len(label) for label in labels)
+    padded_labels = []
+    for label in labels:
+        if len(label) < max_label_length:
+            padding = torch.full((max_label_length - len(label),), -100)  # -100 is ignore_index
+            padded_label = torch.cat([label, padding])
+        else:
+            padded_label = label
+        padded_labels.append(padded_label)
+    
+    labels = torch.stack(padded_labels)
+    
+    return {
+        'input_features': input_features,
+        'labels': labels,
+    }
+
 def load_data(params, is_validation=False):
     """
     Load dataset from local directory or HuggingFace Hub.
@@ -386,47 +426,6 @@ def train(config: Dict[str, Any]):
             seed=42,
         )
         training_logger.info("[LIVE] Trainer arguments set. Initializing Trainer...")
-        
-        # Create custom data collator for dynamic padding
-        def dynamic_padding_collator(batch):
-            """Custom collator that handles dynamic padding for different audio lengths."""
-            # Separate input_features and labels
-            input_features = [item['input_features'] for item in batch]
-            labels = [item['labels'] for item in batch]
-            
-            # Find max length in this batch
-            max_length = max(feat.shape[1] for feat in input_features)
-            
-            # Pad all features to max length in batch
-            padded_features = []
-            for feat in input_features:
-                if feat.shape[1] < max_length:
-                    padding = torch.zeros(80, max_length - feat.shape[1])
-                    padded_feat = torch.cat([feat, padding], dim=1)
-                else:
-                    padded_feat = feat
-                padded_features.append(padded_feat)
-            
-            # Stack features
-            input_features = torch.stack(padded_features)
-            
-            # Pad labels
-            max_label_length = max(len(label) for label in labels)
-            padded_labels = []
-            for label in labels:
-                if len(label) < max_label_length:
-                    padding = torch.full((max_label_length - len(label),), -100)  # -100 is ignore_index
-                    padded_label = torch.cat([label, padding])
-                else:
-                    padded_label = label
-                padded_labels.append(padded_label)
-            
-            labels = torch.stack(padded_labels)
-            
-            return {
-                'input_features': input_features,
-                'labels': labels,
-            }
         
         callbacks = [
             LossLoggingCallback(),
