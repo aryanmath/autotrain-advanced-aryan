@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Show/hide LiFE App option based on task
         const lifeAppOption = document.getElementById("dataset_source").querySelector('option[value="life_app"]');
         if (lifeAppOption) {
-            if (taskValue === "automatic_speech_recognition") {
+            if (taskValue === "ASR") {
                 lifeAppOption.style.display = ""; // Show option
             } else {
                 lifeAppOption.style.display = "none"; // Hide option
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // Show relevant section based on selected data source
-        if (dataSource.value === "life_app" && taskValue === "automatic_speech_recognition") {
+        if (dataSource.value === "life_app" && taskValue === "ASR") {
             if (lifeAppSelection) lifeAppSelection.style.display = "block";
             if (datasetFileDiv) datasetFileDiv.style.display = 'block';
             loadLifeAppProjects();

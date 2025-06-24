@@ -21,7 +21,7 @@ from autotrain.trainers.text_classification.params import TextClassificationPara
 from autotrain.trainers.text_regression.params import TextRegressionParams
 from autotrain.trainers.token_classification.params import TokenClassificationParams
 from autotrain.trainers.vlm.params import VLMTrainingParams
-from autotrain.trainers.automatic_speech_recognition.params import AutomaticSpeechRecognitionParams
+from autotrain.trainers.ASR.params import AutomaticSpeechRecognitionParams
 
 
 # Mapping of task_id to parameter class
@@ -105,7 +105,7 @@ class LocalRunner(BaseBackend):
                 json.dump(config_dict, f, indent=2)
             
             # Construct the training command
-            command = f"python -m autotrain.trainers.automatic_speech_recognition.__main__ --training_config {config_path}"
+            command = f"python -m autotrain.trainers.ASR.__main__ --training_config {config_path}"
             
             # Run the training
             logger.info(f"Running ASR command: {command}")

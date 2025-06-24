@@ -478,8 +478,8 @@ async def fetch_model_choices(
         hub_models = MODEL_CHOICE["vlm"]
     elif task == "extractive-qa":
         hub_models = MODEL_CHOICE["extractive-qa"]
-    elif task == "automatic_speech_recognition":
-        hub_models = MODEL_CHOICE["automatic_speech_recognition"]
+    elif task == "ASR":
+        hub_models = MODEL_CHOICE["ASR"]
     else:
         raise NotImplementedError
 
@@ -559,7 +559,7 @@ async def handle_form(
         selected_script = "autotrain_dummy_script"
         logger.info(f"TEMPORARY BYPASS ACTIVE: Project set to '{selected_project}', Script set to '{selected_script}'")
 
-        if task != "automatic_speech_recognition":
+        if task != "ASR":
             raise HTTPException(
                 status_code=400,
                 detail="LiFE app datasets can only be used with Automatic Speech Recognition tasks"
@@ -749,8 +749,8 @@ async def handle_form(
                 dset_task = "text_token_classification"
             elif task == "extractive-qa":
                 dset_task = "text_extractive_question_answering"
-            elif task == "automatic_speech_recognition":
-                dset_task = "automatic_speech_recognition"
+            elif task == "ASR":
+                dset_task = "ASR"
             else:
                 raise NotImplementedError
             logger.info(f"Task: {dset_task}")
@@ -956,7 +956,7 @@ async def handle_form(request: Request):
         json.dump(config, f, indent=4)
     
     # Start training process
-    if task == "automatic_speech_recognition":
+    if task == "ASR":
         try:
             # First check if any job is already running
             running_jobs = get_running_jobs(DB)
@@ -966,7 +966,7 @@ async def handle_form(request: Request):
             # Start the process
             process = subprocess.Popen([
                 "python",
-                "src/autotrain/trainers/automatic_speech_recognition/__main__.py",
+                "src/autotrain/trainers/ASR/__main__.py",
                 "--training_config",
                 config_path
             ])

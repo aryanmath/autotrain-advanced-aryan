@@ -15,7 +15,7 @@ from autotrain.trainers.text_classification.params import TextClassificationPara
 from autotrain.trainers.text_regression.params import TextRegressionParams
 from autotrain.trainers.token_classification.params import TokenClassificationParams
 from autotrain.trainers.vlm.params import VLMTrainingParams
-from autotrain.trainers.automatic_speech_recognition.params import AutomaticSpeechRecognitionParams
+from autotrain.trainers.ASR.params import AutomaticSpeechRecognitionParams
 
 
 AVAILABLE_HARDWARE = {
@@ -229,7 +229,7 @@ class BaseBackend:
 
     def _get_task_specific_requirements(self):
         """Get task-specific requirements."""
-        if self.task == "automatic_speech_recognition":
+        if self.task == "ASR":
             return [
                 "librosa>=0.10.0",
                 "soundfile>=0.12.1",

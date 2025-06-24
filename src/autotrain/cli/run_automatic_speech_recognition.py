@@ -7,13 +7,13 @@ from autotrain import logger
 from autotrain.cli.run import AutoTrainCLI
 from autotrain.cli.utils import get_field_info
 from autotrain.project import AutoTrainProject
-from autotrain.trainers.automatic_speech_recognition import __main__ as trainer
-from autotrain.trainers.automatic_speech_recognition.params import AutomaticSpeechRecognitionParams
+from autotrain.trainers.ASR import __main__ as trainer
+from autotrain.trainers.ASR.params import AutomaticSpeechRecognitionParams
 
 from . import BaseAutoTrainCommand
 
 
-def run_automatic_speech_recognition_command_factory(args):
+def run_ASR_command_factory(args):
     return RunAutoTrainAutomaticSpeechRecognitionCommand(args)
 
 
@@ -48,7 +48,7 @@ class RunAutoTrainAutomaticSpeechRecognitionCommand(AutoTrainCLI):
             },
         ] + arg_list
         run_parser = parser.add_parser(
-            "automatic_speech_recognition",
+            "ASR",
             description="✨ Run AutoTrain Automatic Speech Recognition"
         )
         for arg in arg_list:
@@ -72,7 +72,7 @@ class RunAutoTrainAutomaticSpeechRecognitionCommand(AutoTrainCLI):
                     default=arg.get("default"),
                     choices=arg.get("choices"),
                 )
-        run_parser.set_defaults(func=run_automatic_speech_recognition_command_factory)
+        run_parser.set_defaults(func=run_ASR_command_factory)
 
     def __init__(self, args):
         self.args = args
@@ -114,7 +114,7 @@ class RunAutoTrainAutomaticSpeechRecognitionCommand(AutoTrainCLI):
         
         # Create training config
         training_config = {
-            "task": "automatic_speech_recognition",
+            "task": "ASR",
             "model": self.args.model,
             "train_data": self.args.train_data,
             "valid_data": self.args.valid_data,

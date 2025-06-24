@@ -7,7 +7,7 @@ from datasets import Dataset
 from transformers import ProcessorMixin
 
 from autotrain import logger
-from autotrain.trainers.automatic_speech_recognition.params import AutomaticSpeechRecognitionParams
+from autotrain.trainers.ASR.params import AutomaticSpeechRecognitionParams
 from transformers import AutoModelForSpeechSeq2Seq, AutoModelForCTC
 
 

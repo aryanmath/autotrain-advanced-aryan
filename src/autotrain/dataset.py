@@ -30,7 +30,7 @@ from autotrain.preprocessor.vision import (
     ObjectDetectionPreprocessor,
 )
 from autotrain.preprocessor.vlm import VLMPreprocessor
-from autotrain.preprocessor.automatic_speech_recognition import AutomaticSpeechRecognitionPreprocessor
+from autotrain.preprocessor.ASR import AutomaticSpeechRecognitionPreprocessor
 
 
 def remove_non_image_files(folder):
@@ -809,7 +809,7 @@ class AutoTrainDataset:
                 local=self.local,
             )
             return preprocessor.prepare()
-        elif self.task in ["automatic_speech_recognition", "automatic_speech_recognition"]:
+        elif self.task in ["ASR", "ASR"]:
             audio_column = self.column_mapping["audio"]
             # Handle both 'text' and 'transcription' as valid column names
             text_column = self.column_mapping.get("text") or self.column_mapping.get("transcription")

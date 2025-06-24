@@ -18,7 +18,7 @@ from autotrain.cli.run_text_regression import RunAutoTrainTextRegressionCommand
 from autotrain.cli.run_token_classification import RunAutoTrainTokenClassificationCommand
 from autotrain.cli.run_tools import RunAutoTrainToolsCommand
 from autotrain.parser import AutoTrainConfigParser
-from autotrain.cli.run_automatic_speech_recognition import RunAutoTrainAutomaticSpeechRecognitionCommand
+from autotrain.cli.run_ASR import RunAutoTrainAutomaticSpeechRecognitionCommand
 from autotrain import logger
 
 
@@ -71,8 +71,8 @@ def main():
     if args.task:
         if args.task == "text-classification":
             from autotrain.trainers.text_classification import __main__ as trainer
-        elif args.task == "automatic_speech_recognition":
-            from autotrain.trainers.automatic_speech_recognition import __main__ as trainer
+        elif args.task == "ASR":
+            from autotrain.trainers.ASR import __main__ as trainer
 
     command = args.func(args)
     command.run()

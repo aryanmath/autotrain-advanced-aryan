@@ -14,7 +14,7 @@ from autotrain.trainers.text_classification.params import TextClassificationPara
 from autotrain.trainers.text_regression.params import TextRegressionParams
 from autotrain.trainers.token_classification.params import TokenClassificationParams
 from autotrain.trainers.vlm.params import VLMTrainingParams
-from autotrain.trainers.automatic_speech_recognition.params import AutomaticSpeechRecognitionParams
+from autotrain.trainers.ASR.params import AutomaticSpeechRecognitionParams
 
 
 HIDDEN_PARAMS = [
@@ -136,7 +136,7 @@ PARAMS["extractive-qa"] = ExtractiveQuestionAnsweringParams(
     max_seq_length=512,
     max_doc_stride=128,
 ).model_dump()
-PARAMS["automatic_speech_recognition"] = AutomaticSpeechRecognitionParams(
+PARAMS["ASR"] = AutomaticSpeechRecognitionParams(
     log="tensorboard",
     mixed_precision="fp16"
 ).model_dump()
@@ -177,7 +177,7 @@ class AppParams:
         _munge_params_img_reg(): Processes parameters for image regression task.
         _munge_params_img_obj_det(): Processes parameters for image object detection task.
         _munge_params_tabular(): Processes parameters for tabular data task.
-        _munge_params_automatic_speech_recognition(): Processes parameters for automatic speech recognition task.
+        _munge_params_ASR(): Processes parameters for automatic speech recognition task.
     """
 
     job_params_json: str
@@ -222,8 +222,8 @@ class AppParams:
             return self._munge_params_vlm()
         elif self.task == "extractive-qa":
             return self._munge_params_extractive_qa()
-        elif self.task == "automatic_speech_recognition":
-            return self._munge_params_automatic_speech_recognition()
+        elif self.task == "ASR":
+            return self._munge_params_ASR()
         else:
             raise ValueError(f"Unknown task: {self.task}")
 
@@ -496,7 +496,7 @@ class AppParams:
 
         return TabularParams(**_params)
 
-    def _munge_params_automatic_speech_recognition(self):
+    def _munge_params_ASR(self):
         _params = self._munge_common_params()
         _params["model"] = self.base_model
         if "log" not in _params:
@@ -759,7 +759,7 @@ def get_task_params(task, param_type):
             "early_stopping_threshold",
         ]
         task_params = {k: v for k, v in task_params.items() if k not in more_hidden_params}
-    if task == "automatic_speech_recognition" and param_type == "basic":
+    if task == "ASR" and param_type == "basic":
         # Optionally filter out advanced ASR params if needed
         pass
 

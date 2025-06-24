@@ -31,7 +31,7 @@ from autotrain.trainers.text_classification.params import TextClassificationPara
 from autotrain.trainers.text_regression.params import TextRegressionParams
 from autotrain.trainers.token_classification.params import TokenClassificationParams
 from autotrain.trainers.vlm.params import VLMTrainingParams
-from autotrain.trainers.automatic_speech_recognition.params import AutomaticSpeechRecognitionParams
+from autotrain.trainers.ASR.params import AutomaticSpeechRecognitionParams
 import logging
 
 logger = logging.getLogger(__name__)
@@ -460,7 +460,7 @@ def asr_munge_data(params, local):
     if os.path.exists(train_data_path):
         dset = AutoTrainDataset(
             train_data=[train_data_path],
-            task="automatic_speech_recognition",
+            task="ASR",
             token=params.token,
             project_name=params.project_name,
             username=params.username,

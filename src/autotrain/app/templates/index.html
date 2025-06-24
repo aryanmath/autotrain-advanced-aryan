@@ -101,7 +101,7 @@
                     fields = ['text', 'question', 'answer'];
                     fieldNames = ['context', 'question', 'answers'];
                     break;
-                case 'automatic_speech_recognition':
+                case 'ASR':
                     fields = ['audio', 'transcription'];
                     fieldNames = ['audio', 'transcription'];
                     // Show LiFE App dataset source option only for ASR
@@ -141,7 +141,7 @@
         createColumnMappings(document.querySelector('select#task').value);
 
         // On page load, hide LiFE App dataset source if not ASR
-        if (document.querySelector('select#task').value !== "automatic_speech_recognition") {
+        if (document.querySelector('select#task').value !== "ASR") {
             document.getElementById("dataset_source").querySelectorAll("option").forEach(opt => {
                 if (opt.value === "life_app") {
                     opt.style.display = "none";
@@ -245,7 +245,7 @@
                             <option value="extractive-qa">Extractive Question Answering</option>
                             <option value="seq2seq">Sequence To Sequence</option>
                             <option value="token-classification">Token Classification</option>
-                            <option value="automatic_speech_recognition">Automatic Speech Recognition</option>
+                            <option value="ASR">Automatic Speech Recognition</option>
                         </optgroup>
                         <optgroup label="Image Tasks">
                             <option value="image-classification">Image Classification</option>
