@@ -364,11 +364,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Restore previous selection if possible and force UI update
             if (window.selectedScript && data.scripts.includes(window.selectedScript)) {
-                scriptSelect.val(window.selectedScript).trigger('change.select2');
+                scriptSelect.val(window.selectedScript).trigger('change');
             } else if (data.scripts && data.scripts.length === 1) {
-                scriptSelect.val(data.scripts[0]).trigger('change.select2');
+                scriptSelect.val(data.scripts[0]).trigger('change');
             } else {
-                scriptSelect.val('').trigger('change.select2');
+                scriptSelect.val('').trigger('change');
             }
 
             // Always re-attach the change handler after Select2 re-init
