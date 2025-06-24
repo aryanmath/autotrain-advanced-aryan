@@ -24,6 +24,7 @@ class AutomaticSpeechRecognitionDataset:
         text_column: str = "transcription",
         max_duration: float = 30.0,
         sampling_rate: int = 16000,
+        model_type: str = None,
     ):
         """
         Initialize the dataset.
@@ -36,6 +37,7 @@ class AutomaticSpeechRecognitionDataset:
             text_column: Name of the column containing text data
             max_duration: Maximum duration of audio in seconds
             sampling_rate: Target sampling rate for audio
+            model_type: Explicit model type ('seq2seq', 'ctc', or 'generic')
         """
         self._data = data
         self.processor = processor
@@ -46,7 +48,10 @@ class AutomaticSpeechRecognitionDataset:
         self.sampling_rate = sampling_rate
         
         # Determine model type
-        self.model_type = self._get_model_type()
+        if model_type is not None:
+            self.model_type = model_type
+        else:
+            self.model_type = self._get_model_type()
         logger.info(f"Detected model type: {self.model_type}")
         
         # Verify audio files exist and can be loaded

@@ -108,28 +108,6 @@ def train(config):
         logger.error(f"Failed to load processor: {e}")
         raise
 
-    logger.info("Preparing datasets...")
-    train_dataset = AutomaticSpeechRecognitionDataset(
-        data=train_data,
-        processor=processor,
-        config=config,
-        audio_column=config.audio_column,
-        text_column=config.text_column,
-        max_duration=config.max_duration,
-        sampling_rate=config.sampling_rate,
-    )
-    valid_dataset = None
-    if valid_data is not None:
-        valid_dataset = AutomaticSpeechRecognitionDataset(
-            data=valid_data,
-            processor=processor,
-            config=config,
-            audio_column=config.audio_column,
-            text_column=config.text_column,
-            max_duration=config.max_duration,
-            sampling_rate=config.sampling_rate,
-        )
-
     logger.info("Loading model...")
     try:
         try:
@@ -138,12 +116,14 @@ def train(config):
                 token=config.token,
                 trust_remote_code=ALLOW_REMOTE_CODE,
             )
+            model_type = "seq2seq"
         except Exception:
             model = AutoModelForCTC.from_pretrained(
                 config.model,
                 token=config.token,
                 trust_remote_code=ALLOW_REMOTE_CODE,
             )
+            model_type = "ctc"
     except Exception as e:
         logger.error(f"Failed to load model: {e}")
         raise
@@ -159,9 +139,9 @@ def train(config):
         save_total_limit=config.save_total_limit,
         fp16=config.mixed_precision == "fp16",
         bf16=config.mixed_precision == "bf16",
-        evaluation_strategy=config.eval_strategy if valid_dataset is not None else "no",
-        save_strategy=config.eval_strategy if valid_dataset is not None else "no",
-        load_best_model_at_end=True if valid_dataset is not None else False,
+        evaluation_strategy=config.eval_strategy if valid_data is not None else "no",
+        save_strategy=config.eval_strategy if valid_data is not None else "no",
+        load_best_model_at_end=True if valid_data is not None else False,
         report_to=config.log,
         auto_find_batch_size=config.auto_find_batch_size,
         lr_scheduler_type=config.scheduler,
@@ -176,12 +156,36 @@ def train(config):
 
     logger.info("Setting up callbacks...")
     callbacks = [UploadLogs(config=config), LossLoggingCallback(), TrainStartCallback()]
-    if valid_dataset is not None:
+    if valid_data is not None:
         callbacks.append(EarlyStoppingCallback(
             early_stopping_patience=config.early_stopping_patience,
             early_stopping_threshold=config.early_stopping_threshold,
         ))
     callbacks.append(PrinterCallback())
+
+    logger.info("Preparing datasets...")
+    train_dataset = AutomaticSpeechRecognitionDataset(
+        data=train_data,
+        processor=processor,
+        config=config,
+        audio_column=config.audio_column,
+        text_column=config.text_column,
+        max_duration=config.max_duration,
+        sampling_rate=config.sampling_rate,
+        model_type=model_type,
+    )
+    valid_dataset = None
+    if valid_data is not None:
+        valid_dataset = AutomaticSpeechRecognitionDataset(
+            data=valid_data,
+            processor=processor,
+            config=config,
+            audio_column=config.audio_column,
+            text_column=config.text_column,
+            max_duration=config.max_duration,
+            sampling_rate=config.sampling_rate,
+            model_type=model_type,
+        )
 
     logger.info("Initializing Trainer...")
     trainer = Trainer(
