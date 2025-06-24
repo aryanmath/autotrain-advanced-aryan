@@ -362,19 +362,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 width: '100%'
             });
 
-            // Restore previous selection if possible
+            // Restore previous selection if possible and force UI update
             if (window.selectedScript && data.scripts.includes(window.selectedScript)) {
-                scriptSelect.val(window.selectedScript).trigger('change');
+                scriptSelect.val(window.selectedScript).trigger('change.select2');
             } else if (data.scripts && data.scripts.length === 1) {
-                scriptSelect.val(data.scripts[0]).trigger('change');
+                scriptSelect.val(data.scripts[0]).trigger('change.select2');
             } else {
-                scriptSelect.val('').trigger('change');
+                scriptSelect.val('').trigger('change.select2');
             }
 
             // Always re-attach the change handler after Select2 re-init
             scriptSelect.off('change').on('change', function() {
                 const selectedScript = $(this).val();
                 window.selectedScript = selectedScript; // Store globally
+                // Force Select2 to update UI immediately
+                scriptSelect.val(selectedScript).trigger('change.select2');
                 if (selectedScript) {
                     loadDatasetsForScript(selectedScript);
                 } else {
