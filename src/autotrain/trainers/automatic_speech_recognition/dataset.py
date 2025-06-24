@@ -209,7 +209,6 @@ class AutomaticSpeechRecognitionDataset:
                         return_tensors="pt",
                     )
             else:
-                # For Whisper (seq2seq) and generic, or if as_target_processor is not present
                 target = self.processor(
                     text,
                     truncation=True,
