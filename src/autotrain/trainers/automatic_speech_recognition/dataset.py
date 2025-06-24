@@ -200,7 +200,7 @@ class AutomaticSpeechRecognitionDataset:
                 raise ValueError(f"Invalid text in row {idx}: {text}")
 
             # Process target text (transcription)
-            if hasattr(self.processor, "as_target_processor"):
+            if self.model_type == "ctc" and hasattr(self.processor, "as_target_processor"):
                 with self.processor.as_target_processor():
                     target = self.processor(
                         text,
@@ -209,7 +209,7 @@ class AutomaticSpeechRecognitionDataset:
                         return_tensors="pt",
                     )
             else:
-                # For WhisperProcessor and others without as_target_processor
+                # For Whisper (seq2seq) and generic, or if as_target_processor is not present
                 target = self.processor(
                     text,
                     truncation=True,
