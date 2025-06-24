@@ -114,22 +114,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
         xhr.onload = function () {
             loadingSpinner.classList.add('hidden');
-            var finalModalContent = document.querySelector('#final-modal .text-center');
+            var finalModalContent = document.getElementById('final-modal-content');
 
             if (xhr.status === 200) {
                 var responseObj = JSON.parse(xhr.responseText);
                 var monitorURL = responseObj.monitor_url;
-                if (monitorURL.startsWith('http')) {
-                    finalModalContent.innerHTML = '<p>Success!</p>' +
-                        '<p>You can check the progress of your training here: <a href="' + monitorURL + '" target="_blank">' + monitorURL + '</a></p>';
-                } else {
-                    finalModalContent.innerHTML = '<p>Success!</p>' +
-                        '<p>' + monitorURL + '</p>';
+                if (finalModalContent) {
+                    if (monitorURL.startsWith('http')) {
+                        finalModalContent.innerHTML = '<p>Success!</p>' +
+                            '<p>You can check the progress of your training here: <a href="' + monitorURL + '" target="_blank">' + monitorURL + '</a></p>';
+                    } else {
+                        finalModalContent.innerHTML = '<p>Success!</p>' +
+                            '<p>' + monitorURL + '</p>';
+                    }
                 }
-
                 showFinalModal();
             } else {
-                finalModalContent.innerHTML = '<p>Error: ' + xhr.status + ' ' + xhr.statusText + '</p>' + '<p> Please check the logs for more information.</p>';
+                if (finalModalContent) {
+                    finalModalContent.innerHTML = '<p>Error: ' + xhr.status + ' ' + xhr.statusText + '</p>' + '<p> Please check the logs for more information.</p>';
+                }
                 console.error('Error:', xhr.status, xhr.statusText);
                 showFinalModal();
             }
