@@ -333,6 +333,16 @@ def load_data(params, is_validation=False):
             files = os.listdir(params.data_path)
             logger.info(f"Files in directory: {files}")
             
+            # Check if this is a HuggingFace dataset format (has train/validation folders)
+            if 'train' in files and 'validation' in files:
+                logger.info("Detected HuggingFace dataset format")
+                if is_validation:
+                    dataset = load_from_disk(os.path.join(params.data_path, 'validation'))
+                else:
+                    dataset = load_from_disk(os.path.join(params.data_path, 'train'))
+                logger.info(f"Loaded {'validation' if is_validation else 'train'} dataset with {len(dataset)} examples")
+                return dataset
+            
             # Look for any CSV file
             csv_files = [f for f in files if f.endswith('.csv')]
             if not csv_files:
