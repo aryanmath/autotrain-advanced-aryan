@@ -61,6 +61,8 @@ class AutomaticSpeechRecognitionDataset:
         Returns:
             str: Model type ('seq2seq', 'ctc', or 'generic')
         """
+        
+        ALLOW_REMOTE_CODE = True 
         try:
             # Try loading as Seq2Seq model first
             AutoModelForSpeechSeq2Seq.from_pretrained(
