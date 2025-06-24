@@ -218,6 +218,7 @@ class AutomaticSpeechRecognitionDataset:
                 raise ValueError(f"Invalid text in row {idx}: {text}")
 
             # Process target text (transcription)
+            logger.info(f"Tokenizing text for model_type {self.model_type}: {text}")
             if self.model_type == "ctc":
                 # For CTC models (like wav2vec2), DO NOT pass return_attention_mask for text
                 target = self.processor.tokenizer(
