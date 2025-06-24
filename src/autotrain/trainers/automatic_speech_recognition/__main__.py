@@ -180,7 +180,7 @@ def train(config):
         text_column=config.text_column,
         max_duration=config.max_duration,
         sampling_rate=config.sampling_rate,
-        model_type=model_type,
+        model_type=model_type,  # <-- pass correct model_type
     )
     valid_dataset = None
     if valid_data is not None:
@@ -193,7 +193,7 @@ def train(config):
             text_column=config.text_column,
             max_duration=config.max_duration,
             sampling_rate=config.sampling_rate,
-            model_type=model_type,
+            model_type=model_type,  # <-- pass correct model_type
         )
 
     logger.info("Initializing Trainer...")
