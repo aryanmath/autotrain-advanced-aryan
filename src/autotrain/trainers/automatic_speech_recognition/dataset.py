@@ -131,11 +131,11 @@ class AutomaticSpeechRecognitionDataset:
                         audio,
                         sampling_rate=self.sampling_rate,
                         return_tensors="pt",
-                        padding=False,  # No padding here - will be done at batch level
+                        padding="max_length",  # Always pad
+                        max_length=1500,        # Whisper expects 1500 frames
                         truncation=True,
                     )
                     input_features = inputs.input_features[0]
-                    
                 except Exception as e:
                     logger.warning(f"Seq2Seq audio processing failed: {e}")
                     # Fallback: use raw audio

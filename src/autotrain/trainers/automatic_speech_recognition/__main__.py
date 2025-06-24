@@ -282,7 +282,6 @@ def load_model_and_processor(params):
             logger.info("Attempting to load as Seq2Seq model...")
             model = AutoModelForSpeechSeq2Seq.from_pretrained(
                 params.model,
-                token=params.token if params.token else None,
                 trust_remote_code=ALLOW_REMOTE_CODE,
             )
             logger.info("Successfully loaded as Seq2Seq model")
@@ -293,7 +292,6 @@ def load_model_and_processor(params):
                 logger.info("Attempting to load as CTC model...")
                 model = AutoModelForCTC.from_pretrained(
                     params.model,
-                    token=params.token if params.token else None,
                     trust_remote_code=ALLOW_REMOTE_CODE,
                 )
                 logger.info("Successfully loaded as CTC model")
@@ -304,7 +302,6 @@ def load_model_and_processor(params):
                     logger.info("Attempting to load as generic model...")
                     model = AutoModel.from_pretrained(
                         params.model,
-                        token=params.token if params.token else None,
                         trust_remote_code=ALLOW_REMOTE_CODE,
                     )
                     logger.info("Successfully loaded as generic model")
