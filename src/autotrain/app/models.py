@@ -337,13 +337,13 @@ def _fetch_vlm_models():
 
 def _fetch_asr_models():
     """
-    Fetches and sorts ASR models from the Hugging Face model hub.
+    Fetches and sorts ASR models from the Hugging Face model hub using the official pipeline tag.
     Returns a sorted list of model identifiers from the Hugging Face model hub.
     """
     # Get models sorted by downloads
     hub_models = list(
         list_models(
-            task="ASR",
+            pipeline_tag="automatic-speech-recognition",
             library="transformers",
             sort="downloads",
             direction=-1,
@@ -353,12 +353,12 @@ def _fetch_asr_models():
     )
     hub_models = get_sorted_models(hub_models)
 
-    # Get trending models
+    # Get trending models (most likes)
     trending_models = list(
         list_models(
-            task="ASR",
+            pipeline_tag="automatic-speech-recognition",
             library="transformers",
-            sort="likes7d",
+            sort="likes",
             direction=-1,
             limit=30,
             full=False,
