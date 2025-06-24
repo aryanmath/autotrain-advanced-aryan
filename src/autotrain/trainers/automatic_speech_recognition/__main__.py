@@ -111,26 +111,29 @@ def train(config):
         raise
 
     logger.info("Loading model...")
+    model_type = None
     try:
+        # Try Seq2Seq first (Whisper, MMS, etc.)
+        model = AutoModelForSpeechSeq2Seq.from_pretrained(
+            config.model,
+            token=config.token,
+            trust_remote_code=ALLOW_REMOTE_CODE,
+        )
+        model_type = "seq2seq"
+        logger.info("Loaded model as Seq2Seq.")
+    except Exception:
         try:
-            model = AutoModelForSpeechSeq2Seq.from_pretrained(
-                config.model,
-                token=config.token,
-                trust_remote_code=ALLOW_REMOTE_CODE,
-            )
-            model_type = "seq2seq"
-            logger.info(f"[DEBUG] model_type set to: {model_type}")
-        except Exception:
+            # Try CTC (Wav2Vec2, Hubert, etc.)
             model = AutoModelForCTC.from_pretrained(
                 config.model,
                 token=config.token,
                 trust_remote_code=ALLOW_REMOTE_CODE,
             )
             model_type = "ctc"
-            logger.info(f"[DEBUG] model_type set to: {model_type}")
-    except Exception as e:
-        logger.error(f"Failed to load model: {e}")
-        raise
+            logger.info("Loaded model as CTC.")
+        except Exception as e:
+            logger.error(f"Failed to load model as Seq2Seq or CTC: {e}")
+            raise
 
     logger.info("Setting up training arguments...")
     training_args = TrainingArguments(

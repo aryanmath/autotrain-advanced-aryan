@@ -5,12 +5,23 @@ import numpy as np
 from typing import Dict, Any, Optional
 from datasets import Dataset
 from transformers import ProcessorMixin
+from transformers import Wav2Vec2ForCTC, WhisperForConditionalGeneration, SpeechEncoderDecoderModel
 
 from autotrain import logger
 from autotrain.trainers.automatic_speech_recognition.params import AutomaticSpeechRecognitionParams
 from transformers import AutoModelForSpeechSeq2Seq, AutoModelForCTC
 
 print(">>> RUNNING dataset.py FROM:", __file__)
+
+def detect_model_type(model):
+    if isinstance(model, Wav2Vec2ForCTC):
+        return "ctc"
+    if isinstance(model, WhisperForConditionalGeneration):
+        return "seq2seq"
+    if isinstance(model, SpeechEncoderDecoderModel):
+        return "seq2seq"
+    # Add more as needed
+    return "ctc"  # Default fallback
 
 class AutomaticSpeechRecognitionDataset:
     """
@@ -20,7 +31,7 @@ class AutomaticSpeechRecognitionDataset:
         self,
         data: Dataset,
         processor: Any,
-        config: Any,
+        model: Any,
         audio_column: str = "audio",
         text_column: str = "transcription",
         max_duration: float = 30.0,
@@ -33,7 +44,7 @@ class AutomaticSpeechRecognitionDataset:
         Args:
             data: Dataset containing audio and text data
             processor: Audio processor for feature extraction
-            config: Training configuration
+            model: The model used for training (to detect model type)
             audio_column: Name of the column containing audio data
             text_column: Name of the column containing text data
             max_duration: Maximum duration of audio in seconds
@@ -42,7 +53,9 @@ class AutomaticSpeechRecognitionDataset:
         """
         self._data = data
         self.processor = processor
-        self.config = config
+        self.model = model
+        self.model_type = detect_model_type(model)
+        self.max_seq_length = getattr(self, "max_seq_length", 128)
         self.audio_column = audio_column
         self.text_column = text_column
         self.max_duration = max_duration
@@ -224,11 +237,10 @@ class AutomaticSpeechRecognitionDataset:
                     )
                 labels = target.input_ids.squeeze(0)
             else:
-                target = self.processor(
+                target = self.processor.tokenizer(
                     text,
-                    truncation=True,
-                    max_length=self.max_seq_length,
                     return_tensors="pt",
+                    add_special_tokens=True,
                 )
                 labels = target.input_ids.squeeze(0)
             
