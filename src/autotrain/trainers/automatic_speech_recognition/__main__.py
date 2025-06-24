@@ -32,6 +32,8 @@ from autotrain.trainers.automatic_speech_recognition.utils import compute_metric
 
 CACHE_DIR = r"C:/Users/Aryan/.cache/huggingface/hub/"
 
+print(">>> RUNNING __main__.py FROM:", __file__)
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--training_config", type=str, required=True)

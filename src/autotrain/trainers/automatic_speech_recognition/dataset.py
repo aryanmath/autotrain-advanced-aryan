@@ -10,6 +10,7 @@ from autotrain import logger
 from autotrain.trainers.automatic_speech_recognition.params import AutomaticSpeechRecognitionParams
 from transformers import AutoModelForSpeechSeq2Seq, AutoModelForCTC
 
+print(">>> RUNNING dataset.py FROM:", __file__)
 
 class AutomaticSpeechRecognitionDataset:
     """
