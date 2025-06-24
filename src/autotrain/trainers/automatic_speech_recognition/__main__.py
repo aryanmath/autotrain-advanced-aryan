@@ -30,7 +30,7 @@ from autotrain.trainers.automatic_speech_recognition.params import AutomaticSpee
 from autotrain.trainers.automatic_speech_recognition.dataset import AutomaticSpeechRecognitionDataset
 from autotrain.trainers.automatic_speech_recognition.utils import compute_metrics, create_model_card
 
-CACHE_DIR = r"C:/Users/Aryan/.cache/huggingface/hub/"
+# CACHE_DIR = r"C:/Users/Aryan/.cache/huggingface/hub/"
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -96,7 +96,7 @@ def train(config):
             config.model,
             token=config.token,
             trust_remote_code=ALLOW_REMOTE_CODE,
-            cache_dir=CACHE_DIR,
+            # cache_dir=CACHE_DIR,
         )
     except Exception as e:
         logger.error(f"Failed to load processor: {e}")
@@ -131,14 +131,14 @@ def train(config):
                 config.model,
                 token=config.token,
                 trust_remote_code=ALLOW_REMOTE_CODE,
-                cache_dir=CACHE_DIR,
+                # cache_dir=CACHE_DIR,
             )
         except Exception:
             model = AutoModelForCTC.from_pretrained(
                 config.model,
                 token=config.token,
                 trust_remote_code=ALLOW_REMOTE_CODE,
-                cache_dir=CACHE_DIR,
+                # cache_dir=CACHE_DIR,
             )
     except Exception as e:
         logger.error(f"Failed to load model: {e}")
