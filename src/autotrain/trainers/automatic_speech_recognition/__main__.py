@@ -96,7 +96,6 @@ def train(config):
             config.model,
             token=config.token,
             trust_remote_code=ALLOW_REMOTE_CODE,
-            cache_dir=CACHE_DIR,
         )
     except Exception as e:
         logger.error(f"Failed to load processor: {e}")
@@ -131,14 +130,12 @@ def train(config):
                 config.model,
                 token=config.token,
                 trust_remote_code=ALLOW_REMOTE_CODE,
-                cache_dir=CACHE_DIR,
             )
         except Exception:
             model = AutoModelForCTC.from_pretrained(
                 config.model,
                 token=config.token,
                 trust_remote_code=ALLOW_REMOTE_CODE,
-                cache_dir=CACHE_DIR,
             )
     except Exception as e:
         logger.error(f"Failed to load model: {e}")
