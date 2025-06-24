@@ -4,11 +4,10 @@ import librosa
 import numpy as np
 from typing import Dict, Any, Optional
 from datasets import Dataset
-from transformers import ProcessorMixin
 
 from autotrain import logger
 
-print(">>> RUNNING dataset.py FROM:", __file__)
+print(">>> RUNNING NEW dataset.py FROM:", __file__)
 
 def detect_model_type(model):
     """Detect model type from model class name."""
@@ -22,9 +21,9 @@ def detect_model_type(model):
 
 def safe_tokenize_text(processor, text, max_seq_length=128):
     """
-    Bulletproof text tokenization that works for all processor types.
+    Simplified tokenization that works for all models.
     """
-    # Method 1: Try Whisper tokenizer directly
+    # Method 1: Try Whisper tokenizer directly (most reliable)
     if hasattr(processor, 'tokenizer') and hasattr(processor.tokenizer, 'encode'):
         try:
             input_ids = processor.tokenizer.encode(
@@ -61,47 +60,13 @@ def safe_tokenize_text(processor, text, max_seq_length=128):
     except Exception as e:
         logger.warning(f"Processor direct failed: {e}")
     
-    # Method 4: Try as_target_processor (for some models)
-    if hasattr(processor, "as_target_processor"):
-        try:
-            with processor.as_target_processor():
-                return processor(
-                    text,
-                    truncation=True,
-                    max_length=max_seq_length,
-                    return_tensors="pt",
-                ).input_ids.squeeze(0)
-        except Exception as e:
-            logger.warning(f"as_target_processor failed: {e}")
-    
-    # Method 5: Manual tokenization for Whisper
-    if hasattr(processor, 'tokenizer') and hasattr(processor.tokenizer, 'vocab'):
-        try:
-            # Simple word-based tokenization as fallback
-            words = text.split()
-            token_ids = []
-            for word in words:
-                if word in processor.tokenizer.vocab:
-                    token_ids.append(processor.tokenizer.vocab[word])
-                else:
-                    # Add unknown token
-                    token_ids.append(processor.tokenizer.unk_token_id)
-            
-            # Truncate to max length
-            if len(token_ids) > max_seq_length:
-                token_ids = token_ids[:max_seq_length]
-            
-            return torch.tensor(token_ids, dtype=torch.long)
-        except Exception as e:
-            logger.warning(f"Manual tokenization failed: {e}")
-    
     # Final fallback: return dummy tokens
     logger.warning(f"All tokenization methods failed for text: {text[:50]}...")
     return torch.tensor([0] * min(max_seq_length, 10), dtype=torch.long)
 
 class AutomaticSpeechRecognitionDataset:
     """
-    Universal ASR Dataset that works with all models.
+    Simplified ASR Dataset that works with all models.
     """
     def __init__(
         self,
@@ -129,7 +94,7 @@ class AutomaticSpeechRecognitionDataset:
         else:
             self.model_type = detect_model_type(model)
         
-        logger.info(f"Dataset initialized with model_type: {self.model_type}")
+        logger.info(f"NEW Dataset initialized with model_type: {self.model_type}")
         logger.info(f"Processor type: {type(processor).__name__}")
         logger.info(f"Model type: {type(model).__name__}")
         
@@ -216,13 +181,8 @@ class AutomaticSpeechRecognitionDataset:
             if not text or not isinstance(text, str):
                 text = " "  # Empty text fallback
             
-            # Tokenize text
-            try:
-                labels = safe_tokenize_text(self.processor, text, self.max_seq_length)
-            except Exception as e:
-                logger.warning(f"Text tokenization failed: {e}")
-                # Fallback: empty labels
-                labels = torch.tensor([], dtype=torch.long)
+            # Tokenize text using simplified method
+            labels = safe_tokenize_text(self.processor, text, self.max_seq_length)
             
             # Return based on model type
             if self.model_type == 'seq2seq':
