@@ -72,7 +72,7 @@ def main():
         if args.task == "text-classification":
             from autotrain.trainers.text_classification import __main__ as trainer
         elif args.task == "ASR":
-            from autotrain.trainers.ASR import __main__ as trainer
+            from autotrain.trainers.automatic_speech_recognition import __main__ as trainer
 
     command = args.func(args)
     command.run()
