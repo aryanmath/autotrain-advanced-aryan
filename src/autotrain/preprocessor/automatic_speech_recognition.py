@@ -50,12 +50,6 @@ class AutomaticSpeechRecognitionPreprocessor:
             for col in [self.audio_column, self.text_column]:
                 if col not in self.valid_data.columns:
                     raise ValueError(f"Column '{col}' not found in validation data")
-        # Reserved column check
-        for col in RESERVED_COLUMNS:
-            if col in self.train_data.columns:
-                raise ValueError(f"{col} is a reserved column name")
-            if self.valid_data is not None and col in self.valid_data.columns:
-                raise ValueError(f"{col} is a reserved column name")
 
     def split(self):
         if self.valid_data is not None:
@@ -88,7 +82,7 @@ class AutomaticSpeechRecognitionPreprocessor:
 
     def check_audio_files(self, df):
         missing = []
-        for idx, path in enumerate(df["audio"]):
+        for idx, path in enumerate(df[self.audio_column]):
             if not os.path.exists(path):
                 missing.append((idx, path))
         if missing:
@@ -98,7 +92,7 @@ class AutomaticSpeechRecognitionPreprocessor:
             raise ValueError(msg)
 
     def normalize_text(self, df):
-        df["transcription"] = df["transcription"].astype(str).str.strip().str.lower()
+        df[self.text_column] = df[self.text_column].astype(str).str.strip().str.lower()
         return df
 
     def prepare(self):

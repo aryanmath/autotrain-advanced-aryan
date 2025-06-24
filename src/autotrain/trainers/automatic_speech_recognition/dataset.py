@@ -95,7 +95,6 @@ class AutomaticSpeechRecognitionDataset:
                 if not os.path.exists(audio_path):
                     invalid_files.append((idx, audio_path, "File not found"))
                     continue
-                    
                 # Try to load the audio file
                 try:
                     audio, sr = librosa.load(audio_path, sr=self.sampling_rate)
@@ -104,10 +103,8 @@ class AutomaticSpeechRecognitionDataset:
                         invalid_files.append((idx, audio_path, f"Duration {duration:.2f}s exceeds max_duration {self.max_duration}s"))
                 except Exception as e:
                     invalid_files.append((idx, audio_path, f"Error loading audio: {str(e)}"))
-                    
             except Exception as e:
                 invalid_files.append((idx, "Unknown", f"Error processing item: {str(e)}"))
-                
         if invalid_files:
             error_msg = "Found invalid audio files:\n"
             for idx, path, reason in invalid_files[:5]:  # Show first 5 errors
