@@ -9,15 +9,11 @@ from transformers import (
     AutoModelForSpeechSeq2Seq,
     AutoModelForCTC,
     AutoProcessor,
-    AutoModel,
-    Wav2Vec2Processor,
-    WhisperProcessor,
     EarlyStoppingCallback,
     Trainer,
     TrainingArguments,
 )
 from transformers.trainer_callback import PrinterCallback
-from transformers.trainer_utils import get_last_checkpoint
 
 from autotrain import logger
 from autotrain.trainers.common import (
@@ -29,13 +25,12 @@ from autotrain.trainers.common import (
     pause_space,
     remove_autotrain_data,
     save_training_params,
-    DetailedTrainingCallback,
 )
 from autotrain.trainers.automatic_speech_recognition.params import AutomaticSpeechRecognitionParams
 from autotrain.trainers.automatic_speech_recognition.dataset import AutomaticSpeechRecognitionDataset
 from autotrain.trainers.automatic_speech_recognition.utils import compute_metrics, create_model_card
 
-# CACHE_DIR = r"C:/Users/Aryan/.cache/huggingface/hub/"
+CACHE_DIR = r"C:/Users/Aryan/.cache/huggingface/hub/"
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -101,7 +96,7 @@ def train(config):
             config.model,
             token=config.token,
             trust_remote_code=ALLOW_REMOTE_CODE,
-            # cache_dir=CACHE_DIR,
+            cache_dir=CACHE_DIR,
         )
     except Exception as e:
         logger.error(f"Failed to load processor: {e}")
@@ -136,14 +131,14 @@ def train(config):
                 config.model,
                 token=config.token,
                 trust_remote_code=ALLOW_REMOTE_CODE,
-                # cache_dir=CACHE_DIR,
+                cache_dir=CACHE_DIR,
             )
         except Exception:
             model = AutoModelForCTC.from_pretrained(
                 config.model,
                 token=config.token,
                 trust_remote_code=ALLOW_REMOTE_CODE,
-                # cache_dir=CACHE_DIR,
+                cache_dir=CACHE_DIR,
             )
     except Exception as e:
         logger.error(f"Failed to load model: {e}")

@@ -252,7 +252,6 @@
 from autotrain import logger
 from autotrain.backends.base import BaseBackend
 from autotrain.utils import run_training
-import os
 
 
 # Import all parameter classes
@@ -308,93 +307,6 @@ class LocalRunner(BaseBackend):
         params = self.env_vars["PARAMS"]
         task_id = int(self.env_vars["TASK_ID"])
         training_pid = run_training(params, task_id, local=True, wait=self.wait)
-        if not self.wait:
-            logger.info(f"Training PID: {training_pid}")
-        return training_pid
-
-    def _create(self):
-        """Create the training job."""
-        logger.info("Starting local training...")
-        
-        # Handle ASR training
-        from autotrain.trainers.automatic_speech_recognition.params import AutomaticSpeechRecognitionParams
-        if isinstance(self.params, AutomaticSpeechRecognitionParams):
-            logger.info("Detected ASR params. Preparing to launch ASR training job.")
-            config_path = f"{self.params.project_name}/training_config.json"
-            os.makedirs(os.path.dirname(config_path), exist_ok=True)
-            config_dict = self.params.model_dump()
-            import json
-            with open(config_path, "w") as f:
-                json.dump(config_dict, f, indent=2)
-            command = f"python -m autotrain.trainers.automatic_speech_recognition.__main__ --training_config {config_path}"
-            logger.info(f"Running ASR command: {command}")
-            import subprocess
-            process = subprocess.Popen(
-                command,
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                universal_newlines=True,
-                bufsize=1,
-                env=os.environ.copy()
-            )
-            # Register the ASR job PID in the database immediately after starting the process
-            from autotrain.app.db import AutoTrainDB
-            DB = AutoTrainDB("autotrain.db")
-            DB.add_job(process.pid)
-            self.job_id = str(process.pid)
-            logger.info(f"ASR Training started with PID: {self.job_id}")
-            import threading, time
-            def monitor_process():
-                try:
-                    while True:
-                        stdout_line = process.stdout.readline()
-                        if stdout_line:
-                            logger.info(f"ASR Trainer: {stdout_line.strip()}")
-                        stderr_line = process.stderr.readline()
-                        if stderr_line:
-                            logger.error(f"ASR Trainer: {stderr_line.strip()}")
-                        if process.poll() is not None:
-                            stdout, stderr = process.communicate()
-                            if stdout:
-                                logger.info("ASR Trainer stdout:")
-                                for line in stdout.splitlines():
-                                    logger.info(line)
-                            if stderr:
-                                logger.error("ASR Trainer stderr:")
-                                for line in stderr.splitlines():
-                                    logger.error(line)
-                            try:
-                                with AutoTrainDB("autotrain.db") as db:
-                                    db.delete_job(process.pid)
-                            except Exception as e:
-                                logger.error(f"Error deleting job from database: {str(e)}")
-                            break
-                        time.sleep(0.1)
-                except Exception as e:
-                    logger.error(f"Error in monitor process: {str(e)}")
-                    try:
-                        with AutoTrainDB("autotrain.db") as db:
-                            db.delete_job(process.pid)
-                    except Exception as db_error:
-                        logger.error(f"Error deleting job from database: {str(db_error)}")
-            monitor_thread = threading.Thread(target=monitor_process, daemon=True)
-            monitor_thread.start()
-            return
-        # Original code for other tasks
-        params_json = self.env_vars["PARAMS"]
-        task_id = int(self.env_vars["TASK_ID"])
-        
-        # Deserialize the JSON string into the correct parameter object
-        params_dict = json.loads(params_json)
-        params_class = TASK_ID_TO_PARAMS_CLASS.get(task_id)
-        
-        if params_class is None:
-            raise ValueError(f"Unknown task ID: {task_id}")
-            
-        params_object = params_class(**params_dict)
-
-        training_pid = run_training(params_object, task_id, local=True, wait=self.wait)
         if not self.wait:
             logger.info(f"Training PID: {training_pid}")
         return training_pid
