@@ -300,33 +300,33 @@ class BaseBackend:
                 "auto_find_batch_size": self.params.get("auto_find_batch_size", False),
                 "logging_steps": self.params.get("logging_steps", -1)
             }
-        #     self.params = AutomaticSpeechRecognitionParams(**base_params)
-        # elif isinstance(self.params, str):
-        #     params_dict = json.loads(self.params)
-        #     task_id = params_dict.get("task_id", 32)
-        #     self.task_id = task_id
-        #     base_params = {
-        #         "project_name": params_dict.get("project_name", "autotrain-project"),
-        #         "token": params_dict.get("token", ""),
-        #         "username": params_dict.get("username", ""),
-        #         "data_path": str(params_dict.get("data_path", "")),
-        #         "model": params_dict.get("model", "facebook/wav2vec2-base"),
-        #         "task_id": task_id,
-        #         "max_duration": params_dict.get("max_duration", 30.0),
-        #         "sampling_rate": params_dict.get("sampling_rate", 16000),
-        #         "audio_column": params_dict.get("audio_column", "audio"),
-        #         "text_column": params_dict.get("text_column", "text"),
-        #         "max_grad_norm": params_dict.get("max_grad_norm", 1.0),
-        #         "weight_decay": params_dict.get("weight_decay", 0.01),
-        #         "warmup_ratio": params_dict.get("warmup_ratio", 0.1),
-        #         "early_stopping_patience": params_dict.get("early_stopping_patience", 3),
-        #         "early_stopping_threshold": params_dict.get("early_stopping_threshold", 0.01),
-        #         "eval_strategy": params_dict.get("eval_strategy", "epoch"),
-        #         "save_total_limit": params_dict.get("save_total_limit", 1),
-        #         "auto_find_batch_size": params_dict.get("auto_find_batch_size", False),
-        #         "logging_steps": params_dict.get("logging_steps", -1)
-        #     }
-        #     self.params = AutomaticSpeechRecognitionParams(**base_params)
+            self.params = AutomaticSpeechRecognitionParams(**base_params)
+        elif isinstance(self.params, str):
+            params_dict = json.loads(self.params)
+            task_id = params_dict.get("task_id", 32)
+            self.task_id = task_id
+            base_params = {
+                "project_name": params_dict.get("project_name", "autotrain-project"),
+                "token": params_dict.get("token", ""),
+                "username": params_dict.get("username", ""),
+                "data_path": str(params_dict.get("data_path", "")),
+                "model": params_dict.get("model", "facebook/wav2vec2-base"),
+                "task_id": task_id,
+                "max_duration": params_dict.get("max_duration", 30.0),
+                "sampling_rate": params_dict.get("sampling_rate", 16000),
+                "audio_column": params_dict.get("audio_column", "audio"),
+                "text_column": params_dict.get("text_column", "text"),
+                "max_grad_norm": params_dict.get("max_grad_norm", 1.0),
+                "weight_decay": params_dict.get("weight_decay", 0.01),
+                "warmup_ratio": params_dict.get("warmup_ratio", 0.1),
+                "early_stopping_patience": params_dict.get("early_stopping_patience", 3),
+                "early_stopping_threshold": params_dict.get("early_stopping_threshold", 0.01),
+                "eval_strategy": params_dict.get("eval_strategy", "epoch"),
+                "save_total_limit": params_dict.get("save_total_limit", 1),
+                "auto_find_batch_size": params_dict.get("auto_find_batch_size", False),
+                "logging_steps": params_dict.get("logging_steps", -1)
+            }
+            self.params = AutomaticSpeechRecognitionParams(**base_params)
         else:
             if isinstance(self.params, LLMTrainingParams):
                 self.task_id = 9
