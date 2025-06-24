@@ -429,7 +429,7 @@ def main():
         logger.info("Initializing ASR training...")
         
         # Initialize trainer with detailed logging
-        trainer = ASRTrainer(
+        trainer = automatic_speech_recognitionTrainer(
             training_config=training_config,
             callbacks=[DetailedTrainingCallback()]  # Add detailed logging callback
         )
