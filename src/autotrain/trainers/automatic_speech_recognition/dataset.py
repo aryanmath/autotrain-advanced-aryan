@@ -209,9 +209,8 @@ class AutomaticSpeechRecognitionDataset:
                 # For CTC models, use the tokenizer directly for text
                 target = self.processor.tokenizer(
                     text,
-                    truncation=True,
-                    max_length=self.max_seq_length,
                     return_tensors="pt",
+                    add_special_tokens=True,
                 )
             elif self.model_type == "seq2seq" and hasattr(self.processor, "as_target_processor"):
                 # For seq2seq models (Whisper, MMS, etc.), use as_target_processor
