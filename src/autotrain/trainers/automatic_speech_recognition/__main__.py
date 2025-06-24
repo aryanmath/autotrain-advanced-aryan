@@ -9,11 +9,15 @@ from transformers import (
     AutoModelForSpeechSeq2Seq,
     AutoModelForCTC,
     AutoProcessor,
+    AutoModel,
+    Wav2Vec2Processor,
+    WhisperProcessor,
     EarlyStoppingCallback,
     Trainer,
     TrainingArguments,
 )
 from transformers.trainer_callback import PrinterCallback
+from transformers.trainer_utils import get_last_checkpoint
 
 from autotrain import logger
 from autotrain.trainers.common import (
@@ -25,6 +29,7 @@ from autotrain.trainers.common import (
     pause_space,
     remove_autotrain_data,
     save_training_params,
+    DetailedTrainingCallback,
 )
 from autotrain.trainers.automatic_speech_recognition.params import AutomaticSpeechRecognitionParams
 from autotrain.trainers.automatic_speech_recognition.dataset import AutomaticSpeechRecognitionDataset
