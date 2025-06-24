@@ -575,7 +575,6 @@ def train(config: Dict[str, Any]):
         train_dataset = AutomaticSpeechRecognitionDataset(
             data=dataset,
             processor=processor,
-            config=params,
             model=model,
             audio_column=params.audio_column,
             text_column=params.text_column,
@@ -588,7 +587,6 @@ def train(config: Dict[str, Any]):
             valid_dataset_obj = AutomaticSpeechRecognitionDataset(
                 data=valid_dataset,
                 processor=processor,
-                config=params,
                 model=model,
                 audio_column=params.audio_column,
                 text_column=params.text_column,
