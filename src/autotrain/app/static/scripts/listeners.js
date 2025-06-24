@@ -360,6 +360,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
             }
 
+            // Save previously selected script if any
+            let prevSelected = scriptSelect.val();
+
             // Reinitialize Select2 after adding options
             if (scriptSelect.data('select2')) {
                 scriptSelect.select2('destroy');
@@ -369,6 +372,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 allowClear: true,
                 width: '100%'
             });
+
+            // If only one script, select it automatically
+            if (data.scripts && data.scripts.length === 1) {
+                scriptSelect.val(data.scripts[0]).trigger('change');
+            } else if (prevSelected && data.scripts.includes(prevSelected)) {
+                scriptSelect.val(prevSelected).trigger('change');
+            } else {
+                scriptSelect.val('').trigger('change');
+            }
 
             // Always re-attach the change handler after Select2 re-init
             scriptSelect.off('change').on('change', function() {
@@ -381,8 +393,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     $('#dataset_file').prop('disabled', true).empty();
                 }
             });
-            // Optionally, trigger change to update UI
-            scriptSelect.trigger('change');
         } catch (error) {
             console.error('Error loading scripts:', error);
         }
