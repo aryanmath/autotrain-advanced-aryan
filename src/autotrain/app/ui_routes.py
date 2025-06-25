@@ -799,6 +799,35 @@ async def handle_form(
     else:
         monitor_url = f"Success! Monitor your job in logs. Job ID: {job_id}"
 
+    # Save config file
+    with open(config_path, "w") as f:
+        json.dump(config, f, indent=4)
+
+    # If ASR task and local dataset, start training subprocess automatically
+    if task == "ASR" and not config.get("using_hub_dataset", False):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = "C:\\Users\\Aryan\\Downloads\\autotrain-advanced-aryan\\src"
+        process = subprocess.Popen([
+            "python",
+            "-m",
+            "autotrain.trainers.automatic_speech_recognition.__main__",
+            "--training_config",
+            config_path
+        ], env=env, cwd=os.getcwd())
+        pid = process.pid
+        try:
+            DB.add_job(pid)
+            logger.info(f"Added ASR job with PID {pid} to database")
+        except sqlite3.IntegrityError:
+            try:
+                kill_process_by_pid(pid)
+            except:
+                pass
+            DB.remove_job(pid)
+            DB.add_job(pid)
+        logger.info(f"ASR training started successfully with PID: {pid}")
+        return {"status": "success", "message": f"ASR training started with PID: {pid}. Check logs for progress.", "pid": pid, "config_path": config_path}
+
     return {"success": "true", "monitor_url": monitor_url}
 
 
