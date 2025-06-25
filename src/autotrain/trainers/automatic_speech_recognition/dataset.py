@@ -14,7 +14,7 @@ def detect_model_type(model):
     model_class = type(model).__name__
     if 'Whisper' in model_class or 'Seq2Seq' in model_class:
         return "seq2seq"
-    elif 'CTC' in model_class or 'Wav2Vec' in model_class:
+    elif 'CTC' in model_class or 'Wav2Vec' in model_class or 'Hubert' in model_class:
         return "ctc"
     else:
         return "generic"
@@ -66,7 +66,7 @@ def safe_tokenize_text(processor, text, max_seq_length=128):
 
 class AutomaticSpeechRecognitionDataset:
     """
-    Simplified ASR Dataset that works with all models.
+    Universal ASR Dataset that works with all models (Whisper, Wav2Vec2, Hubert, etc.).
     """
     def __init__(
         self,
@@ -94,7 +94,7 @@ class AutomaticSpeechRecognitionDataset:
         else:
             self.model_type = detect_model_type(model)
         
-        logger.info(f"NEW Dataset initialized with model_type: {self.model_type}")
+        logger.info(f"Universal Dataset initialized with model_type: {self.model_type}")
         logger.info(f"Processor type: {type(processor).__name__}")
         logger.info(f"Model type: {type(model).__name__}")
         
@@ -141,7 +141,7 @@ class AutomaticSpeechRecognitionDataset:
                     input_features = torch.tensor(audio, dtype=torch.float32)
                     
             elif self.model_type == 'ctc':
-                # For Wav2Vec2 and other CTC models
+                # For Wav2Vec2, Hubert and other CTC models
                 try:
                     inputs = self.processor(
                         audio,

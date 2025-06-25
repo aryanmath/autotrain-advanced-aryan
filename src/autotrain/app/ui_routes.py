@@ -966,7 +966,8 @@ async def handle_form(request: Request):
             # Start the process
             process = subprocess.Popen([
                 "python",
-                "src/autotrain/trainers/ASR/__main__.py",
+                "-m",
+                "autotrain.trainers.automatic_speech_recognition.__main__",
                 "--training_config",
                 config_path
             ])
