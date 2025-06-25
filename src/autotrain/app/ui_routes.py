@@ -926,107 +926,107 @@ async def stop_training(authenticated: bool = Depends(user_authentication)):
     return {"success": False}
 
 
-@ui_router.post("/create_project")
-async def handle_form(request: Request):
-    form_data = await request.form()
+# @ui_router.post("/create_project")
+# async def handle_form(request: Request):
+#     form_data = await request.form()
     
-    # Get task type
-    task = form_data.get("task")
+#     # Get task type
+#     task = form_data.get("task")
     
-    # Create timestamp for unique config file
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+#     # Create timestamp for unique config file
+#     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     
-    # Create config directory
-    config_dir = f"{task}_training"
-    os.makedirs(config_dir, exist_ok=True)
+#     # Create config directory
+#     config_dir = f"{task}_training"
+#     os.makedirs(config_dir, exist_ok=True)
     
-    # Create config file path
-    config_path = os.path.join(config_dir, f"training_config_{timestamp}.json")
+#     # Create config file path
+#     config_path = os.path.join(config_dir, f"training_config_{timestamp}.json")
     
-    # Get data path and splits
-    data_path = form_data.get("data_path")
-    train_split = form_data.get("train_split", "train.json")  # Default to train.json
-    valid_split = form_data.get("valid_split", "eval.json")   # Default to eval.json
+#     # Get data path and splits
+#     data_path = form_data.get("data_path")
+#     train_split = form_data.get("train_split", "train.json")  # Default to train.json
+#     valid_split = form_data.get("valid_split", "eval.json")   # Default to eval.json
     
-    if not data_path:
-        return {"status": "error", "message": "Data path is required"}
+#     if not data_path:
+#         return {"status": "error", "message": "Data path is required"}
     
-    # Create config dictionary
-    config = {
-        "model": form_data.get("model"),
-        "model_name": form_data.get("model"),
-        "data_path": data_path,
-        "train_split": train_split,
-        "valid_split": valid_split,
-        "audio_column": form_data.get("audio_column", "audio"),
-        "text_column": form_data.get("text_column", "transcription"),
-        "project_name": form_data.get("project_name"),
-        "username": form_data.get("username"),
-        "num_train_epochs": int(form_data.get("epochs", 3)),
-        "per_device_train_batch_size": int(form_data.get("batch_size", 8)),
-        "per_device_eval_batch_size": int(form_data.get("batch_size", 8)),
-        "learning_rate": float(form_data.get("learning_rate", 5e-5)),
-        "max_steps": -1,
-        "gradient_accumulation_steps": 1,
-        "gradient_checkpointing": False,
-        "fp16": True,
-        "save_steps": 500,
-        "eval_steps": 500,
-        "logging_steps": 100,
-        "save_total_limit": 1,
-        "output_dir": f"{task}_training/output",
-        "push_to_hub": True,
-        "hub_model_id": f"{form_data.get('username')}/{form_data.get('project_name')}",
-        "max_duration": 30.0,
-        "sampling_rate": 16000,
-        "using_hub_dataset": False  # Set to False for local datasets
-    }
+#     # Create config dictionary
+#     config = {
+#         "model": form_data.get("model"),
+#         "model_name": form_data.get("model"),
+#         "data_path": data_path,
+#         "train_split": train_split,
+#         "valid_split": valid_split,
+#         "audio_column": form_data.get("audio_column", "audio"),
+#         "text_column": form_data.get("text_column", "transcription"),
+#         "project_name": form_data.get("project_name"),
+#         "username": form_data.get("username"),
+#         "num_train_epochs": int(form_data.get("epochs", 3)),
+#         "per_device_train_batch_size": int(form_data.get("batch_size", 8)),
+#         "per_device_eval_batch_size": int(form_data.get("batch_size", 8)),
+#         "learning_rate": float(form_data.get("learning_rate", 5e-5)),
+#         "max_steps": -1,
+#         "gradient_accumulation_steps": 1,
+#         "gradient_checkpointing": False,
+#         "fp16": True,
+#         "save_steps": 500,
+#         "eval_steps": 500,
+#         "logging_steps": 100,
+#         "save_total_limit": 1,
+#         "output_dir": f"{task}_training/output",
+#         "push_to_hub": True,
+#         "hub_model_id": f"{form_data.get('username')}/{form_data.get('project_name')}",
+#         "max_duration": 30.0,
+#         "sampling_rate": 16000,
+#         "using_hub_dataset": False  # Set to False for local datasets
+#     }
     
-    # Save config file
-    with open(config_path, "w") as f:
-        json.dump(config, f, indent=4)
+#     # Save config file
+#     with open(config_path, "w") as f:
+#         json.dump(config, f, indent=4)
     
-    # Start training process
-    if task == "ASR":
-        try:
-            # First check if any job is already running
-            running_jobs = get_running_jobs(DB)
-            if running_jobs:
-                return {"status": "error", "message": "Another job is already running. Please wait for it to finish."}
+#     # Start training process
+#     if task == "ASR":
+#         try:
+#             # First check if any job is already running
+#             running_jobs = get_running_jobs(DB)
+#             if running_jobs:
+#                 return {"status": "error", "message": "Another job is already running. Please wait for it to finish."}
             
-            # Start the process
-            process = subprocess.Popen([
-                "python",
-                "-m",
-                "autotrain.trainers.automatic_speech_recognition.__main__",
-                "--training_config",
-                config_path
-            ])
+#             # Start the process
+#             process = subprocess.Popen([
+#                 "python",
+#                 "-m",
+#                 "autotrain.trainers.automatic_speech_recognition.__main__",
+#                 "--training_config",
+#                 config_path
+#             ])
             
-            # Get process ID
-            pid = process.pid
+#             # Get process ID
+#             pid = process.pid
             
-            # Add job to database using existing system
-            try:
-                DB.add_job(pid)
-                logger.info(f"Added job with PID {pid} to database")
-            except sqlite3.IntegrityError:
-                # If PID already exists, try to kill the old process
-                try:
-                    kill_process_by_pid(pid)
-                except:
-                    pass
-                # Remove old job and add new one
-                DB.remove_job(pid)
-                DB.add_job(pid)
+#             # Add job to database using existing system
+#             try:
+#                 DB.add_job(pid)
+#                 logger.info(f"Added job with PID {pid} to database")
+#             except sqlite3.IntegrityError:
+#                 # If PID already exists, try to kill the old process
+#                 try:
+#                     kill_process_by_pid(pid)
+#                 except:
+#                     pass
+#                 # Remove old job and add new one
+#                 DB.remove_job(pid)
+#                 DB.add_job(pid)
             
-            return {"status": "success", "message": f"Training started with PID: {pid}"}
+#             return {"status": "success", "message": f"Training started with PID: {pid}"}
             
-        except Exception as e:
-            logger.error(f"Error starting training: {str(e)}")
-            return {"status": "error", "message": f"Error starting training: {str(e)}"}
+#         except Exception as e:
+#             logger.error(f"Error starting training: {str(e)}")
+#             return {"status": "error", "message": f"Error starting training: {str(e)}"}
     
-    return {"status": "error", "message": "Invalid task type"}
+#     return {"status": "error", "message": "Invalid task type"}
 
 
 @ui_router.get("/life_app_projects", response_class=JSONResponse)
