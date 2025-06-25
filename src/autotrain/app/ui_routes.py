@@ -800,8 +800,8 @@ async def handle_form(
         monitor_url = f"Success! Monitor your job in logs. Job ID: {job_id}"
 
     # Save config file
-    with open(config_path, "w") as f:
-        json.dump(config, f, indent=4)
+    # with open(config_path, "w") as f:
+    #     json.dump(config, f, indent=4)
 
     # If ASR task and local dataset, start training subprocess automatically
     # if task == "ASR" and not config.get("using_hub_dataset", False):
