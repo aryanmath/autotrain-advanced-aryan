@@ -805,6 +805,8 @@ async def handle_form(
 
     # If ASR task and local dataset, start training subprocess automatically
     if task == "ASR" and not config.get("using_hub_dataset", False):
+        # Ensure Windows-style backslashes in config_path for subprocess
+        config_path_for_cmd = config_path.replace("/", "\\")
         env = os.environ.copy()
         env["PYTHONPATH"] = "C:\\Users\\Aryan\\Downloads\\autotrain-advanced-aryan\\src"
         process = subprocess.Popen([
@@ -812,7 +814,7 @@ async def handle_form(
             "-m",
             "autotrain.trainers.automatic_speech_recognition.__main__",
             "--training_config",
-            config_path
+            config_path_for_cmd
         ], env=env, cwd=os.getcwd())
         pid = process.pid
         try:
@@ -826,7 +828,7 @@ async def handle_form(
             DB.remove_job(pid)
             DB.add_job(pid)
         logger.info(f"ASR training started successfully with PID: {pid}")
-        return {"status": "success", "message": f"ASR training started with PID: {pid}. Check logs for progress.", "pid": pid, "config_path": config_path}
+        return {"status": "success", "message": f"ASR training started with PID: {pid}. Check logs for progress.", "pid": pid, "config_path": config_path_for_cmd}
 
     return {"success": "true", "monitor_url": monitor_url}
 
