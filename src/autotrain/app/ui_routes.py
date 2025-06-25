@@ -521,7 +521,9 @@ async def handle_form(
     if len(valid_split) == 0:
         valid_split = None
 
-    logger.info(f"hardware: {hardware}")
+    print(f"[DEBUG] hardware value from UI: {hardware}")
+    logger.info(f"[DEBUG] hardware value from UI: {hardware}")
+
     if hardware == "local-ui":
         running_jobs = get_running_jobs(DB)
         if running_jobs:
