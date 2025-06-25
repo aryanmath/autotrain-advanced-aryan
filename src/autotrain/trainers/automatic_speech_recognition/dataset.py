@@ -139,7 +139,7 @@ class AutomaticSpeechRecognitionDataset:
                         audio,
                         sampling_rate=self.sampling_rate,
                         return_tensors="pt",
-                        padding=False,  # No padding here - will be done at batch level
+                        padding=True,  # No padding here - will be done at batch level
                         truncation=True,
                     )
                     input_features = inputs.input_features[0]
