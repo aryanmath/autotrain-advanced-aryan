@@ -135,6 +135,13 @@ class AutomaticSpeechRecognitionDataset:
                         truncation=True,
                     )
                     input_features = inputs.input_features[0]
+                    # Pad or truncate to (80, 3000) for Whisper
+                    target_length = 3000
+                    if input_features.shape[1] < target_length:
+                        padding = torch.zeros(80, target_length - input_features.shape[1])
+                        input_features = torch.cat([input_features, padding], dim=1)
+                    elif input_features.shape[1] > target_length:
+                        input_features = input_features[:, :target_length]
                 except Exception as e:
                     logger.warning(f"Seq2Seq audio processing failed: {e}")
                     # Fallback: use raw audio
