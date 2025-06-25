@@ -628,25 +628,14 @@ async def handle_form(
         os.makedirs(data_dir, exist_ok=True)
         dataset.save_to_disk(data_dir)
 
-        # Save config file
-        config_path = os.path.join(project_dir, "training_config.json")
-        with open(config_path, "w", encoding="utf-8") as f:
-            json.dump(params, f, ensure_ascii=False, indent=2)
-
-        # Prepare logs directory
+        # Prepare logs directory (optional, for consistency)
         logs_dir = os.path.join(project_dir, "output_logs")
         os.makedirs(logs_dir, exist_ok=True)
-        log_file = os.path.join(logs_dir, f"training_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
-        # (Pass log_file path to your training script or logger)
 
         # Set data_path to new structure
         data_path = data_dir
         train_split = "train"
         valid_split = "validation"
-
-        # Check if params is already a dict to avoid TypeError from redundant json.loads
-        if not isinstance(params, dict):
-            params = json.loads(params)
 
         # Update params for ASR
         params["audio_column"] = "audio"
@@ -826,37 +815,6 @@ async def handle_form(
     else:
         monitor_url = f"Success! Monitor your job in logs. Job ID: {job_id}"
 
-    # Save config file
-    # with open(config_path, "w") as f:
-    #     json.dump(config, f, indent=4)
-
-    # If ASR task and local dataset, start training subprocess automatically
-    # if task == "ASR" and not config.get("using_hub_dataset", False):
-    #     # Ensure Windows-style backslashes in config_path for subprocess
-    #     config_path_for_cmd = config_path.replace("/", "\\")
-    #     env = os.environ.copy()
-    #     env["PYTHONPATH"] = "C:\\Users\\Aryan\\Downloads\\autotrain-advanced-aryan\\src"
-    #     process = subprocess.Popen([
-    #         "python",
-    #         "-m",
-    #         "autotrain.trainers.automatic_speech_recognition.__main__",
-    #         "--training_config",
-    #         config_path_for_cmd
-    #     ], env=env, cwd=os.getcwd())
-    #     pid = process.pid
-    #     try:
-    #         DB.add_job(pid)
-    #         logger.info(f"Added ASR job with PID {pid} to database")
-    #     except sqlite3.IntegrityError:
-    #         try:
-    #             kill_process_by_pid(pid)
-    #         except:
-    #             pass
-    #         DB.remove_job(pid)
-    #         DB.add_job(pid)
-    #     logger.info(f"ASR training started successfully with PID: {pid}")
-    #     return {"status": "success", "message": f"ASR training started with PID: {pid}. Check logs for progress.", "pid": pid, "config_path": config_path_for_cmd}
-
     return {"success": "true", "monitor_url": monitor_url}
 
 
@@ -953,109 +911,6 @@ async def stop_training(authenticated: bool = Depends(user_authentication)):
     return {"success": False}
 
 
-# @ui_router.post("/create_project")
-# async def handle_form(request: Request):
-#     form_data = await request.form()
-    
-#     # Get task type
-#     task = form_data.get("task")
-    
-#     # Create timestamp for unique config file
-#     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    
-#     # Create config directory
-#     config_dir = f"{task}_training"
-#     os.makedirs(config_dir, exist_ok=True)
-    
-#     # Create config file path
-#     config_path = os.path.join(config_dir, f"training_config_{timestamp}.json")
-    
-#     # Get data path and splits
-#     data_path = form_data.get("data_path")
-#     train_split = form_data.get("train_split", "train.json")  # Default to train.json
-#     valid_split = form_data.get("valid_split", "eval.json")   # Default to eval.json
-    
-#     if not data_path:
-#         return {"status": "error", "message": "Data path is required"}
-    
-#     # Create config dictionary
-#     config = {
-#         "model": form_data.get("model"),
-#         "model_name": form_data.get("model"),
-#         "data_path": data_path,
-#         "train_split": train_split,
-#         "valid_split": valid_split,
-#         "audio_column": form_data.get("audio_column", "audio"),
-#         "text_column": form_data.get("text_column", "transcription"),
-#         "project_name": form_data.get("project_name"),
-#         "username": form_data.get("username"),
-#         "num_train_epochs": int(form_data.get("epochs", 3)),
-#         "per_device_train_batch_size": int(form_data.get("batch_size", 8)),
-#         "per_device_eval_batch_size": int(form_data.get("batch_size", 8)),
-#         "learning_rate": float(form_data.get("learning_rate", 5e-5)),
-#         "max_steps": -1,
-#         "gradient_accumulation_steps": 1,
-#         "gradient_checkpointing": False,
-#         "fp16": True,
-#         "save_steps": 500,
-#         "eval_steps": 500,
-#         "logging_steps": 100,
-#         "save_total_limit": 1,
-#         "output_dir": f"{task}_training/output",
-#         "push_to_hub": True,
-#         "hub_model_id": f"{form_data.get('username')}/{form_data.get('project_name')}",
-#         "max_duration": 30.0,
-#         "sampling_rate": 16000,
-#         "using_hub_dataset": False  # Set to False for local datasets
-#     }
-    
-#     # Save config file
-#     with open(config_path, "w") as f:
-#         json.dump(config, f, indent=4)
-    
-#     # Start training process
-#     if task == "ASR":
-#         try:
-#             # First check if any job is already running
-#             running_jobs = get_running_jobs(DB)
-#             if running_jobs:
-#                 return {"status": "error", "message": "Another job is already running. Please wait for it to finish."}
-            
-#             # Start the process
-#             process = subprocess.Popen([
-#                 "python",
-#                 "-m",
-#                 "autotrain.trainers.automatic_speech_recognition.__main__",
-#                 "--training_config",
-#                 config_path
-#             ])
-            
-#             # Get process ID
-#             pid = process.pid
-            
-#             # Add job to database using existing system
-#             try:
-#                 DB.add_job(pid)
-#                 logger.info(f"Added job with PID {pid} to database")
-#             except sqlite3.IntegrityError:
-#                 # If PID already exists, try to kill the old process
-#                 try:
-#                     kill_process_by_pid(pid)
-#                 except:
-#                     pass
-#                 # Remove old job and add new one
-#                 DB.remove_job(pid)
-#                 DB.add_job(pid)
-            
-#             return {"status": "success", "message": f"Training started with PID: {pid}"}
-            
-#         except Exception as e:
-#             logger.error(f"Error starting training: {str(e)}")
-#             return {"status": "error", "message": f"Error starting training: {str(e)}"}
-    
-#     return {"status": "error", "message": "Invalid task type"}
-
-
 @ui_router.get("/life_app_projects", response_class=JSONResponse)
 async def get_life_app_projects(authenticated: bool = Depends(user_authentication)):
     """
@@ -1091,36 +946,6 @@ async def get_life_app_dataset(authenticated: bool = Depends(user_authentication
     with open(dataset_path, "r", encoding="utf-8") as f:
         dataset = json.load(f)
     return {"dataset": dataset}
-
-# @ui_router.get("/life_app/projects")
-# async def get_life_app_projects():
-#     try:
-#         project_path = os.path.join(BASE_DIR, "static", "projectList.json")
-#         with open(project_path, "r") as f:
-#             projects = json.load(f)
-#         return {"projects": projects}
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
-
-# @ui_router.get("/life_app/scripts")
-# async def get_life_app_scripts(project_ids: List[str]):
-#     try:
-#         script_path = os.path.join(BASE_DIR, "static", "scriptList.json")
-#         with open(script_path, "r") as f:
-#             scripts = json.load(f)
-#         return {"scripts": scripts}
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
-
-# @ui_router.get("/life_app/datasets")
-# async def get_life_app_datasets(project_ids: List[str], script_id: str):
-#     try:
-#         dataset_path = os.path.join(BASE_DIR, "static", "dataset.json")
-#         with open(dataset_path, "r") as f:
-#             datasets = json.load(f)
-#         return {"datasets": datasets}
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
 
 @ui_router.post("/project_selected", response_class=JSONResponse)
 async def handle_project_selection(request: Request, authenticated: bool = Depends(user_authentication)):
@@ -1203,31 +1028,4 @@ async def handle_script_selection(request: Request, authenticated: bool = Depend
             content={"error": str(e)},
             status_code=500
         )
-# @ui_router.post("/life_app_dataset", response_class=JSONResponse)
-# async def get_life_app_dataset(request: Request, authenticated: bool = Depends(user_authentication)):
-#     try:
-#         logger.info("Received request to /ui/life_app_dataset")
-#         data = await request.json()
-#         logger.info(f"Request data: {data}")
-        
-#         selected_projects = data.get('projects', [])
-#         selected_script = data.get('script', '')
-        
-#         # Log both project and script selection
-#         logger.info(f"Projects selected: {selected_projects}")
-#         logger.info(f"Script selected: {selected_script}")
-        
-#         # Always return dataset.json
-#         response_data = {
-#             "status": "success",
-#             "datasets": ["dataset.json"]
-#         }
-#         logger.info(f"Sending response: {response_data}")
-#         return JSONResponse(content=response_data)
-#     except Exception as e:
-#         logger.error(f"Error in dataset loading: {str(e)}")
-#         return JSONResponse(
-#             content={"error": str(e)},
-#             status_code=500
-#         )
 
