@@ -120,18 +120,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 var responseObj = JSON.parse(xhr.responseText);
                 var monitorURL = responseObj.monitor_url;
                 if (finalModalContent) {
-                    if (monitorURL.startsWith('http')) {
-                        finalModalContent.innerHTML = '<p>Success!</p>' +
-                            '<p>You can check the progress of your training here: <a href="' + monitorURL + '" target="_blank">' + monitorURL + '</a></p>';
-                    } else {
-                        finalModalContent.innerHTML = '<p>Success!</p>' +
-                            '<p>' + monitorURL + '</p>';
-                    }
+                if (monitorURL.startsWith('http')) {
+                    finalModalContent.innerHTML = '<p>Success!</p>' +
+                        '<p>You can check the progress of your training here: <a href="' + monitorURL + '" target="_blank">' + monitorURL + '</a></p>';
+                } else {
+                    finalModalContent.innerHTML = '<p>Success!</p>' +
+                        '<p>' + monitorURL + '</p>';
+                }
                 }
                 showFinalModal();
             } else {
                 if (finalModalContent) {
-                    finalModalContent.innerHTML = '<p>Error: ' + xhr.status + ' ' + xhr.statusText + '</p>' + '<p> Please check the logs for more information.</p>';
+                finalModalContent.innerHTML = '<p>Error: ' + xhr.status + ' ' + xhr.statusText + '</p>' + '<p> Please check the logs for more information.</p>';
                 }
                 console.error('Error:', xhr.status, xhr.statusText);
                 showFinalModal();

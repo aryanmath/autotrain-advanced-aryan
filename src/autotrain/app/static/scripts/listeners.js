@@ -278,7 +278,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const response = await fetch('/ui/life_app_projects');
             if (!response.ok) {
                 throw new Error('Failed to fetch projects');
-            }
+        }
             const data = await response.json();
             const projects = data.projects || [];
             
@@ -319,7 +319,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     $('#life_app_script').prop('disabled', true).empty();
                 }
-            });
+                });
         } catch (error) {
             console.error('Error loading projects:', error);
         }
@@ -373,9 +373,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Always re-attach the change handler after Select2 re-init
             scriptSelect.off('change').on('change', function() {
-                const selectedScript = $(this).val();
+            const selectedScript = $(this).val();
                 window.selectedScript = selectedScript;
-                if (selectedScript) {
+            if (selectedScript) {
                     loadDatasetsForScript(selectedScript);
                 } else {
                     $('#dataset_file').prop('disabled', true).empty();
@@ -393,7 +393,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (selectedProjects && selectedProjects.length > 0) {
             console.log('[STATIC HANDLER] Calling loadScriptsForProjects with:', selectedProjects);
             loadScriptsForProjects(selectedProjects);
-        } else {
+            } else {
             $('#life_app_script').prop('disabled', true).empty();
             $('#dataset_file').prop('disabled', true).empty();
         }
@@ -470,12 +470,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (optionElement) {
                     optionElement.selected = false;
                     $(projectSelect).trigger('change');
-                }
+            }
             };
             
             tag.appendChild(removeButton);
             tagContainer.appendChild(tag);
-        });
+    });
     }
 
     $('#dataset_file').find('option').each(function() { console.log($(this).val()); });

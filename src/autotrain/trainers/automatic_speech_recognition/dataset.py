@@ -1,8 +1,3 @@
-import sys
-import io
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
-
 import os
 import torch
 import librosa
@@ -102,7 +97,7 @@ class AutomaticSpeechRecognitionDataset:
         logger.info(f"Universal Dataset initialized with model_type: {self.model_type}")
         logger.info(f"Processor type: {type(processor).__name__}")
         logger.info(f"Model type: {type(model).__name__}")
-        
+
     def __len__(self):
         return len(self._data)
 
@@ -119,27 +114,24 @@ class AutomaticSpeechRecognitionDataset:
                 raise ValueError(f"Audio file not found: {audio_path}")
 
             # Load audio
-            audio, sr = librosa.load(audio_path, sr=self.sampling_rate)
+                audio, sr = librosa.load(audio_path, sr=self.sampling_rate)
             
             # Check duration and truncate if needed
             duration = len(audio) / sr
             if duration > self.max_duration:
                 logger.warning(f"Audio duration {duration:.2f}s exceeds max_duration {self.max_duration}s, truncating")
                 max_samples = int(self.max_duration * self.sampling_rate)
-                if len(audio) < max_samples:
-                    audio = np.pad(audio, (0, max_samples - len(audio)), mode="constant")
-                elif len(audio) > max_samples:
-                    audio = audio[:max_samples]
+                audio = audio[:max_samples]
             
             # Process audio based on model type
             if self.model_type == 'seq2seq':
                 # For Whisper and other Seq2Seq models
-                try:
+            try:
                     inputs = self.processor(
                         audio,
                         sampling_rate=self.sampling_rate,
                         return_tensors="pt",
-                        padding=True,  # No padding here - will be done at batch level
+                        padding=False,  # No padding here - will be done at batch level
                         truncation=True,
                     )
                     input_features = inputs.input_features[0]
@@ -148,7 +140,7 @@ class AutomaticSpeechRecognitionDataset:
                     # Fallback: use raw audio
                     input_features = torch.tensor(audio, dtype=torch.float32)
                     
-            elif self.model_type == 'ctc':
+                elif self.model_type == 'ctc':
                 # For Wav2Vec2, Hubert and other CTC models
                 try:
                     inputs = self.processor(
@@ -165,24 +157,24 @@ class AutomaticSpeechRecognitionDataset:
                     # Fallback: use raw audio
                     input_features = torch.tensor(audio, dtype=torch.float32)
                     
-            else:
+                else:
                 # Generic approach
-                try:
-                    inputs = self.processor(
-                        audio,
-                        sampling_rate=self.sampling_rate,
-                        return_tensors="pt",
+                    try:
+                        inputs = self.processor(
+                            audio,
+                            sampling_rate=self.sampling_rate,
+                            return_tensors="pt",
                         padding=False,  # No padding here - will be done at batch level
-                        truncation=True,
-                    )
-                    if hasattr(inputs, 'input_features'):
-                        input_features = inputs.input_features[0]
+                            truncation=True,
+                        )
+                        if hasattr(inputs, 'input_features'):
+                            input_features = inputs.input_features[0]
                     elif hasattr(inputs, 'input_values'):
                         input_features = inputs.input_values[0]
-                    else:
+                        else:
                         input_features = torch.tensor(audio, dtype=torch.float32)
                             
-                except Exception as e:
+                    except Exception as e:
                     logger.warning(f"Generic audio processing failed: {e}")
                     input_features = torch.tensor(audio, dtype=torch.float32)
             
@@ -190,7 +182,7 @@ class AutomaticSpeechRecognitionDataset:
             text = item[self.text_column]
             if not text or not isinstance(text, str):
                 text = " "  # Empty text fallback
-            
+
             # Tokenize text using simplified method
             labels = safe_tokenize_text(self.processor, text, self.max_seq_length)
             
