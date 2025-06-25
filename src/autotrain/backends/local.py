@@ -111,7 +111,7 @@ class LocalRunner(BaseBackend):
             env["PYTHONUNBUFFERED"] = "1"
             command = f"{sys.executable} -m autotrain.trainers.automatic_speech_recognition.__main__ --training_config \"{config_path}\""
 
-            # Run the training
+            print(f"[DEBUG] Subprocess command: {command}")
             logger.info(f"Running ASR command: {command}")
             logger.info(f"Current working directory: {os.getcwd()}")
             logger.info(f"Config path: {config_path}, exists: {os.path.exists(config_path)}")
