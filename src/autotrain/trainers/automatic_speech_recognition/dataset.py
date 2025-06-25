@@ -126,7 +126,10 @@ class AutomaticSpeechRecognitionDataset:
             if duration > self.max_duration:
                 logger.warning(f"Audio duration {duration:.2f}s exceeds max_duration {self.max_duration}s, truncating")
                 max_samples = int(self.max_duration * self.sampling_rate)
-                audio = audio[:max_samples]
+                if len(audio) < max_samples:
+                    audio = np.pad(audio, (0, max_samples - len(audio)), mode="constant")
+                elif len(audio) > max_samples:
+                    audio = audio[:max_samples]
             
             # Process audio based on model type
             if self.model_type == 'seq2seq':
