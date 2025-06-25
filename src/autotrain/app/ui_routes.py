@@ -601,7 +601,7 @@ async def handle_form(
         # Save DataFrame as CSV (processed_dataset.csv)
         processed_csv = os.path.join("life_app_data", "processed_dataset.csv")
         df.to_csv(processed_csv, index=False)
-        # Prepare AppParams and create project (let dataset class handle split, DatasetDict, etc.)
+        # Always use processed_dataset.csv as data_path for splitting/training
         data_path = processed_csv
         column_mapping = {"audio": "audio", "transcription": "transcription"}
         app_params = AppParams(
@@ -618,7 +618,8 @@ async def handle_form(
             valid_split=None,
         )
         params = app_params.munge()
-        project = AutoTrainProject(params=params, backend=hardware)
+        # Ensure process=True so dataset class handles split/save
+        project = AutoTrainProject(params=params, backend=hardware, process=True)
         job_id = project.create()
         monitor_url = ""
         if hardware == "local-ui":
