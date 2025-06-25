@@ -584,6 +584,7 @@ async def handle_form(
         import pandas as pd
         import base64
         from datasets import Dataset
+        
 
         # Read dataset.json
         with open(dataset_path, "r", encoding="utf-8") as f:
@@ -610,16 +611,38 @@ async def handle_form(
         # Save processed CSV for reference
         processed_csv = os.path.join("life_app_data", "processed_dataset.csv")
         df.to_csv(processed_csv, index=False)
-        # Save as HuggingFace Dataset
-        hf_dataset = Dataset.from_pandas(df)
-        # Save as arrow for training
-        arrow_path = os.path.join("life_app_data", "dataset.arrow")
-        hf_dataset.save_to_disk("life_app_data")
-        # Set data_path to "life_app_data"
-        data_path = "life_app_data"
-        # Set splits to None (single dataset)
-        train_split = None
-        valid_split = None
+                # --- SPLIT & SAVE LIKE LOCAL DATASET ---
+        # Split into train/valid (80/20)
+        train_df, valid_df = train_test_split(df, test_size=0.2, random_state=42)
+        train_df = train_df.reset_index(drop=True)
+        valid_df = valid_df.reset_index(drop=True)
+
+        from datasets import Dataset, DatasetDict
+        train_dataset = Dataset.from_pandas(train_df)
+        valid_dataset = Dataset.from_pandas(valid_df)
+        dataset = DatasetDict({"train": train_dataset, "validation": valid_dataset})
+
+        # Save to: autotrain-<project-name>/autotrain-data/
+        project_dir = f"autotrain-{project_name}"
+        data_dir = os.path.join(project_dir, "autotrain-data")
+        os.makedirs(data_dir, exist_ok=True)
+        dataset.save_to_disk(data_dir)
+
+        # Save config file
+        config_path = os.path.join(project_dir, "training_config.json")
+        with open(config_path, "w", encoding="utf-8") as f:
+            json.dump(params, f, ensure_ascii=False, indent=2)
+
+        # Prepare logs directory
+        logs_dir = os.path.join(project_dir, "output_logs")
+        os.makedirs(logs_dir, exist_ok=True)
+        log_file = os.path.join(logs_dir, f"training_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
+        # (Pass log_file path to your training script or logger)
+
+        # Set data_path to new structure
+        data_path = data_dir
+        train_split = "train"
+        valid_split = "validation"
 
         # Check if params is already a dict to avoid TypeError from redundant json.loads
         if not isinstance(params, dict):
