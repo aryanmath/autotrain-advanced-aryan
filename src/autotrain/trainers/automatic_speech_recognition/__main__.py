@@ -49,58 +49,30 @@ def parse_args():
     return parser.parse_args()
 
 def dynamic_padding_collator(batch):
-    """Universal collator that handles dynamic padding for different model types."""
-    # Separate input_features/input_values and labels
-    input_features = []
-    input_values = []
-    labels = []
+    """Custom collator that handles dynamic padding for different audio lengths."""
+    # Separate input_features and labels
+    input_features = [item['input_features'] for item in batch]
+    labels = [item['labels'] for item in batch]
     
-    for item in batch:
-        if 'input_features' in item:
-            input_features.append(item['input_features'])
-        if 'input_values' in item:
-            input_values.append(item['input_values'])
-        labels.append(item['labels'])
+    # For Whisper models, ensure all features are padded to 3000 frames
+    target_length = 3000  # Whisper expects 3000 frames
     
-    # Handle different model types
-    if input_features:  # Whisper/Seq2Seq models
-        # For Whisper models, ensure all features are padded to 3000 frames
-        target_length = 3000  # Whisper expects 3000 frames
-        
-        # Pad all features to target length
-        padded_features = []
-        for feat in input_features:
-            if feat.shape[1] < target_length:
-                # Pad with zeros to reach target_length
-                padding = torch.zeros(80, target_length - feat.shape[1])
-                padded_feat = torch.cat([feat, padding], dim=1)
-            elif feat.shape[1] > target_length:
-                # Truncate if longer than target_length
-                padded_feat = feat[:, :target_length]
-            else:
-                padded_feat = feat
-            padded_features.append(padded_feat)
-        
-        # Stack features
-        input_features = torch.stack(padded_features)
-        
-    elif input_values:  # Wav2Vec2/Hubert/CTC models
-        # For CTC models, pad to max length in batch
-        max_length = max(len(feat) for feat in input_values)
-        
-        # Pad all features to max length
-        padded_values = []
-        for feat in input_values:
-            if len(feat) < max_length:
-                # Pad with zeros to reach max_length
-                padding = torch.zeros(max_length - len(feat))
-                padded_feat = torch.cat([feat, padding])
-            else:
-                padded_feat = feat
-            padded_values.append(padded_feat)
-        
-        # Stack values
-        input_values = torch.stack(padded_values)
+    # Pad all features to target length
+    padded_features = []
+    for feat in input_features:
+        if feat.shape[1] < target_length:
+            # Pad with zeros to reach target_length
+            padding = torch.zeros(80, target_length - feat.shape[1])
+            padded_feat = torch.cat([feat, padding], dim=1)
+        elif feat.shape[1] > target_length:
+            # Truncate if longer than target_length
+            padded_feat = feat[:, :target_length]
+        else:
+            padded_feat = feat
+        padded_features.append(padded_feat)
+    
+    # Stack features
+    input_features = torch.stack(padded_features)
     
     # Pad labels
     max_label_length = max(len(label) for label in labels)
@@ -115,17 +87,10 @@ def dynamic_padding_collator(batch):
     
     labels = torch.stack(padded_labels)
     
-    # Return based on model type
-    if input_features:
-        return {
-            'input_features': input_features,
-            'labels': labels,
-        }
-    else:
-        return {
-            'input_values': input_values,
-            'labels': labels,
-        }
+    return {
+        'input_features': input_features,
+        'labels': labels,
+    }
 
 def load_data(params, is_validation=False):
     """
