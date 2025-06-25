@@ -16,6 +16,8 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from huggingface_hub import repo_exists
 from nvitop import Device
+import pandas as pd
+import base64
 
 from autotrain import __version__, logger
 from autotrain.app.db import AutoTrainDB
@@ -581,72 +583,26 @@ async def handle_form(
                 status_code=400,
                 detail="LiFE app dataset file not found"
             )
-        import pandas as pd
-        import base64
-        from datasets import Dataset
-        
-
-        # Read dataset.json
+        # Load dataset from dataset.json and decode audio bytes to .wav files
         with open(dataset_path, "r", encoding="utf-8") as f:
             dataset_json = json.load(f)
-        # Filter by selected project if needed (currently only one dataset)
-        # For now, use all rows
         df = pd.DataFrame(dataset_json)
-        # Save audio bytes to files
         audio_dir = os.path.join("life_app_data", "audio")
         os.makedirs(audio_dir, exist_ok=True)
         audio_paths = []
         for idx, row in df.iterrows():
             audio_bytes = row["audio"]
-            # decode base64 if needed, else treat as bytes string
-            try:
-                audio_data = base64.b64decode(audio_bytes)
-            except Exception:
-                audio_data = audio_bytes.encode("latin1")
+            audio_data = base64.b64decode(audio_bytes)
             audio_path = os.path.join(audio_dir, f"audio_{idx}.wav")
             with open(audio_path, "wb") as af:
                 af.write(audio_data)
             audio_paths.append(audio_path)
         df["audio"] = audio_paths
-        # Save processed CSV for reference
+        # Save DataFrame as CSV (processed_dataset.csv)
         processed_csv = os.path.join("life_app_data", "processed_dataset.csv")
         df.to_csv(processed_csv, index=False)
-                # --- SPLIT & SAVE LIKE LOCAL DATASET ---
-        # Split into train/valid (80/20)
-        train_df, valid_df = train_test_split(df, test_size=0.2, random_state=42)
-        train_df = train_df.reset_index(drop=True)
-        valid_df = valid_df.reset_index(drop=True)
-
-        from datasets import Dataset, DatasetDict
-        train_dataset = Dataset.from_pandas(train_df)
-        valid_dataset = Dataset.from_pandas(valid_df)
-        dataset = DatasetDict({"train": train_dataset, "validation": valid_dataset})
-
-        # Save to: autotrain-<project-name>/autotrain-data/
-        project_dir = f"autotrain-{project_name}"
-        data_dir = os.path.join(project_dir, "autotrain-data")
-        os.makedirs(data_dir, exist_ok=True)
-        dataset.save_to_disk(data_dir)
-
-        # Prepare logs directory (optional, for consistency)
-        logs_dir = os.path.join(project_dir, "output_logs")
-        os.makedirs(logs_dir, exist_ok=True)
-
-        # Set data_path to new structure
-        data_path = data_dir
-        train_split = "train"
-        valid_split = "validation"
-
-        # Update params for ASR
-        params["audio_column"] = "audio"
-        params["text_column"] = "transcription"
-        params["data_path"] = data_path
-        params["life_app_project"] = selected_project
-        params["life_app_script"] = selected_script
-        params["using_hub_dataset"] = False
-        params["train_split"] = None
-        params["valid_split"] = None
-        # Set column mapping
+        # Prepare AppParams and create project (let dataset class handle split, DatasetDict, etc.)
+        data_path = processed_csv
         column_mapping = {"audio": "audio", "transcription": "transcription"}
         app_params = AppParams(
             job_params_json=json.dumps(params),
