@@ -106,7 +106,7 @@ class LocalRunner(BaseBackend):
                 json.dump(config_dict, f, indent=2)
             
             # Construct the training command
-            WORKSPACE_ROOT = os.path.abspath(".")  # या जहां से आप manually चलाते हैं
+            WORKSPACE_ROOT = os.path.abspath(".")  
             env = os.environ.copy()
             env["PYTHONUNBUFFERED"] = "1"
             command = f"{sys.executable} -m autotrain.trainers.automatic_speech_recognition.__main__ --training_config \"{config_path}\""
