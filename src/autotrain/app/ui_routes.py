@@ -7,6 +7,7 @@ from typing import List, Optional, Dict, Any
 from datetime import datetime
 import subprocess
 import sqlite3
+import numpy as np
 
 import torch
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, UploadFile, status
@@ -14,6 +15,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from huggingface_hub import repo_exists
 from nvitop import Device
+from datasets import Dataset, DatasetDict
 
 from autotrain import __version__, logger
 from autotrain.app.db import AutoTrainDB
@@ -608,16 +610,27 @@ async def handle_form(
         # Save processed CSV for reference
         processed_csv = os.path.join("life_app_data", "processed_dataset.csv")
         df.to_csv(processed_csv, index=False)
-        # Save as HuggingFace Dataset
-        hf_dataset = Dataset.from_pandas(df)
-        # Save as arrow for training
-        arrow_path = os.path.join("life_app_data", "dataset.arrow")
-        hf_dataset.save_to_disk("life_app_data")
+        # Shuffle and split
+        df = df.sample(frac=1, random_state=42).reset_index(drop=True)
+        split_idx = int(0.8 * len(df))
+        train_df = df.iloc[:split_idx]
+        valid_df = df.iloc[split_idx:]
+        # Save train and validation as HuggingFace Datasets
+        train_dataset = Dataset.from_pandas(train_df)
+        valid_dataset = Dataset.from_pandas(valid_df)
+        dataset_dict = DatasetDict({
+            "train": train_dataset,
+            "validation": valid_dataset
+        })
+        # Save as HuggingFace dataset format
+        dataset_dict.save_to_disk("life_app_data")
         # Set data_path to "life_app_data"
         data_path = "life_app_data"
-        # Set splits to None (single dataset)
-        train_split = None
-        valid_split = None
+        train_split = "train"
+        valid_split = "validation"
+        params["train_split"] = train_split
+        params["valid_split"] = valid_split
+        params["data_path"] = data_path
 
         # Check if params is already a dict to avoid TypeError from redundant json.loads
         if not isinstance(params, dict):
