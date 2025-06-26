@@ -36,7 +36,7 @@ def setup_logger(name, log_file=None, level=logging.INFO):
         if log_dir and not os.path.exists(log_dir):
             os.makedirs(log_dir)
             
-        file_handler = logging.FileHandler(log_file)
+        file_handler = logging.FileHandler(log_file, encoding='utf-8')
         file_handler.setFormatter(detailed_formatter)
         logger.addHandler(file_handler)
     

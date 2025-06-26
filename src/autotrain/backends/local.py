@@ -8,6 +8,13 @@ import threading
 import time
 import sys
 
+# Patch sys.stdout and sys.stderr to utf-8 for Unicode logs
+import io
+if not isinstance(sys.stdout, io.TextIOWrapper) or sys.stdout.encoding.lower() != 'utf-8':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+if not isinstance(sys.stderr, io.TextIOWrapper) or sys.stderr.encoding.lower() != 'utf-8':
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+
 # Import all parameter classes
 from autotrain.trainers.clm.params import LLMTrainingParams
 from autotrain.trainers.extractive_question_answering.params import ExtractiveQuestionAnsweringParams
