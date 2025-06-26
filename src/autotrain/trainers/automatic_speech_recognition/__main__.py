@@ -375,7 +375,7 @@ def train(config: Dict[str, Any]):
             valid_dataset = load_from_disk(validation_path)
             training_logger.info("[LIVE] Validation dataset loaded with %d examples.", len(valid_dataset))
         else:
-        valid_dataset = None
+            valid_dataset = None
         training_logger.info("[LIVE] Loading model and processor...")
         model, processor = load_model_and_processor(params)
         from autotrain.trainers.automatic_speech_recognition import utils
