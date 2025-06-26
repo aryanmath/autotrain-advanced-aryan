@@ -120,10 +120,8 @@ class LocalRunner(BaseBackend):
             process = subprocess.Popen(
                 command,
                 shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                universal_newlines=True,
-                bufsize=1,
+                stdout=open("asr_stdout.log", "w", encoding="utf-8"),
+                stderr=open("asr_stderr.log", "w", encoding="utf-8"),
                 env=env,
                 cwd=WORKSPACE_ROOT
             )
