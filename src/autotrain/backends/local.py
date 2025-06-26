@@ -127,24 +127,26 @@ class LocalRunner(BaseBackend):
             process = subprocess.Popen(
                 command,
                 shell=True,
-                stdout=open("asr_stdout.log", "w", encoding="utf-8"),
-                stderr=open("asr_stderr.log", "w", encoding="utf-8"),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                encoding='utf-8',
                 env=env,
                 cwd=WORKSPACE_ROOT
             )
             
-            def print_and_log_output(stream):
-                # Wrap the stream for UTF-8 decoding
-                if not isinstance(stream, io.TextIOWrapper):
-                    stream = io.TextIOWrapper(stream, encoding='utf-8', errors='replace')
-                with open("asr_stdout.log", "a", encoding="utf-8") as log_file:
+            def tee_stream(stream, log_file_path):
+                with open(log_file_path, "a", encoding="utf-8") as log_file:
                     for line in iter(stream.readline, ''):
-                        print(line, end='')         # Print to terminal live
-                        log_file.write(line)        # Write to log file
+                        print(line, end='')
+                        log_file.write(line)
                         log_file.flush()
+                stream.close()
 
-            output_thread = threading.Thread(target=print_and_log_output, args=(process.stdout,))
-            output_thread.start()
+            stdout_thread = threading.Thread(target=tee_stream, args=(process.stdout, "asr_stdout.log"))
+            stderr_thread = threading.Thread(target=tee_stream, args=(process.stderr, "asr_stderr.log"))
+            stdout_thread.start()
+            stderr_thread.start()
 
             # Register the ASR job PID in the database immediately after starting the process
             from autotrain.app.db import AutoTrainDB
