@@ -358,15 +358,24 @@ def train(config: Dict[str, Any]):
         training_logger.info("[LIVE] Using text_column: %s", getattr(params, 'text_column', None))
 
         # Load dataset
-        training_logger.info("[LIVE] Loading dataset...")
-        dataset = load_data(params)
-        training_logger.info("[LIVE] Dataset loaded with %d examples.", len(dataset))
-        if params.valid_split:
-            training_logger.info("[LIVE] Loading validation dataset...")
-            valid_dataset = load_data(params, is_validation=True)
+        train_path = os.path.join(params.data_path, "train")
+        if os.path.exists(train_path):
+            training_logger.info("[LIVE] Loading training dataset from disk...")
+            from datasets import load_from_disk
+            dataset = load_from_disk(train_path)
+            training_logger.info("[LIVE] Training dataset loaded with %d examples.", len(dataset))
+        else:
+            training_logger.info("[LIVE] Loading dataset using load_data()...")
+            dataset = load_data(params)
+            training_logger.info("[LIVE] Dataset loaded with %d examples.", len(dataset))
+        validation_path = os.path.join(params.data_path, "validation")
+        if os.path.exists(validation_path):
+            training_logger.info("[LIVE] Loading validation dataset from disk...")
+            from datasets import load_from_disk
+            valid_dataset = load_from_disk(validation_path)
             training_logger.info("[LIVE] Validation dataset loaded with %d examples.", len(valid_dataset))
         else:
-            valid_dataset = None
+        valid_dataset = None
         training_logger.info("[LIVE] Loading model and processor...")
         model, processor = load_model_and_processor(params)
         from autotrain.trainers.automatic_speech_recognition import utils
