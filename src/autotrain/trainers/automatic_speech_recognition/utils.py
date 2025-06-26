@@ -18,8 +18,36 @@ def compute_metrics(pred):
     pred_ids = pred.predictions
     label_ids = pred.label_ids
 
-    # Replace -100 with pad_token_id
+    # If pred_ids is a tuple (logits, ...), take the first element
+    if isinstance(pred_ids, tuple):
+        pred_ids = pred_ids[0]
+    if isinstance(label_ids, tuple):
+        label_ids = label_ids[0]
+
+    # Convert to numpy arrays
+    pred_ids = np.asarray(pred_ids)
+    label_ids = np.asarray(label_ids)
+
+    # For Whisper, predictions may be float logits: take argmax if needed
+    if pred_ids.dtype != np.int32 and pred_ids.dtype != np.int64:
+        pred_ids = np.argmax(pred_ids, axis=-1)
+
+    # Remove -100s for labels (replace with pad_token_id)
     label_ids = np.where(label_ids == -100, processor.tokenizer.pad_token_id, label_ids)
+
+    # Convert to int and to list of lists
+    pred_ids = pred_ids.astype(int).tolist()
+    label_ids = label_ids.astype(int).tolist()
+
+    # If any element is a list (batch decode expects list of lists)
+    if isinstance(pred_ids[0], list):
+        pass  # already correct
+    else:
+        pred_ids = [pred_ids]
+    if isinstance(label_ids[0], list):
+        pass
+    else:
+        label_ids = [label_ids]
 
     # Decode
     pred_str = processor.batch_decode(pred_ids, skip_special_tokens=True)
