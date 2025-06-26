@@ -127,24 +127,24 @@ class LocalRunner(BaseBackend):
             process = subprocess.Popen(
                 command,
                 shell=True,
-                stdout=open("asr_stdout.log", "w", encoding="utf-8"),
-                stderr=open("asr_stderr.log", "w", encoding="utf-8"),
+                stdout=open("asr.log", "w", encoding="utf-8"),
+                stderr=subprocess.STDOUT,  # <-- This sends stderr to the same file as stdout
                 env=env,
                 cwd=WORKSPACE_ROOT
             )
             
-            def print_and_log_output(stream):
-                # Wrap the stream for UTF-8 decoding
-                if not isinstance(stream, io.TextIOWrapper):
-                    stream = io.TextIOWrapper(stream, encoding='utf-8', errors='replace')
-                with open("asr_stdout.log", "a", encoding="utf-8") as log_file:
-                    for line in iter(stream.readline, ''):
-                        print(line, end='')         # Print to terminal live
-                        log_file.write(line)        # Write to log file
-                        log_file.flush()
+            # def print_and_log_output(stream):
+            #     # Wrap the stream for UTF-8 decoding
+            #     if not isinstance(stream, io.TextIOWrapper):
+            #         stream = io.TextIOWrapper(stream, encoding='utf-8', errors='replace')
+            #     with open("asr_stdout.log", "a", encoding="utf-8") as log_file:
+            #         for line in iter(stream.readline, ''):
+            #             print(line, end='')         # Print to terminal live
+            #             log_file.write(line)        # Write to log file
+            #             log_file.flush()
 
-            output_thread = threading.Thread(target=print_and_log_output, args=(process.stdout,))
-            output_thread.start()
+            # output_thread = threading.Thread(target=print_and_log_output, args=(process.stdout,))
+            # output_thread.start()
 
             # Register the ASR job PID in the database immediately after starting the process
             from autotrain.app.db import AutoTrainDB

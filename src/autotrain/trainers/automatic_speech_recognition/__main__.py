@@ -413,6 +413,7 @@ def train(config: Dict[str, Any]):
             learning_rate=params.lr,
             num_train_epochs=params.epochs,
             save_strategy="epoch",
+            disable_tqdm=True,
             evaluation_strategy="epoch" if valid_dataset else "no",
             load_best_model_at_end=True if valid_dataset else False,
             metric_for_best_model="wer" if valid_dataset else None,

@@ -80,7 +80,7 @@ This model was trained using AutoTrain.
 
 ## Training Results
 
-- Final Loss: {trainer.state.log_history[-1]['loss'] if trainer.state.log_history else "N/A"}
+- Final Loss: {next((entry['loss'] for entry in reversed(trainer.state.log_history) if 'loss' in entry), "N/A")}
 - Best Validation Loss: {trainer.state.best_metric if hasattr(trainer.state, 'best_metric') else "N/A"}
 
 ## Usage
