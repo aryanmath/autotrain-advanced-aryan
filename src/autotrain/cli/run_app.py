@@ -156,6 +156,7 @@ class RunAutoTrainAppCommand(BaseAutoTrainCommand):
                     shell=True,
                     text=True,
                     bufsize=1,
+                    encoding='utf-8',
                     preexec_fn=os.setsid,
                 )
 
