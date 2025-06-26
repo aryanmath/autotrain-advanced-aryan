@@ -4,30 +4,32 @@ import numpy as np
 from transformers import Trainer
 import jiwer
 
+# At the top of your file, set processor as a global variable
+processor = None
+
+def set_processor(proc):
+    global processor
+    processor = proc
+
 def compute_metrics(pred):
-    """
-    Compute Word Error Rate (WER) for ASR evaluation.
-    
-    Args:
-        pred: Prediction object containing predictions and labels
-        
-    Returns:
-        Dict containing WER score
-    """
+    import jiwer
+    import numpy as np
+
     pred_ids = pred.predictions
     label_ids = pred.label_ids
 
-    # Replace -100 with the pad_token_id
-    label_ids[label_ids == -100] = pred.processor.tokenizer.pad_token_id
+    # Replace -100 with pad_token_id
+    label_ids = np.where(label_ids == -100, processor.tokenizer.pad_token_id, label_ids)
 
-    # Decode predictions and labels
-    pred_str = pred.processor.batch_decode(pred_ids)
-    label_str = pred.processor.batch_decode(label_ids)
+    # Decode
+    pred_str = processor.batch_decode(pred_ids, skip_special_tokens=True)
+    label_str = processor.batch_decode(label_ids, skip_special_tokens=True)
 
-    # Compute WER
+    # Compute metrics
     wer = jiwer.wer(label_str, pred_str)
+    cer = jiwer.cer(label_str, pred_str)
 
-    return {"wer": wer}
+    return {"wer": wer, "cer": cer}
 
 def create_model_card(config: Dict[str, Any], trainer: Trainer, num_classes: int = None) -> str:
     """Create a model card for the trained ASR model."""

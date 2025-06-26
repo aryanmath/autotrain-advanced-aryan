@@ -369,6 +369,8 @@ def train(config: Dict[str, Any]):
             valid_dataset = None
         training_logger.info("[LIVE] Loading model and processor...")
         model, processor = load_model_and_processor(params)
+        from autotrain.trainers.automatic_speech_recognition import utils
+        utils.set_processor(processor)
         training_logger.info("[LIVE] Model and processor loaded.")
         training_logger.info("[LIVE] Creating training dataset object...")
         train_dataset = AutomaticSpeechRecognitionDataset(
@@ -445,6 +447,7 @@ def train(config: Dict[str, Any]):
             eval_dataset=valid_dataset_obj if valid_dataset is not None else None,
             callbacks=callbacks,
             data_collator=dynamic_padding_collator,  # Use custom collator
+            compute_metrics=compute_metrics if valid_dataset is not None else None,  # <-- ADD THIS LINE
         )
         training_logger.info("[LIVE] Trainer initialized. Starting training...")
         trainer.train()
