@@ -139,9 +139,9 @@ class LocalRunner(BaseBackend):
                     stream = io.TextIOWrapper(stream, encoding='utf-8', errors='replace')
                 with open("asr_stdout.log", "a", encoding="utf-8") as log_file:
                     for line in iter(stream.readline, ''):
-                    print(line, end='')         # Print to terminal live
-                    log_file.write(line)        # Write to log file
-                    log_file.flush()
+                        print(line, end='')         # Print to terminal live
+                        log_file.write(line)        # Write to log file
+                        log_file.flush()
 
             output_thread = threading.Thread(target=print_and_log_output, args=(process.stdout,))
             output_thread.start()
