@@ -623,9 +623,10 @@ async def handle_form(
             "validation": valid_dataset
         })
         # Save as HuggingFace dataset format
-        dataset_dict.save_to_disk("life_app_data")
-        # Set data_path to "life_app_data"
-        data_path = "life_app_data"
+        output_dir = os.path.join(project_name, "autotrain-data")
+        os.makedirs(output_dir, exist_ok=True)
+        dataset_dict.save_to_disk(output_dir)
+        data_path = output_dir
         train_split = "train"
         valid_split = "validation"
         params["train_split"] = train_split
