@@ -134,20 +134,20 @@ class LocalRunner(BaseBackend):
             self.job_id = str(process.pid)
             logger.info(f"ASR Training started with PID: {self.job_id}")
 
-            # Start a background thread to monitor the process
-            def monitor_process():
-                while True:
-                    stdout_line = process.stdout.readline()
-                    if stdout_line:
-                        logger.info(f"[ASR STDOUT] {stdout_line.strip()}")
-                    stderr_line = process.stderr.readline()
-                    if stderr_line:
-                        logger.error(f"[ASR STDERR] {stderr_line.strip()}")
-                    if process.poll() is not None:
-                        break
+            # # Start a background thread to monitor the process
+            # def monitor_process():
+            #     while True:
+            #         stdout_line = process.stdout.readline()
+            #         if stdout_line:
+            #             logger.info(f"[ASR STDOUT] {stdout_line.strip()}")
+            #         stderr_line = process.stderr.readline()
+            #         if stderr_line:
+            #             logger.error(f"[ASR STDERR] {stderr_line.strip()}")
+            #         if process.poll() is not None:
+            #             break
 
-            monitor_thread = threading.Thread(target=monitor_process, daemon=True)
-            monitor_thread.start()
+            # monitor_thread = threading.Thread(target=monitor_process, daemon=True)
+            # monitor_thread.start()
                 
             return
             
