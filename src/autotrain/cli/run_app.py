@@ -171,7 +171,6 @@ class RunAutoTrainAppCommand(BaseAutoTrainCommand):
                 if sys.platform == "win32":
                     process.terminate()
                 else:
-                    # If user cancels (Ctrl+C), terminate the subprocess
-                    # Use os.killpg to send SIGTERM to the process group, ensuring all child processes are killed
+                    
                     os.killpg(os.getpgid(process.pid), signal.SIGTERM)
                 logger.info("Process terminated by user")

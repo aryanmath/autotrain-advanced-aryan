@@ -157,7 +157,7 @@ def pause_space(params, is_failure=False):
         Error: Logs if the model failed to train and the discussion was not created.
     """
     if "SPACE_ID" in os.environ:
-        # shut down the space
+        
         logger.info("Pausing space...")
         api = HfApi(token=params.token)
 
@@ -186,7 +186,7 @@ def pause_space(params, is_failure=False):
 
         api.pause_space(repo_id=os.environ["SPACE_ID"])
     if "ENDPOINT_ID" in os.environ:
-        # shut down the endpoint
+        
         logger.info("Pausing endpoint...")
         pause_endpoint(params)
 
@@ -250,7 +250,7 @@ class AutoTrainParams(BaseModel):
         """
         os.makedirs(output_dir, exist_ok=True)
         path = os.path.join(output_dir, "training_params.json")
-        # save formatted json
+        
         with open(path, "w", encoding="utf-8") as f:
             f.write(self.model_dump_json(indent=4))
 
@@ -269,23 +269,22 @@ class AutoTrainParams(BaseModel):
         super().__init__(**data)
 
         if len(self.project_name) > 0:
-            # make sure project_name is always alphanumeric but can have hyphens. if not, raise ValueError
+           
             if not self.project_name.replace("-", "").isalnum():
                 raise ValueError("project_name must be alphanumeric but can contain hyphens")
 
-        # project name cannot be more than 50 characters
+        
         if len(self.project_name) > 50:
             raise ValueError("project_name cannot be more than 50 characters")
 
-        # Parameters not supplied by the user
+        
         defaults = set(self.model_fields.keys())
         supplied = set(data.keys())
         not_supplied = defaults - supplied
         if not_supplied and not is_colab:
             logger.warning(f"Parameters not supplied by user and set to default: {', '.join(not_supplied)}")
 
-        # Parameters that were supplied but not used
-        # This is a naive implementation. It might catch some internal Pydantic params.
+       
         unused = supplied - set(self.model_fields)
         if unused:
             logger.warning(f"Parameters supplied but not used: {', '.join(unused)}")
@@ -409,14 +408,14 @@ class DetailedTrainingCallback(TrainerCallback):
         self.training_started = True
         self.total_steps = state.max_steps
         
-        # Log training start
+        
         logger.info("=" * 80)
         logger.info("🚀 Training Started")
         logger.info("=" * 80)
         logger.info(f"📅 Start time: {self.start_time}")
         logger.info(f"⚙️ Training arguments: {args}")
         
-        # Log GPU info if available
+        
         if torch.cuda.is_available():
             logger.info(f"🎮 GPU: {torch.cuda.get_device_name(0)}")
             logger.info(f"💾 GPU Memory: {torch.cuda.get_device_properties(0).total_memory / 1024**3:.1f} GB")
@@ -433,16 +432,16 @@ class DetailedTrainingCallback(TrainerCallback):
         if state.global_step % args.logging_steps == 0:
             self.current_step = state.global_step
             
-            # Calculate progress
+           
             progress = state.global_step / state.max_steps * 100
             elapsed = datetime.now() - self.start_time
             
-            # Calculate ETA
+            
             steps_per_second = state.global_step / elapsed.total_seconds()
             remaining_steps = state.max_steps - state.global_step
             eta = remaining_steps / steps_per_second if steps_per_second > 0 else 0
             
-            # Get current metrics - add safety check for empty log_history
+           
             if state.log_history:
                 current_loss = state.log_history[-1].get('loss', 'N/A')
                 current_lr = state.log_history[-1].get('learning_rate', 'N/A')
@@ -450,14 +449,14 @@ class DetailedTrainingCallback(TrainerCallback):
                 current_loss = 'N/A'
                 current_lr = 'N/A'
             
-            # Update best loss
+            
             if isinstance(current_loss, (int, float)) and current_loss < self.best_loss:
                 self.best_loss = current_loss
             
-            # Log progress
+           
             logger.info(f"⏳ Progress: {progress:.1f}% ({state.global_step}/{state.max_steps})")
             
-            # Handle loss formatting - check if it's a number or string
+            
             if isinstance(current_loss, (int, float)):
                 loss_str = f"{current_loss:.4f}"
             else:
@@ -470,7 +469,7 @@ class DetailedTrainingCallback(TrainerCallback):
             
             logger.info(f"📈 Loss: {loss_str} (Best: {best_loss_str})")
             
-            # Handle learning rate formatting
+           
             if isinstance(current_lr, (int, float)):
                 lr_str = f"{current_lr:.2e}"
             else:
@@ -480,7 +479,7 @@ class DetailedTrainingCallback(TrainerCallback):
             logger.info(f"⏱️ Elapsed: {elapsed}")
             logger.info(f"⏳ ETA: {timedelta(seconds=int(eta))}")
             
-            # Log GPU memory if available
+            
             if torch.cuda.is_available():
                 allocated = torch.cuda.memory_allocated() / 1024**2
                 cached = torch.cuda.memory_reserved() / 1024**2
@@ -491,7 +490,7 @@ class DetailedTrainingCallback(TrainerCallback):
         logger.info("=" * 80)
         logger.info(f"✅ Epoch {self.current_epoch} completed")
         
-        # Add safety check for empty log_history
+        
         if state.log_history:
             current_loss = state.log_history[-1].get('loss', 'N/A')
             if isinstance(current_loss, (int, float)):
@@ -520,7 +519,7 @@ class DetailedTrainingCallback(TrainerCallback):
         logger.info("=" * 80)
         logger.info(f"⏱️ Total training time: {total_time}")
         
-        # Add safety check for empty log_history
+        
         if state.log_history:
             current_loss = state.log_history[-1].get('loss', 'N/A')
             if isinstance(current_loss, (int, float)):

@@ -474,11 +474,11 @@ def asr_munge_data(params, local):
         params.valid_split = "validation"
         params.audio_column = "audio"
         params.text_column = "transcription"
-    # Add support for LiFE App dataset
+# Add support for LiFE App dataset
     if hasattr(params, "data_path") and params.data_path == "life_app_data":
         params.text_column = "transcription"
         params.audio_column = "audio"
-        params.data_path = "life_app_data"  # Ensure data_path is correctly set
+        params.data_path = "life_app_data"  
     return params
 
 
@@ -588,15 +588,15 @@ class AutoTrainProject:
 
     def create(self):
         if self.process:
-            # Process params and data
+            
             processed_params = self._process_params_data()
             
-            # Ensure params has all required fields for ASR
+            
             if isinstance(processed_params, AutomaticSpeechRecognitionParams):
-                # The params object already has all required fields
+                
                 self.params = processed_params
             elif isinstance(processed_params, dict):
-                # Convert dict to proper params object with all required fields
+                
                 self.params = AutomaticSpeechRecognitionParams(
                     train_data=processed_params.get("data_path"),
                     valid_data=processed_params.get("valid_split"),

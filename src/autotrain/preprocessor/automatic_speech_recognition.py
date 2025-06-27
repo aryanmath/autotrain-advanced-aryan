@@ -1,136 +1,3 @@
-# import os
-# from dataclasses import dataclass
-# from typing import Optional, Dict
-# import pandas as pd
-# from datasets import Dataset, DatasetDict
-# from sklearn.model_selection import train_test_split
-# from autotrain import logger
-
-# RESERVED_COLUMNS = ["audio", "transcription", "duration"]
-
-# @dataclass
-# class AutomaticSpeechRecognitionPreprocessor:
-#     """
-#     Preprocessor for Automatic Speech Recognition (ASR) tasks.
-#     - Accepts a single CSV or JSON file (with or without a duration column).
-#     - Handles column mapping.
-#     - Splits into train/valid if needed.
-#     - Renames columns to standard names.
-#     - Checks audio file existence.
-#     - Normalizes text.
-#     - Saves locally or pushes to hub.
-#     """
-#     train_data: pd.DataFrame
-#     project_name: str
-#     username: str
-#     token: str
-#     column_mapping: Optional[Dict[str, str]] = None
-#     valid_data: Optional[pd.DataFrame] = None
-#     test_size: float = 0.2
-#     seed: int = 42
-#     local: bool = False
-
-#     def __post_init__(self):
-#         # Set default column mapping
-#         if self.column_mapping is None:
-#             self.column_mapping = {
-#                 "audio": "audio",
-#                 "transcription": "transcription",
-#                 "duration": "duration"
-#             }
-#         self.audio_column = self.column_mapping.get("audio", "audio")
-#         self.text_column = self.column_mapping.get("transcription", "transcription")
-#         self.duration_column = self.column_mapping.get("duration", None)
-
-#         # Validate columns exist
-#         for col in [self.audio_column, self.text_column]:
-#             if col not in self.train_data.columns:
-#                 raise ValueError(f"Column '{col}' not found in training data")
-#         if self.valid_data is not None:
-#             for col in [self.audio_column, self.text_column]:
-#                 if col not in self.valid_data.columns:
-#                     raise ValueError(f"Column '{col}' not found in validation data")
-
-#     def split(self):
-#         if self.valid_data is not None:
-#             return self.train_data, self.valid_data
-#         train_df, valid_df = train_test_split(
-#             self.train_data,
-#             test_size=self.test_size,
-#             random_state=self.seed,
-#         )
-#         train_df = train_df.reset_index(drop=True)
-#         valid_df = valid_df.reset_index(drop=True)
-#         return train_df, valid_df
-
-#     def prepare_columns(self, train_df, valid_df):
-#         # Rename columns to standard names
-#         train_df = train_df.rename(columns={
-#             self.audio_column: "audio",
-#             self.text_column: "transcription"
-#         })
-#         valid_df = valid_df.rename(columns={
-#             self.audio_column: "audio",
-#             self.text_column: "transcription"
-#         })
-#         # If duration column exists, rename it
-#         if self.duration_column and self.duration_column in train_df.columns:
-#             train_df = train_df.rename(columns={self.duration_column: "autotrain_duration"})
-#         if self.duration_column and self.duration_column in valid_df.columns:
-#             valid_df = valid_df.rename(columns={self.duration_column: "autotrain_duration"})
-#         return train_df, valid_df
-
-#     def check_audio_files(self, df):
-#         missing = []
-#         for idx, path in enumerate(df[self.audio_column]):
-#             if not os.path.exists(path):
-#                 missing.append((idx, path))
-#         if missing:
-#             msg = "Missing audio files:\n" + "\n".join([f"Row {i}: {p}" for i, p in missing[:5]])
-#             if len(missing) > 5:
-#                 msg += f"\n... and {len(missing)-5} more"
-#             raise ValueError(msg)
-
-#     def normalize_text(self, df):
-#         df[self.text_column] = df[self.text_column].astype(str).str.strip().str.lower()
-#         return df
-
-#     def prepare(self):
-#         train_df, valid_df = self.split()
-#         train_df, valid_df = self.prepare_columns(train_df, valid_df)
-#         self.check_audio_files(train_df)
-#         self.check_audio_files(valid_df)
-#         train_df = self.normalize_text(train_df)
-#         valid_df = self.normalize_text(valid_df)
-#         train_dataset = Dataset.from_pandas(train_df)
-#         valid_dataset = Dataset.from_pandas(valid_df)
-#         dataset = DatasetDict({"train": train_dataset, "validation": valid_dataset})
-#         if self.local:
-#             output_dir = f"{self.project_name}/autotrain-data"
-#             os.makedirs(output_dir, exist_ok=True)
-#             dataset.save_to_disk(output_dir)
-#             logger.info(f"Dataset saved to {output_dir}")
-#             return output_dir
-#         else:
-#             train_dataset.push_to_hub(
-#                 f"{self.username}/autotrain-data-{self.project_name}",
-#                 split="train",
-#                 private=True,
-#                 token=self.token,
-#             )
-#             valid_dataset.push_to_hub(
-#                 f"{self.username}/autotrain-data-{self.project_name}",
-#                 split="validation",
-#                 private=True,
-#                 token=self.token,
-#             )
-#             logger.info(f"Dataset pushed to hub: {self.username}/autotrain-data-{self.project_name}")
-#             return f"{self.username}/autotrain-data-{self.project_name}"
-
-
-
-
-
 import os
 import logging
 import pandas as pd
@@ -171,12 +38,12 @@ class AutomaticSpeechRecognitionPreprocessor(AutoTrainPreprocessor):
         seed: int = 42,
         local: bool = False,
     ):
-        # Set default column mapping to match user's CSV structure
+       
         if column_mapping is None:
             column_mapping = {
-                "audio": "audio",  # Path to audio files
-                "transcription": "transcription",  # Text transcription
-                "duration": "duration"  # Audio duration
+                "audio": "audio",  
+                "transcription": "transcription", 
+                "duration": "duration"  
             }
             
         super().__init__(
@@ -191,12 +58,12 @@ class AutomaticSpeechRecognitionPreprocessor(AutoTrainPreprocessor):
         self.seed = seed
         self.local = local
 
-        # Extract column names from mapping
+        
         self.audio_column = self.column_mapping.get("audio", "audio")
         self.text_column = self.column_mapping.get("transcription", "transcription")
         self.duration_column = self.column_mapping.get("duration", "duration")
 
-        # Validate columns exist
+        
         if self.audio_column not in self.train_data.columns:
             raise ValueError(f"Audio column '{self.audio_column}' not found in training data")
         if self.text_column not in self.train_data.columns:
@@ -228,7 +95,7 @@ class AutomaticSpeechRecognitionPreprocessor(AutoTrainPreprocessor):
 
     def prepare_columns(self, train_df: pd.DataFrame, valid_df: pd.DataFrame):
         """Prepare columns for training."""
-        # Rename columns to standard names that the trainer expects
+        
         train_df = train_df.rename(columns={
             self.audio_column: "audio",
             self.text_column: "transcription"
@@ -248,17 +115,17 @@ class AutomaticSpeechRecognitionPreprocessor(AutoTrainPreprocessor):
         train_dataset = Dataset.from_pandas(train_df)
         valid_dataset = Dataset.from_pandas(valid_df)
 
-        # Save locally
+        
         dataset = DatasetDict({
             "train": train_dataset,
             "validation": valid_dataset
         })
         
-        # Create output directory
+       
         output_dir = os.path.join(self.project_name, "autotrain-data")
         os.makedirs(output_dir, exist_ok=True)
         
-        # Save dataset to disk
+        
         dataset.save_to_disk(output_dir)
         logger.info(f"Dataset saved to {output_dir}")
         
@@ -269,19 +136,19 @@ class AutomaticSpeechRecognitionPreprocessor(AutoTrainPreprocessor):
         logger.info(f"Available columns in DataFrame: {df.columns.tolist()}")
         logger.info(f"Column mapping: {self.column_mapping}")
         
-        # Process audio files
+        
         logger.info(f"Processing audio files from column: {self.audio_column}")
         
         processed_audio = []
         for audio_path in df[self.audio_column]:
             processed_audio.append(self._process_audio(audio_path))
         
-        # Clean text
+        
         logger.info(f"Cleaning text from column: {self.text_column}")
         
         processed_text = df[self.text_column].apply(lambda x: x.strip().lower())
         
-        # Create processed dataframe
+        
         processed_df = pd.DataFrame({
             'audio': processed_audio,
             'transcription': processed_text
@@ -303,10 +170,10 @@ class AutomaticSpeechRecognitionPreprocessor(AutoTrainPreprocessor):
 
     def _create_datasets(self, processed_df: pd.DataFrame) -> DatasetDict:
         """Create train/validation/test datasets."""
-        # Create train dataset
+        
         train_dataset = Dataset.from_pandas(processed_df)
         
-        # Create dataset dictionary
+        
         datasets = DatasetDict({
             'train': train_dataset
         })
@@ -322,7 +189,7 @@ class AutomaticSpeechRecognitionPreprocessor(AutoTrainPreprocessor):
         datasets.save_to_disk(save_path)
         logger.info("Training dataset saved successfully")
 
-# Add a utility to load LiFE App dataset from disk for preprocessing if needed
+
 def load_life_app_dataset_from_disk(data_path):
     from datasets import load_from_disk
     return load_from_disk(data_path)

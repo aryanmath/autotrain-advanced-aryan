@@ -23,7 +23,7 @@ def safe_tokenize_text(processor, text, max_seq_length=128):
     """
     Simplified tokenization that works for all models.
     """
-    # Method 1: Try Whisper tokenizer directly (most reliable)
+    
     if hasattr(processor, 'tokenizer') and hasattr(processor.tokenizer, 'encode'):
         try:
             input_ids = processor.tokenizer.encode(
@@ -36,7 +36,7 @@ def safe_tokenize_text(processor, text, max_seq_length=128):
         except Exception as e:
             logger.warning(f"Whisper tokenizer failed: {e}")
     
-    # Method 2: Try processor.tokenizer
+    
     if hasattr(processor, "tokenizer"):
         try:
             return processor.tokenizer(
@@ -49,7 +49,7 @@ def safe_tokenize_text(processor, text, max_seq_length=128):
         except Exception as e:
             logger.warning(f"Processor tokenizer failed: {e}")
     
-    # Method 3: Try processor directly
+   
     try:
         return processor(
             text,
@@ -60,7 +60,7 @@ def safe_tokenize_text(processor, text, max_seq_length=128):
     except Exception as e:
         logger.warning(f"Processor direct failed: {e}")
     
-    # Final fallback: return dummy tokens
+   
     logger.warning(f"All tokenization methods failed for text: {text[:50]}...")
     return torch.tensor([0] * min(max_seq_length, 10), dtype=torch.long)
 
@@ -88,7 +88,7 @@ class AutomaticSpeechRecognitionDataset:
         self.sampling_rate = sampling_rate
         self.max_seq_length = 128
         
-        # Detect model type
+        
         if model_type is not None:
             self.model_type = model_type
         else:
@@ -108,34 +108,34 @@ class AutomaticSpeechRecognitionDataset:
         try:
             item = self._data[idx]
             
-            # Get audio path
+            
             audio_path = item[self.audio_column]
             if not os.path.exists(audio_path):
                 raise ValueError(f"Audio file not found: {audio_path}")
 
-            # Load audio
+            
             audio, sr = librosa.load(audio_path, sr=self.sampling_rate)
             
-            # Check duration and truncate if needed
+           
             duration = len(audio) / sr
             if duration > self.max_duration:
                 logger.warning(f"Audio duration {duration:.2f}s exceeds max_duration {self.max_duration}s, truncating")
                 max_samples = int(self.max_duration * self.sampling_rate)
                 audio = audio[:max_samples]
             
-            # Process audio based on model type
+           
             if self.model_type == 'seq2seq':
-                # For Whisper and other Seq2Seq models
+                
                 try:
                     inputs = self.processor(
                         audio,
                         sampling_rate=self.sampling_rate,
                         return_tensors="pt",
-                        padding=False,  # No padding here - will be done at batch level
+                        padding=False,  
                         truncation=True,
                     )
                     input_features = inputs.input_features[0]
-                    # Pad or truncate to (80, 3000) for Whisper
+                    
                     target_length = 3000
                     if input_features.shape[1] < target_length:
                         padding = torch.zeros(80, target_length - input_features.shape[1])
@@ -144,34 +144,34 @@ class AutomaticSpeechRecognitionDataset:
                         input_features = input_features[:, :target_length]
                 except Exception as e:
                     logger.warning(f"Seq2Seq audio processing failed: {e}")
-                    # Fallback: use raw audio
+                    
                     input_features = torch.tensor(audio, dtype=torch.float32)
                     
             elif self.model_type == 'ctc':
-                # For Wav2Vec2, Hubert and other CTC models
+                
                 try:
                     inputs = self.processor(
                         audio,
                         sampling_rate=self.sampling_rate,
                         return_tensors="pt",
-                        padding=False,  # No padding here - will be done at batch level
+                        padding=False,  
                         truncation=True,
                     )
                     input_features = inputs.input_values[0]
                         
                 except Exception as e:
                     logger.warning(f"CTC audio processing failed: {e}")
-                    # Fallback: use raw audio
+                    
                     input_features = torch.tensor(audio, dtype=torch.float32)
                     
             else:
-                # Generic approach
+                
                 try:
                     inputs = self.processor(
                         audio,
                         sampling_rate=self.sampling_rate,
                         return_tensors="pt",
-                        padding=False,  # No padding here - will be done at batch level
+                        padding=False,  
                         truncation=True,
                     )
                     if hasattr(inputs, 'input_features'):
@@ -185,15 +185,15 @@ class AutomaticSpeechRecognitionDataset:
                     logger.warning(f"Generic audio processing failed: {e}")
                     input_features = torch.tensor(audio, dtype=torch.float32)
             
-            # Get text
+            
             text = item[self.text_column]
             if not text or not isinstance(text, str):
-                text = " "  # Empty text fallback
+                text = " "  
             
-            # Tokenize text using simplified method
+            
             labels = safe_tokenize_text(self.processor, text, self.max_seq_length)
             
-            # Return based on model type
+           
             if self.model_type == 'seq2seq':
                 return {
                     "input_features": input_features,
@@ -207,11 +207,11 @@ class AutomaticSpeechRecognitionDataset:
 
         except Exception as e:
             logger.error(f"Error processing item {idx}: {str(e)}")
-            # Return dummy data to prevent training from crashing
+            
             if self.model_type == 'seq2seq':
-                dummy_audio = torch.zeros(80, 100, dtype=torch.float32)  # Small dummy size
+                dummy_audio = torch.zeros(80, 100, dtype=torch.float32)  
             else:
-                dummy_audio = torch.zeros(1000, dtype=torch.float32)  # Small dummy size
+                dummy_audio = torch.zeros(1000, dtype=torch.float32) 
             dummy_labels = torch.tensor([0], dtype=torch.long)
             
             if self.model_type == 'seq2seq':

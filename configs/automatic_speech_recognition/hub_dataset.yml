@@ -5,12 +5,12 @@ log: tensorboard
 backend: local
 
 data:
-  path: common_voice # this must be the hub dataset name
-  train_split: train # this must be the name of the training split in the hub dataset
-  valid_split: validation # this must be the name of the validation split in the hub dataset
+  path: common_voice 
+  train_split: train 
+  valid_split: validation 
   column_mapping:
-    audio_column: audio # this must be the name of the column containing the audio file paths
-    text_column: transcription # this must be the name of the column containing the transcriptions
+    audio_column: audio 
+    text_column: transcription 
   using_hub_dataset: true
 
 params:

@@ -47,14 +47,14 @@ class AutomaticSpeechRecognitionParams(AutoTrainParams):
         auto_find_batch_size (bool): Automatically find optimal batch size.
         eval_strategy (str): Evaluation strategy during training.
     """
-    # Base fields
+    
     project_name: str
     data_path: str
     model: str
     username: str
     token: Optional[str] = None
     
-    # Dataset fields
+    
     using_hub_dataset: bool = False
     train_split: Optional[str] = None
     valid_split: Optional[str] = None
@@ -64,10 +64,10 @@ class AutomaticSpeechRecognitionParams(AutoTrainParams):
     sampling_rate: int = 16000
     max_seq_length: int = 128
     
-    # Output fields
+    
     output_dir: str = Field(default="output")
     
-    # Training fields
+    
     batch_size: int = 8
     gradient_accumulation: int = 1
     epochs: int = 3
@@ -76,14 +76,14 @@ class AutomaticSpeechRecognitionParams(AutoTrainParams):
     optimizer: str = "adamw_torch"
     mixed_precision: str = "no"
     
-    # Hub fields
+    
     push_to_hub: bool = False
     hub_model_id: Optional[str] = None
     
-    # Logging field
+    
     log: str = Field("tensorboard", title="Logging method for experiment tracking")
     
-    # New fields
+    
     logging_steps: int = Field(10, title="Number of steps between logging")
     save_total_limit: int = Field(2, title="Maximum number of checkpoints to keep")
     warmup_ratio: float = Field(0.1, title="Warmup ratio for learning rate scheduler")
@@ -97,7 +97,7 @@ class AutomaticSpeechRecognitionParams(AutoTrainParams):
     
     def validate_params(self):
         """Validate parameters."""
-        # Validate model
+       
         available_models = fetch_models()
         model_found = False
         for category, models in available_models.items():
@@ -107,36 +107,36 @@ class AutomaticSpeechRecognitionParams(AutoTrainParams):
         if not model_found:
             raise ValueError(f"Model {self.model} not found in available models: {available_models}")
         
-        # Validate data path
+        
         if not self.data_path:
             raise ValueError("data_path must be provided")
             
-        # Validate hub dataset parameters
+        
         if self.using_hub_dataset:
             if not self.train_split:
                 raise ValueError("train_split must be provided when using hub dataset")
             if not self.token:
                 raise ValueError("token must be provided when using hub dataset")
         else:
-            # Validate local dataset parameters
+            
             if not os.path.exists(self.data_path):
                 raise ValueError(f"data_path does not exist: {self.data_path}")
             
-            # Check for data files
+            
             files = os.listdir(self.data_path)
             
-            # Check for CSV file
+           
             csv_files = [f for f in files if f.endswith('.csv')]
             if not csv_files:
                 raise ValueError(f"No CSV file found in {self.data_path}")
             
-            # Check for audio folder
+           
             audio_folder = os.path.join(self.data_path, 'audio')
             if not os.path.exists(audio_folder):
                 logger.warning(f"Audio folder not found: {audio_folder}")
                 logger.warning("Will try to use audio paths as provided in CSV")
                 
-        # Validate training parameters
+       
         if self.batch_size <= 0:
             raise ValueError("batch_size must be positive")
         if self.gradient_accumulation <= 0:
@@ -146,14 +146,14 @@ class AutomaticSpeechRecognitionParams(AutoTrainParams):
         if self.lr <= 0:
             raise ValueError("learning rate must be positive")
             
-        # Validate mixed precision
+        
         if self.mixed_precision not in ["no", "fp16", "bf16"]:
             raise ValueError("mixed_precision must be one of: no, fp16, bf16")
             
-        # Validate scheduler
+       
         if self.scheduler not in ["linear", "cosine", "cosine_with_restarts", "polynomial", "constant", "constant_with_warmup"]:
             raise ValueError("scheduler must be one of: linear, cosine, cosine_with_restarts, polynomial, constant, constant_with_warmup")
             
-        # Validate optimizer
+        
         if self.optimizer not in ["adamw_hf", "adamw_torch", "adamw_torch_fused", "adamw_apex_fused", "adafactor", "adamw_anyprecision", "sgd", "adagrad"]:
             raise ValueError("optimizer must be one of: adamw_hf, adamw_torch, adamw_torch_fused, adamw_apex_fused, adafactor, adamw_anyprecision, sgd, adagrad")

@@ -145,5 +145,5 @@ class RunAutoTrainAutomaticSpeechRecognitionCommand(AutoTrainCLI):
         with open(config_path, "w") as f:
             json.dump(training_config, f, indent=2)
         
-        # Run training
+        
         trainer.train(training_config) 

@@ -69,10 +69,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const lifeAppOption = document.getElementById("dataset_source").querySelector('option[value="life_app"]');
         if (lifeAppOption) {
             if (taskValue === "ASR") {
-                lifeAppOption.style.display = ""; // Show option
+                lifeAppOption.style.display = ""; 
             } else {
-                lifeAppOption.style.display = "none"; // Hide option
-                // If LiFE App was selected, switch to local
+                lifeAppOption.style.display = "none"; 
+                
         if (dataSource.value === "life_app") {
                     dataSource.value = "local";
                 }
@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 updateTextarea();
                 observeParamChanges();
             }
-            handleDataSource(); // Call handleDataSource on task change
+            handleDataSource(); 
         });
     });
 
@@ -214,7 +214,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Attach event listeners to dataset_source dropdown and task dropdown
     dataSource.addEventListener("change", handleDataSource);
-    document.getElementById('task').addEventListener('change', handleDataSource); // Ensure handleDataSource is called on task change
+    document.getElementById('task').addEventListener('change', handleDataSource); 
     jsonCheckbox.addEventListener('change', switchToJSON);
     paramsTextarea.addEventListener('input', updateParamsFromTextarea);
 

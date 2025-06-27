@@ -133,20 +133,7 @@ class LocalRunner(BaseBackend):
                 cwd=WORKSPACE_ROOT
             )
             
-            # def print_and_log_output(stream):
-            #     # Wrap the stream for UTF-8 decoding
-            #     if not isinstance(stream, io.TextIOWrapper):
-            #         stream = io.TextIOWrapper(stream, encoding='utf-8', errors='replace')
-            #     with open("asr_stdout.log", "a", encoding="utf-8") as log_file:
-            #         for line in iter(stream.readline, ''):
-            #             print(line, end='')         # Print to terminal live
-            #             log_file.write(line)        # Write to log file
-            #             log_file.flush()
-
-            # output_thread = threading.Thread(target=print_and_log_output, args=(process.stdout,))
-            # output_thread.start()
-
-            # Register the ASR job PID in the database immediately after starting the process
+            
             from autotrain.app.db import AutoTrainDB
             DB = AutoTrainDB("autotrain.db")
             DB.add_job(process.pid)
@@ -154,20 +141,7 @@ class LocalRunner(BaseBackend):
             self.job_id = str(process.pid)
             logger.info(f"ASR Training started with PID: {self.job_id}")
 
-            # # Start a background thread to monitor the process
-            # def monitor_process():
-            #     while True:
-            #         stdout_line = process.stdout.readline()
-            #         if stdout_line:
-            #             logger.info(f"[ASR STDOUT] {stdout_line.strip()}")
-            #         stderr_line = process.stderr.readline()
-            #         if stderr_line:
-            #             logger.error(f"[ASR STDERR] {stderr_line.strip()}")
-            #         if process.poll() is not None:
-            #             break
-
-            # monitor_thread = threading.Thread(target=monitor_process, daemon=True)
-            # monitor_thread.start()
+           
                 
             return
             
@@ -246,64 +220,3 @@ class LocalRunner(BaseBackend):
                 pass
 
 
-# from autotrain import logger
-# from autotrain.backends.base import BaseBackend
-# from autotrain.utils import run_training
-
-
-# # Import all parameter classes
-# from autotrain.trainers.clm.params import LLMTrainingParams
-# from autotrain.trainers.extractive_question_answering.params import ExtractiveQuestionAnsweringParams
-# from autotrain.trainers.generic.params import GenericParams
-# from autotrain.trainers.image_classification.params import ImageClassificationParams
-# from autotrain.trainers.image_regression.params import ImageRegressionParams
-# from autotrain.trainers.object_detection.params import ObjectDetectionParams
-# from autotrain.trainers.sent_transformers.params import SentenceTransformersParams
-# from autotrain.trainers.seq2seq.params import Seq2SeqParams
-# from autotrain.trainers.tabular.params import TabularParams
-# from autotrain.trainers.text_classification.params import TextClassificationParams
-# from autotrain.trainers.text_regression.params import TextRegressionParams
-# from autotrain.trainers.token_classification.params import TokenClassificationParams
-# from autotrain.trainers.vlm.params import VLMTrainingParams
-# from autotrain.trainers.automatic_speech_recognition.params import AutomaticSpeechRecognitionParams
-
-
-# # Mapping of task_id to parameter class
-# TASK_ID_TO_PARAMS_CLASS = {
-#     9: LLMTrainingParams,
-#     2: TextClassificationParams,
-#     26: TabularParams,
-#     27: GenericParams,
-#     28: Seq2SeqParams,
-#     18: ImageClassificationParams,
-#     4: TokenClassificationParams,
-#     10: TextRegressionParams,
-#     29: ObjectDetectionParams,
-#     30: SentenceTransformersParams,
-#     24: ImageRegressionParams,
-#     31: VLMTrainingParams,
-#     5: ExtractiveQuestionAnsweringParams,
-#     32: AutomaticSpeechRecognitionParams,
-# }
-
-# class LocalRunner(BaseBackend):
-#     """
-#     LocalRunner is a class that inherits from BaseBackend and is responsible for managing local training tasks.
-
-#     Methods:
-#         create():
-#             Starts the local training process by retrieving parameters and task ID from environment variables.
-#             Logs the start of the training process.
-#             Runs the training with the specified parameters and task ID.
-#             If the `wait` attribute is False, logs the training process ID (PID).
-#             Returns the training process ID (PID).
-#     """
-
-#     def create(self):
-#         logger.info("Starting local training...")
-#         params = self.env_vars["PARAMS"]
-#         task_id = int(self.env_vars["TASK_ID"])
-#         training_pid = run_training(params, task_id, local=True, wait=self.wait)
-#         if not self.wait:
-#             logger.info(f"Training PID: {training_pid}")
-#         return training_pid
