@@ -782,7 +782,7 @@ async def api_logs(job: JobIDModel, token: bool = Depends(api_auth)):
     response = get_session().get(jwt_url, headers=build_hf_headers(token=token))
     hf_raise_for_status(response)
     jwt_token = response.json()["token"]  # works for 24h (see "exp" field)
-
+#hello
     # fetch the logs
     logs_url = f"https://api.hf.space/v1/{job_id}/logs/run"
 

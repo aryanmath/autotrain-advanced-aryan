@@ -76,7 +76,7 @@ class RunAutoTrainAutomaticSpeechRecognitionCommand(AutoTrainCLI):
 
     def __init__(self, args):
         self.args = args
-
+#hello
         store_true_arg_names = [
             "train",
             "deploy",

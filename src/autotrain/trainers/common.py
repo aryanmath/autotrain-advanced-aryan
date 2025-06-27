@@ -66,7 +66,7 @@ def remove_global_step(directory):
                 print(f"Removing folder: {folder_path}")
                 shutil.rmtree(folder_path)
 
-
+#hello
 def remove_autotrain_data(config):
     """
     Removes the AutoTrain data directory and global step for a given project.

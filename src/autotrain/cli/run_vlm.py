@@ -7,7 +7,7 @@ from autotrain.trainers.vlm.params import VLMTrainingParams
 
 from . import BaseAutoTrainCommand
 
-
+#hello
 def run_vlm_command_factory(args):
     return RunAutoTrainVLMCommand(args)
 

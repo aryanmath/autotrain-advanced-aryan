@@ -116,7 +116,7 @@ class AutomaticSpeechRecognitionDataset:
             
             audio, sr = librosa.load(audio_path, sr=self.sampling_rate)
             
-           
+           #hello
             duration = len(audio) / sr
             if duration > self.max_duration:
                 logger.warning(f"Audio duration {duration:.2f}s exceeds max_duration {self.max_duration}s, truncating")

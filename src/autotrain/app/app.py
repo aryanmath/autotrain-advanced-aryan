@@ -23,7 +23,7 @@ app.mount("/static", StaticFiles(directory=static_path), name="static")
 logger.info(f"AutoTrain version: {__version__}")
 logger.info("AutoTrain started successfully")
 
-
+#hello
 @app.get("/")
 async def forward_to_ui(request: Request):
     """

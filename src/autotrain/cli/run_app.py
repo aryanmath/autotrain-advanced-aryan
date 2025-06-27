@@ -162,7 +162,7 @@ class RunAutoTrainAppCommand(BaseAutoTrainCommand):
 
             output_thread = threading.Thread(target=handle_output, args=(process.stdout, log_file))
             output_thread.start()
-
+#hello
             try:
                 process.wait()
                 output_thread.join()

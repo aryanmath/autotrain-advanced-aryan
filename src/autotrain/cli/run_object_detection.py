@@ -6,7 +6,7 @@ from autotrain.project import AutoTrainProject
 from autotrain.trainers.object_detection.params import ObjectDetectionParams
 
 from . import BaseAutoTrainCommand
-
+#hello
 
 def run_object_detection_command_factory(args):
     return RunAutoTrainObjectDetectionCommand(args)

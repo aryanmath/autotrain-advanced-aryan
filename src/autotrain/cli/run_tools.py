@@ -5,7 +5,7 @@ from . import BaseAutoTrainCommand
 
 def run_tools_command_factory(args):
     return RunAutoTrainToolsCommand(args)
-
+#hello
 
 class RunAutoTrainToolsCommand(BaseAutoTrainCommand):
     @staticmethod

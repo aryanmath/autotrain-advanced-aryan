@@ -3,7 +3,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
+#hello
 class AutoTrainDB:
     """
     A class to manage job records in a SQLite database.

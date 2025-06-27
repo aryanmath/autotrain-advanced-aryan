@@ -427,7 +427,7 @@ class AppParams:
             _params["valid_split"] = self.valid_split
 
         return ImageClassificationParams(**_params)
-
+#hello
     def _munge_params_img_reg(self):
         _params = self._munge_common_params()
         _params["model"] = self.base_model

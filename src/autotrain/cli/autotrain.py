@@ -51,7 +51,7 @@ def main():
     RunAutoTrainImageRegressionCommand.register_subcommand(commands_parser)
     RunAutoTrainExtractiveQACommand.register_subcommand(commands_parser)
     RunAutoTrainAutomaticSpeechRecognitionCommand.register_subcommand(commands_parser)
-
+#hello
     args = parser.parse_args()
 
     if args.version:

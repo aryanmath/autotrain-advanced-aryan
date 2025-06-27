@@ -525,7 +525,7 @@ def launch_command(params):
                     "--gradient_accumulation_steps",
                     str(params.gradient_accumulation),
                 ]
-
+#hello
         if num_gpus > 0:
             cmd.append("--mixed_precision")
             if params.mixed_precision == "fp16":

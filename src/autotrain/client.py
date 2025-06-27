@@ -235,7 +235,7 @@ class Client:
 
         if column_mapping is None:
             column_mapping = DEFAULT_COLUMN_MAPPING[task]
-
+#hello
         # check if column_mapping is valid for the task
         default_col_map = DEFAULT_COLUMN_MAPPING[task]
         missing_cols = []

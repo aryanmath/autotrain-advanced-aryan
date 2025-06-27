@@ -7,7 +7,7 @@ from autotrain.trainers.token_classification.params import TokenClassificationPa
 
 from . import BaseAutoTrainCommand
 
-
+#hello
 def run_token_classification_command_factory(args):
     return RunAutoTrainTokenClassificationCommand(args)
 
