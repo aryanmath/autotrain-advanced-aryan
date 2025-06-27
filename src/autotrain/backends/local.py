@@ -8,14 +8,14 @@ import threading
 import time
 import sys
 
-# Patch sys.stdout and sys.stderr to utf-8 for Unicode logs
+
 import io
 if not isinstance(sys.stdout, io.TextIOWrapper) or sys.stdout.encoding.lower() != 'utf-8':
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 if not isinstance(sys.stderr, io.TextIOWrapper) or sys.stderr.encoding.lower() != 'utf-8':
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
-# Import all parameter classes
+
 from autotrain.trainers.clm.params import LLMTrainingParams
 from autotrain.trainers.extractive_question_answering.params import ExtractiveQuestionAnsweringParams
 from autotrain.trainers.generic.params import GenericParams
@@ -32,7 +32,7 @@ from autotrain.trainers.vlm.params import VLMTrainingParams
 from autotrain.trainers.automatic_speech_recognition.params import AutomaticSpeechRecognitionParams
 
 
-# Mapping of task_id to parameter class
+
 TASK_ID_TO_PARAMS_CLASS = {
     9: LLMTrainingParams,
     2: TextClassificationParams,
@@ -67,25 +67,25 @@ class LocalRunner(BaseBackend):
     def _setup(self):
         """Setup the training environment."""
         logger.info("Setting up local training environment...")
-        # No special setup needed for local training
+        
         pass
 
     def _prepare(self):
         """Prepare the training environment."""
         logger.info("Preparing local training environment...")
-        # No special preparation needed for local training
+        
         pass
 
     def _validate(self):
         """Validate the training configuration."""
         logger.info("Validating local training configuration...")
-        # No special validation needed for local training
+        
         pass
 
     def _monitor(self):
         """Monitor the training process."""
         logger.info("Monitoring local training process...")
-        # No special monitoring needed for local training
+        
         pass
 
     def create(self):
@@ -101,18 +101,18 @@ class LocalRunner(BaseBackend):
         """Create the training job."""
         logger.info("Starting local training...")
         
-        # Handle ASR training differently
+        
         if isinstance(self.params, AutomaticSpeechRecognitionParams):
-            # Save params to a temporary config file
+            
             config_path = f"{self.params.project_name}/training_config.json"
             os.makedirs(os.path.dirname(config_path), exist_ok=True)
             
-            # Convert params to dict and save
+            
             config_dict = self.params.dict()
             with open(config_path, "w") as f:
                 json.dump(config_dict, f, indent=2)
             
-            # Construct the training command
+            
             WORKSPACE_ROOT = os.path.abspath(".")  
             env = os.environ.copy()
             env["PYTHONUNBUFFERED"] = "1"
@@ -128,7 +128,7 @@ class LocalRunner(BaseBackend):
                 command,
                 shell=True,
                 stdout=open("asr.log", "w", encoding="utf-8"),
-                stderr=subprocess.STDOUT,  # <-- This sends stderr to the same file as stdout
+                stderr=subprocess.STDOUT,  
                 env=env,
                 cwd=WORKSPACE_ROOT
             )
@@ -145,11 +145,11 @@ class LocalRunner(BaseBackend):
                 
             return
             
-        # Original code for other tasks
+        
         params_json = self.env_vars["PARAMS"]
         task_id = int(self.env_vars["TASK_ID"])
         
-        # Deserialize the JSON string into the correct parameter object
+        
         params_dict = json.loads(params_json)
         params_class = TASK_ID_TO_PARAMS_CLASS.get(task_id)
         
@@ -173,7 +173,7 @@ class LocalRunner(BaseBackend):
             db: Database connection
         """
         try:
-            # Monitor process output
+           
             while True:
                 output = process.stdout.readline()
                 if output == '' and process.poll() is not None:
@@ -181,10 +181,10 @@ class LocalRunner(BaseBackend):
                 if output:
                     logger.info(f"ASR Trainer: {output.strip()}")
                     
-            # Get return code
+           
             return_code = process.poll()
             
-            # Check if process failed
+            
             if return_code != 0:
                 logger.error("ASR Trainer failed")
                 try:
@@ -202,7 +202,7 @@ class LocalRunner(BaseBackend):
                 logger.error(f"Error deleting job from database: {str(e)}")
                 
         finally:
-            # Cleanup
+            
             try:
                 process.stdout.close()
                 process.stderr.close()
