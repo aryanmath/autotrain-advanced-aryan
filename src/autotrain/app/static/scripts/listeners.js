@@ -472,7 +472,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     $(projectSelect).trigger('change');
             }
             };
-            
+            // This
             tag.appendChild(removeButton);
             tagContainer.appendChild(tag);
     });

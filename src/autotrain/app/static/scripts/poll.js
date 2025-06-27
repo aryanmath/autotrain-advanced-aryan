@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                     stopTrainingButton.style.display = 'none';
                     startTrainingButton.style.display = 'block';
                 }
-            })
+            })// This
             .catch(error => {
                 console.error('Error:', error);
                 // Update the paragraph to show an error message

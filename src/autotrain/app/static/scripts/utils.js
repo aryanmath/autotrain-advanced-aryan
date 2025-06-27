@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function () {
         for (var i = 0; i < files.length; i++) {
             fileText += files[i].name + ' ';
         }
-
+// This
         fileContainer.innerHTML = fileText;
     });
 
