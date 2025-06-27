@@ -6,6 +6,14 @@ import os
 import subprocess
 import threading
 import time
+import sys
+
+# Patch sys.stdout and sys.stderr to utf-8 for Unicode logs
+import io
+if not isinstance(sys.stdout, io.TextIOWrapper) or sys.stdout.encoding.lower() != 'utf-8':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+if not isinstance(sys.stderr, io.TextIOWrapper) or sys.stderr.encoding.lower() != 'utf-8':
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
 # Import all parameter classes
 from autotrain.trainers.clm.params import LLMTrainingParams
@@ -105,21 +113,27 @@ class LocalRunner(BaseBackend):
                 json.dump(config_dict, f, indent=2)
             
             # Construct the training command
-            command = f"python -m autotrain.trainers.automatic_speech_recognition.__main__ --training_config {config_path}"
-            
-            # Run the training
+            WORKSPACE_ROOT = os.path.abspath(".")  
+            env = os.environ.copy()
+            env["PYTHONUNBUFFERED"] = "1"
+            command = f"{sys.executable} -m autotrain.trainers.automatic_speech_recognition.__main__ --training_config \"{config_path}\""
+
+            print(f"[DEBUG] Subprocess command: {command}")
             logger.info(f"Running ASR command: {command}")
+            logger.info(f"Current working directory: {os.getcwd()}")
+            logger.info(f"Config path: {config_path}, exists: {os.path.exists(config_path)}")
+            logger.info(f"Python executable: {sys.executable}")
+            logger.info(f"Environment PATH: {os.environ.get('PATH')}")
             process = subprocess.Popen(
                 command,
                 shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                universal_newlines=True,
-                bufsize=1,  # Line buffered
-                env=os.environ.copy()  # Pass current environment
+                stdout=open("asr.log", "w", encoding="utf-8"),
+                stderr=subprocess.STDOUT,  # <-- This sends stderr to the same file as stdout
+                env=env,
+                cwd=WORKSPACE_ROOT
             )
-
-            # Register the ASR job PID in the database immediately after starting the process
+            
+            
             from autotrain.app.db import AutoTrainDB
             DB = AutoTrainDB("autotrain.db")
             DB.add_job(process.pid)
@@ -127,50 +141,7 @@ class LocalRunner(BaseBackend):
             self.job_id = str(process.pid)
             logger.info(f"ASR Training started with PID: {self.job_id}")
 
-            # Start a background thread to monitor the process
-            def monitor_process():
-                try:
-                    while True:
-                        # Read output while process is running
-                        stdout_line = process.stdout.readline()
-                        if stdout_line:
-                            logger.info(f"ASR Trainer: {stdout_line.strip()}")
-                        
-                        stderr_line = process.stderr.readline()
-                        if stderr_line:
-                            logger.error(f"ASR Trainer: {stderr_line.strip()}")
-                        
-                        # Check if process has ended
-                        if process.poll() is not None:
-                            # Process has ended
-                            stdout, stderr = process.communicate()
-                            if stdout:
-                                logger.info("ASR Trainer stdout:")
-                                for line in stdout.splitlines():
-                                    logger.info(line)
-                            if stderr:
-                                logger.error("ASR Trainer stderr:")
-                                for line in stderr.splitlines():
-                                    logger.error(line)
-                            # Create new DB connection in this thread
-                            try:
-                                with AutoTrainDB("autotrain.db") as db:
-                                    db.delete_job(process.pid)
-                            except Exception as e:
-                                logger.error(f"Error deleting job from database: {str(e)}")
-                            break
-                        time.sleep(0.1)  # Reduced sleep time for more responsive monitoring
-                except Exception as e:
-                    logger.error(f"Error in monitor process: {str(e)}")
-                    # Create new DB connection in this thread
-                    try:
-                        with AutoTrainDB("autotrain.db") as db:
-                            db.delete_job(process.pid)
-                    except Exception as db_error:
-                        logger.error(f"Error deleting job from database: {str(db_error)}")
-
-            monitor_thread = threading.Thread(target=monitor_process, daemon=True)
-            monitor_thread.start()
+           
                 
             return
             
@@ -247,3 +218,5 @@ class LocalRunner(BaseBackend):
                     db.__enter__()
             except:
                 pass
+
+
