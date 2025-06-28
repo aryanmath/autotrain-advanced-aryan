@@ -77,7 +77,7 @@ class AutomaticSpeechRecognitionParams(AutoTrainParams):
     mixed_precision: str = "no"
     
     
-    push_to_hub: bool = False
+    push_to_hub: bool = True
     hub_model_id: Optional[str] = None
     
     
