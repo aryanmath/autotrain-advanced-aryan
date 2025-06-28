@@ -47,22 +47,22 @@ def remove_non_image_files(folder):
     Returns:
         None
     """
-    # Define allowed image file extensions
+    
     allowed_extensions = {".jpg", ".jpeg", ".png", ".JPG", ".JPEG", ".PNG", ".jsonl"}
 
-    # Iterate through all files in the folder
+    
     for root, dirs, files in os.walk(folder):
         for file in files:
-            # Get the file extension
+            
             file_extension = os.path.splitext(file)[1]
 
-            # If the file extension is not in the allowed list, remove the file
+            
             if file_extension.lower() not in allowed_extensions:
                 file_path = os.path.join(root, file)
                 os.remove(file_path)
                 print(f"Removed file: {file_path}")
 
-        # Recursively call the function on each subfolder
+        
         for subfolder in dirs:
             remove_non_image_files(os.path.join(root, subfolder))
 
@@ -131,7 +131,7 @@ class AutoTrainImageClassificationDataset:
 
             zip_ref = zipfile.ZipFile(bytes_io, "r")
             zip_ref.extractall(train_dir)
-            # remove the __MACOSX directory
+            
             macosx_dir = os.path.join(train_dir, "__MACOSX")
             if os.path.exists(macosx_dir):
                 os.system(f"rm -rf {macosx_dir}")
@@ -145,7 +145,7 @@ class AutoTrainImageClassificationDataset:
                 bytes_io = io.BytesIO(content)
                 zip_ref = zipfile.ZipFile(bytes_io, "r")
                 zip_ref.extractall(valid_dir)
-                # remove the __MACOSX directory
+                
                 macosx_dir = os.path.join(valid_dir, "__MACOSX")
                 if os.path.exists(macosx_dir):
                     os.system(f"rm -rf {macosx_dir}")
@@ -230,7 +230,7 @@ class AutoTrainObjectDetectionDataset:
 
             zip_ref = zipfile.ZipFile(bytes_io, "r")
             zip_ref.extractall(train_dir)
-            # remove the __MACOSX directory
+            
             macosx_dir = os.path.join(train_dir, "__MACOSX")
             if os.path.exists(macosx_dir):
                 os.system(f"rm -rf {macosx_dir}")
@@ -244,7 +244,7 @@ class AutoTrainObjectDetectionDataset:
                 bytes_io = io.BytesIO(content)
                 zip_ref = zipfile.ZipFile(bytes_io, "r")
                 zip_ref.extractall(valid_dir)
-                # remove the __MACOSX directory
+                
                 macosx_dir = os.path.join(valid_dir, "__MACOSX")
                 if os.path.exists(macosx_dir):
                     os.system(f"rm -rf {macosx_dir}")
@@ -341,7 +341,7 @@ class AutoTrainVLMDataset:
 
             zip_ref = zipfile.ZipFile(bytes_io, "r")
             zip_ref.extractall(train_dir)
-            # remove the __MACOSX directory
+            
             macosx_dir = os.path.join(train_dir, "__MACOSX")
             if os.path.exists(macosx_dir):
                 os.system(f"rm -rf {macosx_dir}")
@@ -355,7 +355,7 @@ class AutoTrainVLMDataset:
                 bytes_io = io.BytesIO(content)
                 zip_ref = zipfile.ZipFile(bytes_io, "r")
                 zip_ref.extractall(valid_dir)
-                # remove the __MACOSX directory
+                
                 macosx_dir = os.path.join(valid_dir, "__MACOSX")
                 if os.path.exists(macosx_dir):
                     os.system(f"rm -rf {macosx_dir}")
@@ -441,7 +441,7 @@ class AutoTrainImageRegressionDataset:
 
             zip_ref = zipfile.ZipFile(bytes_io, "r")
             zip_ref.extractall(train_dir)
-            # remove the __MACOSX directory
+            
             macosx_dir = os.path.join(train_dir, "__MACOSX")
             if os.path.exists(macosx_dir):
                 os.system(f"rm -rf {macosx_dir}")
@@ -455,7 +455,7 @@ class AutoTrainImageRegressionDataset:
                 bytes_io = io.BytesIO(content)
                 zip_ref = zipfile.ZipFile(bytes_io, "r")
                 zip_ref.extractall(valid_dir)
-                # remove the __MACOSX directory
+                
                 macosx_dir = os.path.join(valid_dir, "__MACOSX")
                 if os.path.exists(macosx_dir):
                     os.system(f"rm -rf {macosx_dir}")
@@ -541,8 +541,6 @@ class AutoTrainDataset:
             else:
                 if self.ext == "jsonl":
                     train_df.append(pd.read_json(file, lines=True))
-                elif self.ext == "life_jsonl":
-                    train_df.append(pd.json_normalize(file))
                 else:
                     train_df.append(pd.read_csv(file))
         if len(train_df) > 1:
@@ -811,20 +809,118 @@ class AutoTrainDataset:
                 local=self.local,
             )
             return preprocessor.prepare()
-        elif self.task in ["automatic-speech-recognition", "automatic_speech_recognition"]:
-            audio_column = self.column_mapping["audio"]
-            # Handle both 'text' and 'transcription' as valid column names
-            text_column = self.column_mapping.get("text") or self.column_mapping.get("transcription")
-            if text_column is None:
-                raise ValueError("Column mapping must include either 'text' or 'transcription' for the text column")
+        # elif self.task in ["ASR", "ASR"]:
+        #     audio_column = self.column_mapping["audio"]
+            
+        #     text_column = self.column_mapping.get("text") or self.column_mapping.get("transcription")
+        #     if text_column is None:
+        #         raise ValueError("Column mapping must include either 'text' or 'transcription' for the text column")
+        #     preprocessor = AutomaticSpeechRecognitionPreprocessor(
+        #         train_data=self.train_df,
+        #         token=self.token,
+        #         project_name=self.project_name,
+        #         username=self.username,
+        #         column_mapping=self.column_mapping,
+        #         valid_data=self.valid_df,
+        #     )
+        #     return preprocessor.prepare()
+        else:
+            raise ValueError(f"Task {self.task} not supported")
+
+
+@dataclass
+class AutoTrainAutomaticSpeechRecognitionDataset:
+    """
+    A class to handle ASR Dataset for AutoTrain.
+
+    Attributes:
+        train_data (str): Path to the training data.
+        token (str): Authentication token.
+        project_name (str): Name of the project.
+        username (str): Username of the project owner.
+        column_mapping ([Dict[str, str]]): Mapping of column names. Defaults to None.
+        valid_data (Optional[str]): Path to the validation data. Default is None.
+        percent_valid (Optional[float]): Percentage of training data to use for validation. Default is None.
+        local (bool): Flag to indicate if the data is local. Default is False.
+
+    Methods:
+        __str__() -> str:
+            Returns a string representation of the dataset.
+
+        __post_init__():
+            Initializes the dataset and sets default values for validation data.
+
+        prepare():
+            Prepares the dataset for training by extracting and preprocessing the data.
+    """
+    train_data: str
+    token: str
+    project_name: str
+    username: Optional[str] = None
+    column_mapping: Optional[Dict[str, str]] = None
+    valid_data: Optional[List[str]] = None
+    percent_valid: Optional[float] = None
+    local: bool = False
+
+    # train_data: str
+    # token: str
+    # project_name: str
+    # username: str
+    # valid_data: Optional[str] = None
+    # percent_valid: Optional[float] = None
+    # local: bool = False
+
+    def __str__(self) -> str:
+        info = f"Dataset: {self.project_name} ({self.task})\n"
+        info += f"Train data: {self.train_data}\n"
+        info += f"Valid data: {self.valid_data}\n"
+        return info
+
+    def __post_init__(self):
+        self.task = "ASR"
+        if not self.valid_data and self.percent_valid is None:
+            self.percent_valid = 0.2
+        elif self.valid_data and self.percent_valid is not None:
+            raise ValueError("You can only specify one of valid_data or percent_valid")
+        elif self.valid_data:
+            self.percent_valid = 0.0
+
+    def prepare(self):
+        valid_dir = None
+        if not isinstance(self.train_data, str):
+            # If train_data is a file-like object, extract it to a temporary directory
+            cache_dir = os.environ.get("HF_HOME")
+            if not cache_dir:
+                cache_dir = os.path.join(os.path.expanduser("~"), ".cache", "huggingface")
+
+            random_uuid = uuid.uuid4()
+            train_dir = os.path.join(cache_dir, "autotrain", str(random_uuid))
+            os.makedirs(train_dir, exist_ok=True)
+
+            zip_ref = zipfile.ZipFile(self.train_data, "r")
+            names = zip_ref.namelist()
+            csv_files = [name for name in names if name.endswith(".csv")]
+            #Find the CSV file from the zip
+            if len(names) == 0:
+                raise ValueError("The zip file does not contain any files")
+            if not any(name.endswith(".csv") for name in names):
+                raise ValueError("The zip file does not contain a CSV file")
+            # if len(csv_files) > 1:
+            #     raise ValueError("The zip file contains more than one CSV file, please provide a single CSV file")
+            
+            #Read the CSV file using pandas
+            train_df = zip_ref.open(csv_files[0])            
+            zip_ref.extractall(train_dir)
+            train_df['audio'] = train_df['audio'].apply(lambda x: os.path.join(train_dir, x))
+
+            valid_df = None
+
             preprocessor = AutomaticSpeechRecognitionPreprocessor(
-                train_data=self.train_df,
+                train_data=train_df,
                 token=self.token,
                 project_name=self.project_name,
                 username=self.username,
                 column_mapping=self.column_mapping,
-                valid_data=self.valid_df,
+                valid_data=valid_df,
             )
-            return preprocessor.prepare()
-        else:
-            raise ValueError(f"Task {self.task} not supported")
+        return preprocessor.prepare()

@@ -19,7 +19,7 @@ from autotrain.trainers.automatic_speech_recognition.params import AutomaticSpee
 
 
 AVAILABLE_HARDWARE = {
-    # hugging face spaces
+   
     "spaces-a10g-large": "a10g-large",
     "spaces-a10g-small": "a10g-small",
     "spaces-a100-large": "a100-large",
@@ -203,7 +203,7 @@ class BaseBackend:
             else:
                 raise ValueError("Must provide username for non-local backends")
         else:
-            # For local backends, username is optional
+            
             self.username = self.params.username if self.params.username is not None else ""
 
         self.available_hardware = AVAILABLE_HARDWARE
@@ -229,9 +229,9 @@ class BaseBackend:
 
     def _get_task_specific_requirements(self):
         """Get task-specific requirements."""
-        if self.task == "automatic-speech-recognition":
+        if self.task == "ASR":
             return [
                 "librosa>=0.10.0",
                 "soundfile>=0.12.1",
             ]
-        # ... existing code ...
+        

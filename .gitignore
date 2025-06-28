@@ -145,3 +145,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+life_app_data
+src/autotrain/app/static/audio_files
