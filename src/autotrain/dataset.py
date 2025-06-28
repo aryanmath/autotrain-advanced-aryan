@@ -909,7 +909,8 @@ class AutoTrainAutomaticSpeechRecognitionDataset:
             #     raise ValueError("The zip file contains more than one CSV file, please provide a single CSV file")
             
             #Read the CSV file using pandas
-            train_df = zip_ref.open(csv_files[0])            
+            # train_df = zip_ref.open(csv_files[0])
+            train_df = pd.read_csv(zip_ref.open(csv_files[0]))
             zip_ref.extractall(train_dir)
             train_df['audio'] = train_df['audio'].apply(lambda x: os.path.join(train_dir, x))
 
