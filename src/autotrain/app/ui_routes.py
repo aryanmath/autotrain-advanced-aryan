@@ -540,7 +540,7 @@ async def handle_form(
         )
 
     params = json.loads(params)
-    # convert "null" to None
+   
     for key in params:
         if params[key] == "null":
             params[key] = None
@@ -556,9 +556,9 @@ async def handle_form(
 
     logger.info(f"LiFE App Data Source: {data_source}, Project: {selected_project}, Script: {selected_script}")
 
-    # LiFE App dataset handling
+    
     if data_source == "life_app":
-        # TEMPORARY BYPASS: Set dummy values for project and script to bypass validation
+
         selected_project = "autotrain_dummy_project"
         selected_script = "autotrain_dummy_script"
         logger.info(f"TEMPORARY BYPASS ACTIVE: Project set to '{selected_project}', Script set to '{selected_script}'")
@@ -573,7 +573,7 @@ async def handle_form(
                 status_code=400,
                 detail="Please select both a project and a script from LiFE app"
             )
-        # Load dataset from dataset.json
+       
         dataset_path = os.path.join(BASE_DIR, "static", "dataset.json")
         logger.info(f"Checking LiFE App dataset path: {dataset_path}, Exists: {os.path.exists(dataset_path)}")
         if not os.path.exists(dataset_path):
@@ -585,19 +585,18 @@ async def handle_form(
         import base64
         from datasets import Dataset
 
-        # Read dataset.json
+        
         with open(dataset_path, "r", encoding="utf-8") as f:
             dataset_json = json.load(f)
-        # Filter by selected project if needed (currently only one dataset)
-        # For now, use all rows
+
         df = pd.DataFrame(dataset_json)
-        # Save audio bytes to files
+
         audio_dir = os.path.join("life_app_data", "audio")
         os.makedirs(audio_dir, exist_ok=True)
         audio_paths = []
         for idx, row in df.iterrows():
             audio_bytes = row["audio"]
-            # decode base64 if needed, else treat as bytes string
+           
             try:
                 audio_data = base64.b64decode(audio_bytes)
             except Exception:
@@ -607,22 +606,22 @@ async def handle_form(
                 af.write(audio_data)
             audio_paths.append(audio_path)
         df["audio"] = audio_paths
-        # Save processed CSV for reference
+        
         processed_csv = os.path.join("life_app_data", "processed_dataset.csv")
         df.to_csv(processed_csv, index=False)
-        # Shuffle and split
+        
         df = df.sample(frac=1, random_state=42).reset_index(drop=True)
         split_idx = int(0.8 * len(df))
         train_df = df.iloc[:split_idx]
         valid_df = df.iloc[split_idx:]
-        # Save train and validation as HuggingFace Datasets
+       
         train_dataset = Dataset.from_pandas(train_df)
         valid_dataset = Dataset.from_pandas(valid_df)
         dataset_dict = DatasetDict({
             "train": train_dataset,
             "validation": valid_dataset
         })
-        # Save as HuggingFace dataset format
+        
         output_dir = os.path.join(project_name, "autotrain-data")
         os.makedirs(output_dir, exist_ok=True)
         dataset_dict.save_to_disk(output_dir)
@@ -633,11 +632,11 @@ async def handle_form(
         params["valid_split"] = valid_split
         params["data_path"] = data_path
 
-        # Check if params is already a dict to avoid TypeError from redundant json.loads
+        
         if not isinstance(params, dict):
             params = json.loads(params)
 
-        # Update params for ASR
+        
         params["audio_column"] = "audio"
         params["text_column"] = "transcription"
         params["data_path"] = data_path
@@ -689,7 +688,7 @@ async def handle_form(
             raise HTTPException(status_code=400, detail="Please enter a training split.")
         data_path = hub_dataset
     else:
-        # Handle local dataset upload
+       
         file_extension = os.path.splitext(data_files_training[0].filename)[1]
         file_extension = file_extension[1:] if file_extension.startswith(".") else file_extension
         if task == "image-classification":
@@ -815,37 +814,6 @@ async def handle_form(
     else:
         monitor_url = f"Success! Monitor your job in logs. Job ID: {job_id}"
 
-    # # Save config file
-    # with open(config_path, "w") as f:
-    #     json.dump(config, f, indent=4)
-
-    # # If ASR task and local dataset, start training subprocess automatically
-    # if task == "ASR" and not config.get("using_hub_dataset", False):
-    #     # Ensure Windows-style backslashes in config_path for subprocess
-    #     config_path_for_cmd = config_path.replace("/", "\\")
-    #     env = os.environ.copy()
-    #     env["PYTHONPATH"] = "C:\\Users\\Aryan\\Downloads\\autotrain-advanced-aryan\\src"
-    #     process = subprocess.Popen([
-    #         "python",
-    #         "-m",
-    #         "autotrain.trainers.automatic_speech_recognition.__main__",
-    #         "--training_config",
-    #         config_path_for_cmd
-    #     ], env=env, cwd=os.getcwd())
-    #     pid = process.pid
-    #     try:
-    #         DB.add_job(pid)
-    #         logger.info(f"Added ASR job with PID {pid} to database")
-    #     except sqlite3.IntegrityError:
-    #         try:
-    #             kill_process_by_pid(pid)
-    #         except:
-    #             pass
-    #         DB.remove_job(pid)
-    #         DB.add_job(pid)
-    #     logger.info(f"ASR training started successfully with PID: {pid}")
-    #     return {"status": "success", "message": f"ASR training started with PID: {pid}. Check logs for progress.", "pid": pid, "config_path": config_path_for_cmd}
-
     return {"success": "true", "monitor_url": monitor_url}
 
 
@@ -909,7 +877,7 @@ async def fetch_logs(authenticated: bool = Depends(user_authentication)):
 
     logs = logs.split("\n")
     logs = logs[::-1]
-    # remove lines containing /is_model_training & /accelerators
+    
     logs = [log for log in logs if "/ui/" not in log and "/static/" not in log and "nvidia-ml-py" not in log]
 
     cuda_available = torch.cuda.is_available()
@@ -989,14 +957,14 @@ async def handle_project_selection(request: Request, authenticated: bool = Depen
     Handle project selection and return corresponding scripts based on project-script mapping.
     """
     try:
-        # Request se selected projects get karna
+        
         data = await request.json()
         selected_projects = data.get('projects', [])
         
-        # Log selected projects
+       
         logger.info(f"Projects selected: {selected_projects}")
         
-        # Load project-script mapping
+       
         mapping_path = os.path.join(BASE_DIR, "static", "project_script_mapping.json")
         if not os.path.exists(mapping_path):
             logger.error("Project-script mapping file not found")
@@ -1005,19 +973,19 @@ async def handle_project_selection(request: Request, authenticated: bool = Depen
         with open(mapping_path, "r", encoding="utf-8") as f:
             project_script_mapping = json.load(f)
         
-        # Get scripts for selected projects
+        
         available_scripts = set()
         for project in selected_projects:
             if project in project_script_mapping:
                 available_scripts.update(project_script_mapping[project])
         
-        # Convert set to list for JSON response
+        
         scripts = list(available_scripts)
         
-        # Log available scripts
+       
         logger.info(f"Available scripts for projects {selected_projects}: {scripts}")
         
-        # Return scripts
+        
         return JSONResponse(content={
             "status": "success",
             "projects": selected_projects,
