@@ -128,8 +128,7 @@ class LocalRunner(BaseBackend):
                 command,
                 shell=True,
                 stdout=open("asr.log", "w", encoding="utf-8"),
-                stderr=subprocess.STDOUT,  
-                stderr=subprocess.STDOUT,  
+                stderr=subprocess.STDOUT, 
                 env=env,
                 cwd=WORKSPACE_ROOT
             )
