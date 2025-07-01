@@ -115,6 +115,7 @@ def launch_command(params):
             - ImageRegressionParams
             - Seq2SeqParams
             - VLMTrainingParams
+            - AutomaticSpeechRecognitionParams
 
     Returns:
         list: A list of command line arguments to be executed for training.
