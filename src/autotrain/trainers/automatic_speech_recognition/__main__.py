@@ -344,7 +344,7 @@ def train(config: Dict[str, Any]):
     try:
         if isinstance(config, dict):
             config = AutomaticSpeechRecognitionParams(**config)
-        training_logger = get_training_logger(config.get('output_dir', '.'))
+        training_logger = get_training_logger(getattr(config, 'output_dir', '.'))
         training_logger.info("[LIVE] Initializing ASR training pipeline...")
         training_logger.info("[LIVE] Parameters parsed.")
         device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -479,7 +479,11 @@ def train(config: Dict[str, Any]):
         if PartialState().process_index == 0:
             pause_space(config)
     except Exception as e:
-        training_logger.error("[LIVE] Error in training pipeline: %s", str(e))
+        # Robust error logging if training_logger is not defined
+        try:
+            training_logger.error("[LIVE] Error in training pipeline: %s", str(e))
+        except Exception:
+            print(f"[LIVE] Error in training pipeline: {str(e)}")
         logger.error(traceback.format_exc())
         raise
 
