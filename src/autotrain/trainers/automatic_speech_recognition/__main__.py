@@ -466,6 +466,15 @@ def train(config: Dict[str, Any]):
         model_card = utils.create_model_card(config, trainer)
         with open(f"{config.project_name}/README.md", "w") as f:
             f.write(model_card)
+        # Remove token from training_config.json before upload
+        config_path = os.path.join(config.project_name, "training_config.json")
+        if os.path.exists(config_path):
+            with open(config_path, "r") as f:
+                cfg = json.load(f)
+            if "token" in cfg:
+                del cfg["token"]
+            with open(config_path, "w") as f:
+                json.dump(cfg, f, indent=2)
         # Push model to Hugging Face Hub if push_to_hub is True (main process only)
         if config.push_to_hub:
             if PartialState().process_index == 0:
