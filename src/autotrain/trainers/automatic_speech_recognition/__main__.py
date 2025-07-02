@@ -11,7 +11,7 @@ import traceback
 import sys
 
 from accelerate.state import PartialState
-from datasets import load_from_disk, load_dataset, Dataset
+from datasets import load_from_disk, load_dataset, Dataset, DatasetDict
 from huggingface_hub import HfApi
 from transformers import (
     AutoConfig,
@@ -460,6 +460,25 @@ def train(config: Dict[str, Any]):
         training_logger.info("[LIVE] Trainer initialized. Starting training...")
         trainer.train()
         training_logger.info("[LIVE] Training complete.")
+
+        # --- NEW: Push dataset to Hugging Face Hub if push_to_hub is True ---
+        if getattr(params, 'push_to_hub', False):
+            from datasets import DatasetDict, load_from_disk
+            from huggingface_hub import HfApi
+            import getpass
+            
+            # Load the dataset from disk (train/valid)
+            dataset_path = os.path.join(params.output_dir, "autotrain-data")
+            if os.path.exists(dataset_path):
+                dataset = DatasetDict.load_from_disk(dataset_path)
+            else:
+                # Fallback: try data_path if autotrain-data not found
+                dataset = DatasetDict.load_from_disk(params.data_path)
+            
+            repo_id = f"{params.username}/autotrain-data-{params.project_name}"
+            training_logger.info(f"[LIVE] Pushing dataset to hub: {repo_id}")
+            dataset.push_to_hub(repo_id, private=True, token=params.token)
+            training_logger.info(f"[LIVE] Dataset pushed to hub: {repo_id}")
     except Exception as e:
         training_logger.error("[LIVE] Error in training pipeline: %s", str(e))
         logger.error(traceback.format_exc())
