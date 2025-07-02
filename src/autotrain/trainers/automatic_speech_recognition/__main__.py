@@ -465,12 +465,32 @@ def train(config: Dict[str, Any]):
         trainer.save_model(params.output_dir)
         processor.save_pretrained(params.output_dir)
 
-        # --- NEW: Push dataset to Hugging Face Hub if push_to_hub is True ---
+        # --- NEW: Push model from latest checkpoint to Hugging Face Hub if push_to_hub is True ---
+        if getattr(params, 'push_to_hub', False):
+            from huggingface_hub import HfApi
+            import glob
+            # Find latest checkpoint directory
+            checkpoint_dirs = sorted(glob.glob(os.path.join(params.output_dir, 'checkpoint-*')), key=os.path.getmtime)
+            if checkpoint_dirs:
+                latest_checkpoint = checkpoint_dirs[-1]
+                repo_id = f"{params.username}/{params.project_name}"
+                training_logger.info(f"[LIVE] Pushing model from {latest_checkpoint} to hub: {repo_id}")
+                api = HfApi(token=params.token)
+                api.create_repo(
+                    repo_id=repo_id, repo_type="model", private=True, exist_ok=True
+                )
+                api.upload_folder(
+                    folder_path=latest_checkpoint,
+                    repo_id=repo_id,
+                    repo_type="model"
+                )
+                training_logger.info(f"[LIVE] Model pushed to hub: {repo_id}")
+            else:
+                training_logger.warning("[LIVE] No checkpoint directory found to push model.")
+
+        # --- Push dataset to Hugging Face Hub if push_to_hub is True ---
         if getattr(params, 'push_to_hub', False):
             from datasets import DatasetDict, load_from_disk
-            from huggingface_hub import HfApi
-            import getpass
-            
             # Load the dataset from disk (train/valid)
             dataset_path = os.path.join(params.output_dir, "autotrain-data")
             if os.path.exists(dataset_path):
@@ -478,7 +498,6 @@ def train(config: Dict[str, Any]):
             else:
                 # Fallback: try data_path if autotrain-data not found
                 dataset = DatasetDict.load_from_disk(params.data_path)
-            
             repo_id = f"{params.username}/autotrain-data-{params.project_name}"
             training_logger.info(f"[LIVE] Pushing dataset to hub: {repo_id}")
             dataset.push_to_hub(repo_id, private=True, token=params.token)
