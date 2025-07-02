@@ -9,6 +9,8 @@ from datetime import datetime
 import pandas as pd
 import traceback
 import sys
+import glob
+import shutil
 
 from accelerate.state import PartialState
 from datasets import load_from_disk, load_dataset, Dataset, DatasetDict
@@ -480,6 +482,10 @@ def train(config: Dict[str, Any]):
                 del cfg["token"]
             with open(config_path, "w") as f:
                 json.dump(cfg, f, indent=2)
+        # Always delete the entire logs directory before upload
+        log_dir = os.path.join(config.project_name, "logs")
+        if os.path.exists(log_dir):
+            shutil.rmtree(log_dir)
         # Push model to Hugging Face Hub if push_to_hub is True (main process only)
         if config.push_to_hub:
             if PartialState().process_index == 0:
