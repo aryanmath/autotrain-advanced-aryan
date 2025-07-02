@@ -344,6 +344,11 @@ def train(config: Dict[str, Any]):
     try:
         if isinstance(config, dict):
             config = AutomaticSpeechRecognitionParams(**config)
+        # Enforce push_to_hub and hub_model_id defaults
+        if not hasattr(config, "push_to_hub") or config.push_to_hub is None:
+            config.push_to_hub = True
+        if not hasattr(config, "hub_model_id") or not config.hub_model_id:
+            config.hub_model_id = config.project_name
         training_logger = get_training_logger(getattr(config, 'output_dir', '.'))
         training_logger.info("[LIVE] Initializing ASR training pipeline...")
         training_logger.info("[LIVE] Parameters parsed.")
