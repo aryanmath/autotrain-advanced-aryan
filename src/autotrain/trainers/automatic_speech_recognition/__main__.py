@@ -342,21 +342,19 @@ def load_model_and_processor(params):
 @monitor
 def train(config: Dict[str, Any]):
     try:
-        
+        if isinstance(config, dict):
+            config = AutomaticSpeechRecognitionParams(**config)
         training_logger = get_training_logger(config.get('output_dir', '.'))
         training_logger.info("[LIVE] Initializing ASR training pipeline...")
-        params = AutomaticSpeechRecognitionParams(**config)
         training_logger.info("[LIVE] Parameters parsed.")
         device = "cuda" if torch.cuda.is_available() else "cpu"
         training_logger.info("[LIVE] Using device: %s", device)
 
-        
-        training_logger.info("[LIVE] Using data_path: %s", params.data_path)
-        training_logger.info("[LIVE] Using audio_column: %s", getattr(params, 'audio_column', None))
-        training_logger.info("[LIVE] Using text_column: %s", getattr(params, 'text_column', None))
+        training_logger.info("[LIVE] Using data_path: %s", config.data_path)
+        training_logger.info("[LIVE] Using audio_column: %s", getattr(config, 'audio_column', None))
+        training_logger.info("[LIVE] Using text_column: %s", getattr(config, 'text_column', None))
 
-       
-        train_path = os.path.join(params.data_path, "train")
+        train_path = os.path.join(config.data_path, "train")
         if os.path.exists(train_path):
             training_logger.info("[LIVE] Loading training dataset from disk...")
             from datasets import load_from_disk
@@ -364,9 +362,9 @@ def train(config: Dict[str, Any]):
             training_logger.info("[LIVE] Training dataset loaded with %d examples.", len(dataset))
         else:
             training_logger.info("[LIVE] Loading dataset using load_data()...")
-            dataset = load_data(params)
+            dataset = load_data(config)
             training_logger.info("[LIVE] Dataset loaded with %d examples.", len(dataset))
-        validation_path = os.path.join(params.data_path, "validation")
+        validation_path = os.path.join(config.data_path, "validation")
         if os.path.exists(validation_path):
             training_logger.info("[LIVE] Loading validation dataset from disk...")
             from datasets import load_from_disk
@@ -375,7 +373,7 @@ def train(config: Dict[str, Any]):
         else:
             valid_dataset = None
         training_logger.info("[LIVE] Loading model and processor...")
-        model, processor = load_model_and_processor(params)
+        model, processor = load_model_and_processor(config)
         from autotrain.trainers.automatic_speech_recognition import utils
         utils.set_processor(processor)
         training_logger.info("[LIVE] Model and processor loaded.")
@@ -384,10 +382,10 @@ def train(config: Dict[str, Any]):
             data=dataset,
             processor=processor,
             model=model,
-            audio_column=params.audio_column,
-            text_column=params.text_column,
-            max_duration=params.max_duration,
-            sampling_rate=params.sampling_rate,
+            audio_column=config.audio_column,
+            text_column=config.text_column,
+            max_duration=config.max_duration,
+            sampling_rate=config.sampling_rate,
         )
         training_logger.info("[LIVE] Training dataset object created with %d examples.", len(train_dataset))
         if valid_dataset is not None:
@@ -396,35 +394,35 @@ def train(config: Dict[str, Any]):
                 data=valid_dataset,
                 processor=processor,
                 model=model,
-                audio_column=params.audio_column,
-                text_column=params.text_column,
-                max_duration=params.max_duration,
-                sampling_rate=params.sampling_rate,
+                audio_column=config.audio_column,
+                text_column=config.text_column,
+                max_duration=config.max_duration,
+                sampling_rate=config.sampling_rate,
             )
             training_logger.info("[LIVE] Validation dataset object created with %d examples.", len(valid_dataset_obj))
         training_logger.info("[LIVE] Initializing Trainer...")
         training_args = TrainingArguments(
-            output_dir=params.output_dir,
-            per_device_train_batch_size=params.batch_size,
-            per_device_eval_batch_size=params.batch_size,
-            gradient_accumulation_steps=params.gradient_accumulation,
-            learning_rate=params.lr,
-            num_train_epochs=params.epochs,
+            output_dir=config.output_dir,
+            per_device_train_batch_size=config.batch_size,
+            per_device_eval_batch_size=config.batch_size,
+            gradient_accumulation_steps=config.gradient_accumulation,
+            learning_rate=config.lr,
+            num_train_epochs=config.epochs,
             save_strategy="epoch",
             disable_tqdm=True,
             evaluation_strategy="epoch" if valid_dataset else "no",
             load_best_model_at_end=True if valid_dataset else False,
             metric_for_best_model="wer" if valid_dataset else None,
             greater_is_better=False if valid_dataset else None,
-            push_to_hub=params.push_to_hub,
-            hub_model_id=params.hub_model_id,
-            hub_token=params.token,
-            logging_dir=os.path.join(params.output_dir, "logs"),
+            push_to_hub=config.push_to_hub,
+            hub_model_id=config.hub_model_id,
+            hub_token=config.token,
+            logging_dir=os.path.join(config.output_dir, "logs"),
             logging_steps=10,
             save_total_limit=2,
             remove_unused_columns=False,
-            fp16=params.mixed_precision == "fp16",
-            bf16=params.mixed_precision == "bf16",
+            fp16=config.mixed_precision == "fp16",
+            bf16=config.mixed_precision == "bf16",
             dataloader_num_workers=0,  
             dataloader_pin_memory=False,  
             gradient_checkpointing=True,
@@ -437,17 +435,15 @@ def train(config: Dict[str, Any]):
             seed=42,
         )
         training_logger.info("[LIVE] Trainer arguments set. Initializing Trainer...")
-        
         callbacks = [
             LossLoggingCallback(),
             TrainStartCallback(),
             PrinterCallback(),
             DetailedTrainingCallback(),
             EarlyStoppingCallback(early_stopping_patience=3) if valid_dataset is not None else None,
-            UploadLogs(params) if params.push_to_hub else None,
+            UploadLogs(config) if config.push_to_hub else None,
         ]
         callbacks = [cb for cb in callbacks if cb is not None]
-
         trainer = Trainer(
             model=model,
             args=training_args,
@@ -460,16 +456,13 @@ def train(config: Dict[str, Any]):
         training_logger.info("[LIVE] Trainer initialized. Starting training...")
         trainer.train()
         training_logger.info("[LIVE] Training complete.")
-
         # Save final model and processor to project_name (like image classification)
         trainer.save_model(config.project_name)
         processor.save_pretrained(config.project_name)
-
-        # Create and save model card
+        # Create and save model card (FIXED)
         model_card = utils.create_model_card(config, trainer)
         with open(f"{config.project_name}/README.md", "w") as f:
             f.write(model_card)
-
         # Push model to Hugging Face Hub if push_to_hub is True (main process only)
         if config.push_to_hub:
             if PartialState().process_index == 0:
@@ -483,7 +476,6 @@ def train(config: Dict[str, Any]):
                 api.upload_folder(
                     folder_path=config.project_name, repo_id=f"{config.username}/{config.project_name}", repo_type="model"
                 )
-
         if PartialState().process_index == 0:
             pause_space(config)
     except Exception as e:
