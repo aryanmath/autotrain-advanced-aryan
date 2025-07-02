@@ -461,47 +461,30 @@ def train(config: Dict[str, Any]):
         trainer.train()
         training_logger.info("[LIVE] Training complete.")
 
-        # Save final model and processor to output_dir (like other tasks)
-        trainer.save_model(params.output_dir)
-        processor.save_pretrained(params.output_dir)
+        # Save final model and processor to project_name (like image classification)
+        trainer.save_model(config.project_name)
+        processor.save_pretrained(config.project_name)
 
-        # --- NEW: Push model from latest checkpoint to Hugging Face Hub if push_to_hub is True ---
-        if getattr(params, 'push_to_hub', False):
-            from huggingface_hub import HfApi
-            import glob
-            # Find latest checkpoint directory
-            checkpoint_dirs = sorted(glob.glob(os.path.join(params.output_dir, 'checkpoint-*')), key=os.path.getmtime)
-            if checkpoint_dirs:
-                latest_checkpoint = checkpoint_dirs[-1]
-                repo_id = f"{params.username}/{params.project_name}"
-                training_logger.info(f"[LIVE] Pushing model from {latest_checkpoint} to hub: {repo_id}")
-                api = HfApi(token=params.token)
+        # Create and save model card
+        with open(f"{config.project_name}/README.md", "w") as f:
+            f.write(model_card)
+
+        # Push model to Hugging Face Hub if push_to_hub is True (main process only)
+        if config.push_to_hub:
+            if PartialState().process_index == 0:
+                remove_autotrain_data(config)
+                save_training_params(config)
+                logger.info("Pushing model to hub...")
+                api = HfApi(token=config.token)
                 api.create_repo(
-                    repo_id=repo_id, repo_type="model", private=True, exist_ok=True
+                    repo_id=f"{config.username}/{config.project_name}", repo_type="model", private=True, exist_ok=True
                 )
                 api.upload_folder(
-                    folder_path=latest_checkpoint,
-                    repo_id=repo_id,
-                    repo_type="model"
+                    folder_path=config.project_name, repo_id=f"{config.username}/{config.project_name}", repo_type="model"
                 )
-                training_logger.info(f"[LIVE] Model pushed to hub: {repo_id}")
-            else:
-                training_logger.warning("[LIVE] No checkpoint directory found to push model.")
 
-        # --- Push dataset to Hugging Face Hub if push_to_hub is True ---
-        if getattr(params, 'push_to_hub', False):
-            from datasets import DatasetDict, load_from_disk
-            # Load the dataset from disk (train/valid)
-            dataset_path = os.path.join(params.output_dir, "autotrain-data")
-            if os.path.exists(dataset_path):
-                dataset = DatasetDict.load_from_disk(dataset_path)
-            else:
-                # Fallback: try data_path if autotrain-data not found
-                dataset = DatasetDict.load_from_disk(params.data_path)
-            repo_id = f"{params.username}/autotrain-data-{params.project_name}"
-            training_logger.info(f"[LIVE] Pushing dataset to hub: {repo_id}")
-            dataset.push_to_hub(repo_id, private=True, token=params.token)
-            training_logger.info(f"[LIVE] Dataset pushed to hub: {repo_id}")
+        if PartialState().process_index == 0:
+            pause_space(config)
     except Exception as e:
         training_logger.error("[LIVE] Error in training pipeline: %s", str(e))
         logger.error(traceback.format_exc())
