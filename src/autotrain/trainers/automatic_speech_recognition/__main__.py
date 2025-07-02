@@ -459,6 +459,9 @@ def train(config: Dict[str, Any]):
         # Save final model and processor to project_name (like image classification)
         trainer.save_model(config.project_name)
         processor.save_pretrained(config.project_name)
+        # Force-save tokenizer.json if available
+        if hasattr(processor, "tokenizer") and hasattr(processor.tokenizer, "save_pretrained"):
+            processor.tokenizer.save_pretrained(config.project_name)
         # Create and save model card (FIXED)
         model_card = utils.create_model_card(config, trainer)
         with open(f"{config.project_name}/README.md", "w") as f:
