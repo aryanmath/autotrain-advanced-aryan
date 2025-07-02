@@ -461,6 +461,10 @@ def train(config: Dict[str, Any]):
         trainer.train()
         training_logger.info("[LIVE] Training complete.")
 
+        # Save final model and processor to output_dir (like other tasks)
+        trainer.save_model(params.output_dir)
+        processor.save_pretrained(params.output_dir)
+
         # --- NEW: Push dataset to Hugging Face Hub if push_to_hub is True ---
         if getattr(params, 'push_to_hub', False):
             from datasets import DatasetDict, load_from_disk
