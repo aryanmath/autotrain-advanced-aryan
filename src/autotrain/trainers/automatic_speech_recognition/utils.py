@@ -3,6 +3,7 @@ from typing import Dict, Any
 import numpy as np
 from transformers import Trainer
 import jiwer
+import os
 
 
 processor = None
@@ -59,50 +60,100 @@ def compute_metrics(pred):
 
     return {"wer": wer, "cer": cer}
 
-def create_model_card(config: Dict[str, Any], trainer: Trainer, num_classes: int = None) -> str:
-    """Create a model card for the trained ASR model."""
-    model_card = f"""# {config.project_name}
+MODEL_CARD = """
+---
+tags:
+- autotrain
+- transformers
+- automatic-speech-recognition{base_model}
+widget:
+- src: https://huggingface.co/datasets/mishig/sample_audio/resolve/main/sample1.wav
+  example_title: Sample Audio 1
+- src: https://huggingface.co/datasets/mishig/sample_audio/resolve/main/sample2.wav
+  example_title: Sample Audio 2{dataset_tag}
+---
 
-This model was trained using AutoTrain.
+# Model Trained Using AutoTrain
+
+- Problem type: Automatic Speech Recognition
+
+## Validation Metrics
+{validation_metrics}
 
 ## Training Configuration
-
-- Base Model: {config.model}
-- Task: Automatic Speech Recognition
-- Training Data: {config.data_path}
-- Validation Data: {config.valid_split if config.valid_split else "None"}
-- Epochs: {config.epochs}
-- Batch Size: {config.batch_size}
-- Learning Rate: {config.lr}
-- Optimizer: {config.optimizer}
-- Scheduler: {config.scheduler}
-- Mixed Precision: {config.mixed_precision}
-
-## Training Results
-
-- Final Loss: {next((entry['loss'] for entry in reversed(trainer.state.log_history) if 'loss' in entry), "N/A")}
-- Best Validation Loss: {trainer.state.best_metric if hasattr(trainer.state, 'best_metric') else "N/A"}
+- Base Model: {base_model}
+- Training Data: {training_data}
+- Validation Data: {validation_data}
+- Epochs: {epochs}
+- Batch Size: {batch_size}
+- Learning Rate: {learning_rate}
+- Optimizer: {optimizer}
+- Scheduler: {scheduler}
+- Mixed Precision: {mixed_precision}
 
 ## Usage
-
 ```python
 from transformers import AutoModelForCTC, Wav2Vec2Processor
 import torch
 import librosa
 
 # Load model and processor
-model = AutoModelForCTC.from_pretrained("{config.username}/{config.project_name}")
-processor = Wav2Vec2Processor.from_pretrained("{config.username}/{config.project_name}")
+model = AutoModelForCTC.from_pretrained("{username}/{project_name}")
+processor = Wav2Vec2Processor.from_pretrained("{username}/{project_name}")
 
-# Load and preprocess audio
-audio, sr = librosa.load("path_to_audio.wav", sr={config.sampling_rate})
-inputs = processor(audio, sampling_rate={config.sampling_rate}, return_tensors="pt", padding=True)
+audio, sr = librosa.load("path_to_audio.wav", sr={sampling_rate})
+inputs = processor(audio, sampling_rate={sampling_rate}, return_tensors="pt", padding=True)
 
-# Get predictions
 with torch.no_grad():
     logits = model(inputs.input_values).logits
     predicted_ids = torch.argmax(logits, dim=-1)
     transcription = processor.batch_decode(predicted_ids)
 ```
 """
+
+def create_model_card(config: Dict[str, Any], trainer: Trainer, num_classes: int = None) -> str:
+    """Create a detailed model card for the trained ASR model."""
+    # Validation metrics (WER/CER)
+    if hasattr(trainer, 'evaluate'):
+        eval_scores = trainer.evaluate() if (hasattr(config, 'valid_split') and config.valid_split) else None
+        if eval_scores:
+            valid_metrics = [
+                f"wer: {eval_scores.get('wer', 'N/A')}",
+                f"cer: {eval_scores.get('cer', 'N/A')}"
+            ]
+            validation_metrics = "\n\n".join(valid_metrics)
+        else:
+            validation_metrics = "No validation metrics available"
+    else:
+        validation_metrics = "No validation metrics available"
+
+    # Dataset tag
+    if hasattr(config, 'data_path') and (config.data_path == f"{config.project_name}/autotrain-data" or os.path.isdir(config.data_path)):
+        dataset_tag = ""
+    else:
+        dataset_tag = f"\ndatasets:\n- {getattr(config, 'data_path', '')}"
+
+    # Base model
+    if hasattr(config, 'model') and os.path.isdir(config.model):
+        base_model = ""
+    else:
+        base_model = f"\nbase_model: {getattr(config, 'model', '')}"
+
+    # Fill in the template
+    model_card = MODEL_CARD.format(
+        base_model=base_model,
+        dataset_tag=dataset_tag,
+        validation_metrics=validation_metrics,
+        training_data=getattr(config, 'data_path', ''),
+        validation_data=getattr(config, 'valid_split', 'None'),
+        epochs=getattr(config, 'epochs', 'N/A'),
+        batch_size=getattr(config, 'batch_size', 'N/A'),
+        learning_rate=getattr(config, 'lr', 'N/A'),
+        optimizer=getattr(config, 'optimizer', 'N/A'),
+        scheduler=getattr(config, 'scheduler', 'N/A'),
+        mixed_precision=getattr(config, 'mixed_precision', 'N/A'),
+        username=getattr(config, 'username', 'username'),
+        project_name=getattr(config, 'project_name', 'project_name'),
+        sampling_rate=getattr(config, 'sampling_rate', 16000),
+    )
     return model_card 

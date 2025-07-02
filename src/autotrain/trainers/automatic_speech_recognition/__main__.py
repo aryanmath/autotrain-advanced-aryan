@@ -466,6 +466,7 @@ def train(config: Dict[str, Any]):
         processor.save_pretrained(config.project_name)
 
         # Create and save model card
+        model_card = utils.create_model_card(config, trainer)
         with open(f"{config.project_name}/README.md", "w") as f:
             f.write(model_card)
 
@@ -491,7 +492,6 @@ def train(config: Dict[str, Any]):
         raise
 
 def main():
-    
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--training_config", type=str, default=None)
@@ -499,41 +499,16 @@ def main():
     if args.training_config:
         with open(args.training_config, "r", encoding="utf-8") as f:
             config = json.load(f)
-       
         data_path = config.get("data_path", "")
         if data_path == "life_app_data" or os.path.basename(data_path) == "life_app_data":
             from datasets import load_from_disk
             train_dataset = load_from_disk(data_path)
             valid_dataset = None
         else:
-            
             train_dataset = None
             valid_dataset = None
-        
         print(f"Loaded LiFE App dataset: {train_dataset}")
-        
         sys.exit(0)
-    try:
-        
-        with open("training_config.json", "r") as f:
-            training_config = json.load(f)
-            
-        logger.info("Initializing ASR training...")
-        
-       
-        trainer = automatic_speech_recognitionTrainer(
-            training_config=training_config,
-            callbacks=[DetailedTrainingCallback()]  
-        )
-        
-        
-        logger.info("Starting ASR training with detailed progress logging...")
-        trainer.train()
-        
-    except Exception as e:
-        logger.error(f"Error during ASR training: {str(e)}")
-        logger.error(traceback.format_exc())
-        raise e
 
 if __name__ == "__main__":
     args = parse_args()
