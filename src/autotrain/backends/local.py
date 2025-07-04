@@ -158,7 +158,7 @@ class LocalRunner(BaseBackend):
             
         params_object = params_class(**params_dict)
 
-        training_pid = run_training(params_object, task_id, wait=self.wait)
+        training_pid = run_training(params_object)
         if not self.wait:
             logger.info(f"Training PID: {training_pid}")
         return training_pid
