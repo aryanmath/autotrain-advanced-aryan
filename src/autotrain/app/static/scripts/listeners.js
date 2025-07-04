@@ -1,20 +1,4 @@
-/**
- * AutoTrain Advanced - Frontend Event Listeners and UI Logic
- *
- * This file handles all user interactions in the AutoTrain UI:
- * - Parameter management (basic/full mode, JSON editing)
- * - Dataset source selection (Local, Hugging Face Hub, LiFE App for ASR)
- * - Dynamic UI rendering based on task and parameters
- * - LiFE App integration for ASR task only
- *
- * File Structure:
- * 1. Variable Declarations
- * 2. Parameter Management Functions
- * 3. UI Rendering Functions
- * 4. Dataset Source Handling
- * 5. Event Listeners Setup
- * 6. ASR/LiFE App Specific Logic
- */
+
 
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -396,11 +380,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
             }
 
-            updateProjectTags();
-
             // Handle project selection changes
             $(projectSelect).off('change').on('change', function() {
-                updateProjectTags();
                 const selectedProjects = $(this).val();
                 if (selectedProjects && selectedProjects.length > 0) {
                     loadScriptsForProjects(selectedProjects);
@@ -412,16 +393,6 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error('Error loading projects:', error);
         }
     }
-
-    /**
-     * Initialize Select2 for script dropdown
-     * Provides enhanced dropdown functionality with search and clear options
-     */
-    $('#life_app_script').select2({
-        placeholder: "Select Script",
-        allowClear: true,
-        width: '100%'
-    });
 
     /**
      * Loads scripts for selected LiFE App projects
@@ -459,15 +430,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 width: '100%'
             });
 
-            // Always set the value and trigger change to update UI
-            if (window.selectedScript && data.scripts.includes(window.selectedScript)) {
-                scriptSelect.val(window.selectedScript).trigger('change');
-            } else if (data.scripts && data.scripts.length === 1) {
-                scriptSelect.val(data.scripts[0]).trigger('change');
-            } else {
-                scriptSelect.val('').trigger('change');
-            }
-
             // Add or update the visible script display element
             let scriptDisplay = document.getElementById('selected-script-display');
             if (!scriptDisplay) {
@@ -481,8 +443,18 @@ document.addEventListener('DOMContentLoaded', function () {
             function updateScriptDisplay(val) {
                 scriptDisplay.textContent = val ? `Selected Script: ${val}` : '';
             }
-            // Initial display
-            updateScriptDisplay(scriptSelect.val());
+
+            // Always set the value and trigger change to update UI
+            if (window.selectedScript && data.scripts.includes(window.selectedScript)) {
+                scriptSelect.val(window.selectedScript).trigger('change');
+                updateScriptDisplay(window.selectedScript); // update label immediately
+            } else if (data.scripts && data.scripts.length === 1) {
+                scriptSelect.val(data.scripts[0]).trigger('change');
+                updateScriptDisplay(data.scripts[0]); // update label immediately
+            } else {
+                scriptSelect.val('').trigger('change');
+                updateScriptDisplay('');
+            }
 
             // Handle script selection changes
             scriptSelect.off('change').on('change', function() {
@@ -503,6 +475,7 @@ document.addEventListener('DOMContentLoaded', function () {
     /**
      * Project selection event handler
      * Triggers script loading when projects are selected
+     * Relies only on Select2's built-in tag display for selected projects
      */
     $('#life_app_project').on('change', function() {
         const selectedProjects = $(this).val();
@@ -559,39 +532,6 @@ document.addEventListener('DOMContentLoaded', function () {
         } catch (error) {
             console.error('Error loading datasets:', error);
         }
-    }
-
-    /**
-     * Updates the visual tag display for selected projects
-     * Shows selected projects as removable tags below the dropdown
-     */
-    function updateProjectTags() {
-        const projectSelect = document.getElementById('life_app_project');
-        const tagContainer = document.getElementById('life-app-project-tags');
-        if (!projectSelect || !tagContainer) return;
-
-        tagContainer.innerHTML = '';
-        const selectedOptions = $(projectSelect).select2('data');
-
-        selectedOptions.forEach(option => {
-            const tag = document.createElement('span');
-            tag.className = 'inline-flex items-center px-2 py-1 mr-2 mb-2 text-sm font-medium text-blue-800 bg-blue-100 rounded-full dark:bg-blue-900 dark:text-blue-300';
-            tag.textContent = option.text;
-
-            const removeButton = document.createElement('button');
-            removeButton.className = 'ml-1 text-blue-800 hover:text-blue-600 dark:text-blue-300 dark:hover:text-blue-100';
-            removeButton.innerHTML = '×';
-            removeButton.onclick = () => {
-                const optionElement = Array.from(projectSelect.options).find(opt => opt.value === option.id);
-                if (optionElement) {
-                    optionElement.selected = false;
-                    $(projectSelect).trigger('change');
-                }
-            };
-
-            tag.appendChild(removeButton);
-            tagContainer.appendChild(tag);
-        });
     }
 
     // === ASR-SPECIFIC LOGIC END ===
