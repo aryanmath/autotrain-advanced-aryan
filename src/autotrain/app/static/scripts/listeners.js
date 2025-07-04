@@ -186,26 +186,22 @@ document.addEventListener('DOMContentLoaded', function () {
     /**
      * Handles dataset source selection and shows/hides appropriate UI sections
      * Supports: Local upload, Hugging Face Hub, and LiFE App (ASR only)
+     * Fixes: Hides local upload UI when LiFE App is selected, and vice versa
      */
     function handleDataSource() {
-        // Main repo logic for hub/local dataset sources
-        if (dataSource.value === "hub") {
-            uploadDataTabContent.style.display = "none";
-            uploadDataTabs.style.display = "none";
-            hubDataTabContent.style.display = "block";
-        } else if (dataSource.value === "local") {
-            uploadDataTabContent.style.display = "block";
-            uploadDataTabs.style.display = "block";
-            hubDataTabContent.style.display = "none";
-        }
-
-        // === ASR-SPECIFIC LOGIC START ===
-        // Show/hide LiFE App option and UI only for ASR task
         const lifeAppOption = document.getElementById("dataset_source").querySelector('option[value="life_app"]');
         const lifeAppSelection = document.getElementById("life-app-selection");
         const datasetFileDiv = document.getElementById('dataset_file_div');
         const taskValue = document.getElementById('task').value;
 
+        // Hide all dataset source UIs by default
+        if (hubDataTabContent) hubDataTabContent.style.display = "none";
+        if (uploadDataTabContent) uploadDataTabContent.style.display = "none";
+        if (uploadDataTabs) uploadDataTabs.style.display = "none";
+        if (lifeAppSelection) lifeAppSelection.style.display = "none";
+        if (datasetFileDiv) datasetFileDiv.style.display = 'none';
+
+        // Show/hide LiFE App option in dropdown
         if (lifeAppOption) {
             if (taskValue === "ASR") {
                 lifeAppOption.style.display = "";
@@ -217,15 +213,17 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
+        // Show relevant section based on selected data source
         if (dataSource.value === "life_app" && taskValue === "ASR") {
             if (lifeAppSelection) lifeAppSelection.style.display = "block";
             if (datasetFileDiv) datasetFileDiv.style.display = 'block';
             loadLifeAppProjects();
-        } else {
-            if (lifeAppSelection) lifeAppSelection.style.display = "none";
-            if (datasetFileDiv) datasetFileDiv.style.display = 'none';
+        } else if (dataSource.value === "hub") {
+            if (hubDataTabContent) hubDataTabContent.style.display = "block";
+        } else if (dataSource.value === "local") {
+            if (uploadDataTabContent) uploadDataTabContent.style.display = "block";
+            if (uploadDataTabs) uploadDataTabs.style.display = "block";
         }
-        // === ASR-SPECIFIC LOGIC END ===
     }
 
     // ============================================================================
@@ -428,6 +426,7 @@ document.addEventListener('DOMContentLoaded', function () {
     /**
      * Loads scripts for selected LiFE App projects
      * Fetches available scripts from backend and populates dropdown
+     * Fixes: Ensures Select2 always shows the selected script after re-initialization
      */
     async function loadScriptsForProjects(selectedProjects) {
         const scriptSelect = $('#life_app_script');
@@ -459,7 +458,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 width: '100%'
             });
 
-            // Restore previous selection if possible
+            // Always set the value and trigger change to update UI
             if (window.selectedScript && data.scripts.includes(window.selectedScript)) {
                 scriptSelect.val(window.selectedScript).trigger('change');
             } else if (data.scripts && data.scripts.length === 1) {
