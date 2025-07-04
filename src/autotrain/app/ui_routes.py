@@ -691,6 +691,48 @@ async def handle_form(
         # Handle local dataset upload#hello
         file_extension = os.path.splitext(data_files_training[0].filename)[1]
         file_extension = file_extension[1:] if file_extension.startswith(".") else file_extension
+        # --- ASR ZIP+CSV+audio folder support ---
+        if task == "ASR" and file_extension.lower() == "zip":
+            import tempfile, shutil
+            import pandas as pd
+            import zipfile, os
+            import io
+            # 1. Extract zip to temp dir
+            temp_dir = tempfile.mkdtemp()
+            data_files_training[0].file.seek(0)
+            with zipfile.ZipFile(io.BytesIO(data_files_training[0].file.read()), 'r') as zip_ref:
+                zip_ref.extractall(temp_dir)
+            # 2. Find CSV and audio folder
+            csv_path = None
+            audio_dir = None
+            for root, dirs, files in os.walk(temp_dir):
+                for file in files:
+                    if file.endswith('.csv'):
+                        csv_path = os.path.join(root, file)
+                for d in dirs:
+                    if d.lower() == 'audio':
+                        audio_dir = os.path.join(root, d)
+            if not csv_path or not audio_dir:
+                shutil.rmtree(temp_dir)
+                raise HTTPException(status_code=400, detail="ZIP must contain a CSV and an audio/ folder.")
+            # 3. Update CSV audio column to full path
+            df = pd.read_csv(csv_path)
+            if 'audio' not in df.columns or 'transcription' not in df.columns:
+                shutil.rmtree(temp_dir)
+                raise HTTPException(status_code=400, detail="CSV must have 'audio' and 'transcription' columns.")
+            def get_audio_path(x):
+                p = os.path.join(audio_dir, str(x))
+                if not os.path.exists(p):
+                    raise HTTPException(status_code=400, detail=f"Audio file {x} not found in audio folder.")
+                return p
+            df['audio'] = df['audio'].apply(get_audio_path)
+            # 4. Save updated CSV to temp
+            updated_csv_path = os.path.join(temp_dir, 'updated_data.csv')
+            df.to_csv(updated_csv_path, index=False)
+            # 5. Use updated CSV as training file
+            training_files = [updated_csv_path]
+            file_extension = 'csv'
+        # --- END ASR ZIP+CSV+audio folder support ---
         if task == "image-classification":
             dset = AutoTrainImageClassificationDataset(
                 train_data=training_files[0],
