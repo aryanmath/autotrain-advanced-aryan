@@ -588,11 +588,7 @@ async def handle_form(
                 status_code=400,
                 detail="LiFE app dataset file not found"
             )
-        import pandas as pd
-        import base64
-        from datasets import Dataset
 
-       
         with open(dataset_path, "r", encoding="utf-8") as f:
             dataset_json = json.load(f)
         
