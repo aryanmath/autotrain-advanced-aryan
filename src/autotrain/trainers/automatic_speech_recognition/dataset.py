@@ -7,7 +7,6 @@ from datasets import Dataset
 
 from autotrain import logger
 
-print(">>> RUNNING NEW dataset.py FROM:", __file__)
 
 def detect_model_type(model):
     """Detect model type from model class name."""

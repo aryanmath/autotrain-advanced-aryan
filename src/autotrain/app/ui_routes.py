@@ -8,6 +8,11 @@ from datetime import datetime
 import subprocess
 import sqlite3
 import numpy as np
+import tempfile
+import shutil
+import pandas as pd
+import zipfile
+import io
 
 import torch
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, UploadFile, status
@@ -693,10 +698,6 @@ async def handle_form(
         file_extension = file_extension[1:] if file_extension.startswith(".") else file_extension
         # --- ASR ZIP+CSV+audio folder support ---
         if task == "ASR" and file_extension.lower() == "zip":
-            import tempfile, shutil
-            import pandas as pd
-            import zipfile, os
-            import io
             # 1. Extract zip to temp dir
             temp_dir = tempfile.mkdtemp()
             data_files_training[0].file.seek(0)
