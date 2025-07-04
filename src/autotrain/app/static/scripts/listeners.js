@@ -1,5 +1,3 @@
-
-
 document.addEventListener('DOMContentLoaded', function () {
 
     // ============================================================================
@@ -368,25 +366,24 @@ document.addEventListener('DOMContentLoaded', function () {
                 projectSelect.appendChild(option);
             });
 
-            // Initialize Select2 for enhanced dropdown functionality
-            if (!$(projectSelect).data('select2')) {
-                $(projectSelect).select2({
-                    placeholder: "Select LiFE App Project(s)",
-                    allowClear: true,
-                    multiple: true,
-                    width: '100%',
-                    maximumSelectionLength: 2,
-                    tags: true
-                });
-            }
+            // --- Select2 for LiFE App Project(s) ---
+            $('#life_app_project').select2({
+                placeholder: 'Select LiFE App Project(s)',
+                allowClear: true,
+                multiple: true,
+                width: '100%',
+                maximumSelectionLength: 2,
+                tags: true
+            });
 
-            // Handle project selection changes
-            $(projectSelect).off('change').on('change', function() {
+            // --- Project selection event handler ---
+            $('#life_app_project').on('change', function() {
                 const selectedProjects = $(this).val();
                 if (selectedProjects && selectedProjects.length > 0) {
                     loadScriptsForProjects(selectedProjects);
                 } else {
                     $('#life_app_script').prop('disabled', true).empty();
+                    $('#dataset_file').prop('disabled', true).empty();
                 }
             });
         } catch (error) {
@@ -425,42 +422,23 @@ document.addEventListener('DOMContentLoaded', function () {
                 scriptSelect.select2('destroy');
             }
             scriptSelect.select2({
-                placeholder: "Select Script",
+                placeholder: 'Select Script',
                 allowClear: true,
-                width: '100%'
+                width: '100%',
+                templateSelection: formatState
             });
 
-            // Add or update the visible script display element
-            let scriptDisplay = document.getElementById('selected-script-display');
-            if (!scriptDisplay) {
-                scriptDisplay = document.createElement('div');
-                scriptDisplay.id = 'selected-script-display';
-                scriptDisplay.style.marginTop = '8px';
-                scriptDisplay.style.fontWeight = 'bold';
-                scriptSelect.parent().append(scriptDisplay);
-            }
-            // Helper to update the display
-            function updateScriptDisplay(val) {
-                scriptDisplay.textContent = val ? `Selected Script: ${val}` : '';
-            }
-
-            // Always set the value and trigger change to update UI
-            if (window.selectedScript && data.scripts.includes(window.selectedScript)) {
-                scriptSelect.val(window.selectedScript).trigger('change');
-                updateScriptDisplay(window.selectedScript); // update label immediately
-            } else if (data.scripts && data.scripts.length === 1) {
+            // Set value if only one script
+            if (data.scripts && data.scripts.length === 1) {
                 scriptSelect.val(data.scripts[0]).trigger('change');
-                updateScriptDisplay(data.scripts[0]); // update label immediately
             } else {
                 scriptSelect.val('').trigger('change');
-                updateScriptDisplay('');
             }
 
             // Handle script selection changes
             scriptSelect.off('change').on('change', function() {
                 const selectedScript = $(this).val();
                 window.selectedScript = selectedScript;
-                updateScriptDisplay(selectedScript);
                 if (selectedScript) {
                     loadDatasetsForScript(selectedScript);
                 } else {
@@ -471,21 +449,6 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error('Error loading scripts:', error);
         }
     }
-
-    /**
-     * Project selection event handler
-     * Triggers script loading when projects are selected
-     * Relies only on Select2's built-in tag display for selected projects
-     */
-    $('#life_app_project').on('change', function() {
-        const selectedProjects = $(this).val();
-        if (selectedProjects && selectedProjects.length > 0) {
-            loadScriptsForProjects(selectedProjects);
-        } else {
-            $('#life_app_script').prop('disabled', true).empty();
-            $('#dataset_file').prop('disabled', true).empty();
-        }
-    });
 
     /**
      * Loads datasets for selected LiFE App script
@@ -532,6 +495,15 @@ document.addEventListener('DOMContentLoaded', function () {
         } catch (error) {
             console.error('Error loading datasets:', error);
         }
+    }
+
+    // --- Select2 for LiFE App Script with custom templateSelection ---
+    function formatState (state) {
+        if (!state.id) {
+            return state.text;
+        }
+        // Customize display if needed
+        return $('<span>' + state.text + '</span>');
     }
 
     // === ASR-SPECIFIC LOGIC END ===
