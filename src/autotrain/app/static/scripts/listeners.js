@@ -428,7 +428,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 templateSelection: formatState
             });
 
-            // Set value if only one script
+            // Set value if only one script, or clear
             if (data.scripts && data.scripts.length === 1) {
                 scriptSelect.val(data.scripts[0]).trigger('change');
             } else {
@@ -497,14 +497,17 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // --- Select2 for LiFE App Script with custom templateSelection ---
+    // --- Select2 for LiFE App Script with plain text templateSelection ---
     function formatState (state) {
-        if (!state.id) {
-            return state.text;
-        }
-        // Customize display if needed
-        return $('<span>' + state.text + '</span>');
+        // Always return plain text for compatibility
+        return state.text;
     }
+    $('#life_app_script').select2({
+        placeholder: 'Select Script',
+        allowClear: true,
+        width: '100%',
+        templateSelection: formatState
+    });
 
     // === ASR-SPECIFIC LOGIC END ===
 
