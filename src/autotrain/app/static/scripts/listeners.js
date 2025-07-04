@@ -427,6 +427,7 @@ document.addEventListener('DOMContentLoaded', function () {
      * Loads scripts for selected LiFE App projects
      * Fetches available scripts from backend and populates dropdown
      * Fixes: Ensures Select2 always shows the selected script after re-initialization
+     * Also: Adds a visible UI element to display the selected script name
      */
     async function loadScriptsForProjects(selectedProjects) {
         const scriptSelect = $('#life_app_script');
@@ -467,10 +468,27 @@ document.addEventListener('DOMContentLoaded', function () {
                 scriptSelect.val('').trigger('change');
             }
 
+            // Add or update the visible script display element
+            let scriptDisplay = document.getElementById('selected-script-display');
+            if (!scriptDisplay) {
+                scriptDisplay = document.createElement('div');
+                scriptDisplay.id = 'selected-script-display';
+                scriptDisplay.style.marginTop = '8px';
+                scriptDisplay.style.fontWeight = 'bold';
+                scriptSelect.parent().append(scriptDisplay);
+            }
+            // Helper to update the display
+            function updateScriptDisplay(val) {
+                scriptDisplay.textContent = val ? `Selected Script: ${val}` : '';
+            }
+            // Initial display
+            updateScriptDisplay(scriptSelect.val());
+
             // Handle script selection changes
             scriptSelect.off('change').on('change', function() {
                 const selectedScript = $(this).val();
                 window.selectedScript = selectedScript;
+                updateScriptDisplay(selectedScript);
                 if (selectedScript) {
                     loadDatasetsForScript(selectedScript);
                 } else {
