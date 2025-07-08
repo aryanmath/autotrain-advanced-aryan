@@ -710,6 +710,15 @@ def train(config: Dict[str, Any]):
                 del cfg["token"]
             with open(config_path, "w") as f:
                 json.dump(cfg, f, indent=2)
+        # Remove token from training_params.json before upload (fixes HF Hub error)
+        params_path = os.path.join(config.project_name, "training_params.json")
+        if os.path.exists(params_path):
+            with open(params_path, "r") as f:
+                params = json.load(f)
+            if "token" in params:
+                del params["token"]
+            with open(params_path, "w") as f:
+                json.dump(params, f, indent=2)
         # Always delete the entire logs directory before upload
         log_dir = os.path.join(config.project_name, "logs")
         if os.path.exists(log_dir):
