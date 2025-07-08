@@ -99,13 +99,6 @@ def compute_metrics(pred, processor):
             return {"wer": 1.0, "cer": 1.0, "accuracy": 0.0}
         pred_str = processor.batch_decode(pred_ids, skip_special_tokens=True)
         label_str = processor.batch_decode(label_ids, skip_special_tokens=True)
-        # Minimal debug for evaluation (print only once)
-        if not hasattr(compute_metrics, "_printed_debug"):
-            if len(pred_str) > 0 and len(label_str) > 0:
-                print(f"[EVAL DEBUG] pred_str[0]: '{pred_str[0]}' | label_str[0]: '{label_str[0]}'")
-            else:
-                print(f"[EVAL DEBUG] pred_str: {pred_str} | label_str: {label_str}")
-            compute_metrics._printed_debug = True
     except Exception as e:
         return {"wer": 1.0, "cer": 1.0, "accuracy": 0.0}
 
