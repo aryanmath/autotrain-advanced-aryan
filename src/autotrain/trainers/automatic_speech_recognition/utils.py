@@ -4,7 +4,7 @@ from jiwer import wer, cer
 from transformers import TrainerCallback
 from autotrain.trainers.automatic_speech_recognition.dataset import AutoTrainASRDataset
 from autotrain import logger
-
+import jiwer
 # Metrics tracked for ASR evaluation
 ASR_EVAL_METRICS = (
     "eval_loss",
