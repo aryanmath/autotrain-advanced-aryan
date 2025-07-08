@@ -54,12 +54,21 @@ def parse_args():
     return parser.parse_args()
 
 def dynamic_padding_collator(batch):
-    # Main repo style: support both seq2seq and ctc batches
     if "input_features" in batch[0]:
-        input_features = [item["input_features"] for item in batch]
+        # Whisper: pad/truncate to [80, 3000]
+        target_length = 3000
+        padded_features = []
+        for feat in [item["input_features"] for item in batch]:
+            if feat.shape[1] < target_length:
+                padding = torch.zeros(feat.shape[0], target_length - feat.shape[1], dtype=feat.dtype)
+                padded_feat = torch.cat([feat, padding], dim=1)
+            else:
+                padded_feat = feat[:, :target_length]
+            padded_features.append(padded_feat)
+        input_features = torch.stack(padded_features)
         labels = [item["labels"] for item in batch]
         return {
-            "input_features": torch.stack(input_features),
+            "input_features": input_features,
             "labels": torch.nn.utils.rnn.pad_sequence(labels, batch_first=True, padding_value=-100),
         }
     elif "input_values" in batch[0]:
