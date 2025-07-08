@@ -538,7 +538,7 @@ def train(config: Dict[str, Any]):
             logger.info(f"Using standard early stopping patience: {early_stopping_patience}")
             logger.info(f"Using standard epochs: {adjusted_epochs}")
             
-        # Calculate logging steps like image classification
+        # Calculate logging_steps the same way as other tasks
         if getattr(config, 'logging_steps', -1) == -1:
             if valid_dataset is not None:
                 logging_steps = int(0.2 * len(valid_dataset) / config.batch_size)
@@ -548,10 +548,15 @@ def train(config: Dict[str, Any]):
                 logging_steps = 1
             if logging_steps > 25:
                 logging_steps = 25
+            config.logging_steps = logging_steps
         else:
             logging_steps = getattr(config, 'logging_steps', 10)
-        
         logger.info(f"Logging steps: {logging_steps}")
+        
+        # Set evaluation_strategy from config.evaluation_strategy if available, else 'no'
+        eval_strategy = getattr(config, 'evaluation_strategy', None)
+        if eval_strategy is None:
+            eval_strategy = "epoch" if valid_dataset is not None else "no"
         
         # Use dict format like image classification for better control
         training_args = dict(
@@ -561,27 +566,23 @@ def train(config: Dict[str, Any]):
             gradient_accumulation_steps=config.gradient_accumulation,
             learning_rate=adjusted_lr,
             num_train_epochs=adjusted_epochs,
-            save_strategy="epoch",
+            save_strategy=eval_strategy,
             disable_tqdm=False,  # enables the progress bar like other tasks
-            logging_steps=1,    # log every step for more granular logs
-            evaluation_strategy="epoch" if valid_dataset else "no",
-            load_best_model_at_end=True if valid_dataset else False,
-            metric_for_best_model="wer" if valid_dataset else None,
-            greater_is_better=False if valid_dataset else None,
-            push_to_hub=False,
-            logging_dir=os.path.join(config.project_name, "logs"),
-            save_total_limit=2,
-            remove_unused_columns=False,
-            dataloader_num_workers=0,  
-            dataloader_pin_memory=False,  
-            gradient_checkpointing=True,
-            optim="adamw_torch",
-            lr_scheduler_type="linear",
-            warmup_ratio=0.1,
-            weight_decay=adjusted_weight_decay,
-            max_grad_norm=1.0,
-            report_to=getattr(config, 'log', 'tensorboard'),
-            seed=42,
+            logging_steps=logging_steps,  # use calculated value
+            evaluation_strategy=eval_strategy,  # use config or fallback
+            load_best_model_at_end=True if valid_dataset is not None else False,
+            report_to=config.log,
+            auto_find_batch_size=config.auto_find_batch_size,
+            lr_scheduler_type=config.scheduler,
+            optim=config.optimizer,
+            warmup_ratio=config.warmup_ratio,
+            weight_decay=config.weight_decay,
+            max_grad_norm=config.max_grad_norm,
+            push_to_hub=config.push_to_hub,
+            save_total_limit=config.save_total_limit,
+            fp16=config.mixed_precision == "fp16",
+            bf16=config.mixed_precision == "bf16",
+            ddp_find_unused_parameters=False,
         )
         
         # Add mixed precision settings
