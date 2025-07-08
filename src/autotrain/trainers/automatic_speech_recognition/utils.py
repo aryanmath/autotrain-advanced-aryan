@@ -93,40 +93,25 @@ def compute_metrics(pred, processor):
     if not isinstance(label_ids[0], list):
         label_ids = [label_ids]
 
-    # Debug: print input IDs
-    print("[DEBUG] Pred IDs sample:", pred_ids[:5])
-    print("[DEBUG] Label IDs sample:", label_ids[:5])
-
     # Decode to strings using provided processor
     try:
         if processor is None:
-            print("[DEBUG] Processor is None!")
             return {"wer": 1.0, "cer": 1.0, "accuracy": 0.0}
-        print("[DEBUG] Processor type:", type(processor))
-        if hasattr(processor, 'tokenizer'):
-            print("[DEBUG] Processor vocab size:", len(processor.tokenizer.get_vocab()))
         pred_str = processor.batch_decode(pred_ids, skip_special_tokens=True)
         label_str = processor.batch_decode(label_ids, skip_special_tokens=True)
     except Exception as e:
-        print(f"[DEBUG] Exception in decoding: {e}")
         return {"wer": 1.0, "cer": 1.0, "accuracy": 0.0}
 
     if not pred_str or not label_str:
-        print("[DEBUG] Empty pred_str or label_str after decoding!")
         return {"wer": 1.0, "cer": 1.0, "accuracy": 0.0}
 
     # Filter out empty strings
     valid_pairs = [(p, l) for p, l in zip(pred_str, label_str) if p.strip() and l.strip()]
     if not valid_pairs:
-        print("[DEBUG] No valid pairs after filtering empty strings!")
         return {"wer": 1.0, "cer": 1.0, "accuracy": 0.0}
 
     pred_str_clean = [p for p, l in valid_pairs]
     label_str_clean = [l for p, l in valid_pairs]
-
-    # Debug print for predictions and labels
-    print("[DEBUG] Decoded Predictions:", pred_str_clean)
-    print("[DEBUG] Decoded Labels:", label_str_clean)
 
     # Compute metrics
     try:
@@ -134,7 +119,6 @@ def compute_metrics(pred, processor):
         cer_score = jiwer.cer(label_str_clean, pred_str_clean)
         accuracy = np.mean([p.strip() == l.strip() for p, l in valid_pairs])
     except Exception as e:
-        print(f"[DEBUG] Exception in metric computation: {e}")
         return {"wer": 1.0, "cer": 1.0, "accuracy": 0.0}
 
     return {"wer": wer_score, "cer": cer_score, "accuracy": accuracy}

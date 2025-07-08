@@ -79,7 +79,6 @@ class AutoTrainASRDataset(Dataset):
         self.sampling_rate = sampling_rate
         self.max_seq_length = max_seq_length
         self.model_type = model_type or detect_model_type(model)
-        from autotrain import logger
         # Check processor
         if not hasattr(self, 'processor') or self.processor is None:
             logger.warning("[DEBUG] Processor is NOT set on ASR dataset! Labels will be broken.")
@@ -116,9 +115,6 @@ class AutoTrainASRDataset(Dataset):
             item = self._data[idx]
             audio_path = item[self.audio_column]
             text = item[self.text_column] if self.text_column in item else None
-            from autotrain import logger
-            logger.warning(f"[DEBUG] __getitem__ audio_path: {audio_path}")
-            logger.warning(f"[DEBUG] __getitem__ text: {text}")
             # Encode the text using the processor (batch call, like seq2seq)
             label_ids = None
             decoded_from_ids = None
