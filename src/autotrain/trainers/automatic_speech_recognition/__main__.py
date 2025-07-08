@@ -562,7 +562,7 @@ def train(config: Dict[str, Any]):
             learning_rate=adjusted_lr,
             num_train_epochs=adjusted_epochs,
             save_strategy="epoch",
-            disable_tqdm=True,  # disables the progress bar for clean logs
+            disable_tqdm=False,  # enables the progress bar like other tasks
             logging_steps=1,    # log every step for more granular logs
             evaluation_strategy="epoch" if valid_dataset else "no",
             load_best_model_at_end=True if valid_dataset else False,
