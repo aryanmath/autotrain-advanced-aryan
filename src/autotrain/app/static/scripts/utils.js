@@ -88,6 +88,7 @@ document.addEventListener('DOMContentLoaded', function () {
             ? document.getElementById('base_model_input').value
             : document.getElementById('base_model').value;
 
+            
         formData.append('base_model', baseModelValue);
         formData.append('project_name', document.getElementById('project_name').value);
         formData.append('task', document.getElementById('task').value);
