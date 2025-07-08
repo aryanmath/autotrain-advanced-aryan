@@ -87,6 +87,10 @@ class AutoTrainASRDataset(Dataset):
         try:
             item = self._data[idx]
             audio_path = item[self.audio_column]
+            text = item[self.text_column] if self.text_column in item else None
+            # Debug print for audio path and text
+            print(f"[DEBUG] __getitem__ audio_path: {audio_path}")
+            print(f"[DEBUG] __getitem__ text: {text}")
             if not os.path.exists(audio_path):
                 raise ValueError(f"Audio file not found: {audio_path}")
             # Load the audio file and check its duration
@@ -145,7 +149,6 @@ class AutoTrainASRDataset(Dataset):
                         input_features = torch.tensor(audio, dtype=torch.float32)
                 except Exception:
                     input_features = torch.tensor(audio, dtype=torch.float32)
-            text = item[self.text_column]
             if not text or not isinstance(text, str):
                 text = " "
             labels = safe_tokenize_text(self.processor, text, self.max_seq_length)
