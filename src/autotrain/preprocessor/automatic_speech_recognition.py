@@ -77,6 +77,14 @@ class AutomaticSpeechRecognitionPreprocessor:
             raise ValueError(f"{audio_dir} should contain at least 5 audio files.")
 
         df = pd.read_csv(csv_file)
+        print("Loaded columns (train):", df.columns)
+        if "autotrain_audio" in df.columns and "autotrain_transcription" in df.columns:
+            print("Auto-renaming columns from autotrain_* to standard names (train)")
+            df = df.rename(columns={
+                "autotrain_audio": "audio",
+                "autotrain_transcription": "transcription"
+            })
+            print("Columns after renaming (train):", df.columns)
         if 'audio' not in df.columns or 'transcription' not in df.columns:
             raise ValueError("CSV must have 'audio' and 'transcription' columns.")
 
@@ -115,6 +123,14 @@ class AutomaticSpeechRecognitionPreprocessor:
                 raise ValueError(f"{valid_audio_dir} should contain at least 5 audio files.")
 
             valid_df = pd.read_csv(valid_csv_file)
+            print("Loaded columns (valid):", valid_df.columns)
+            if "autotrain_audio" in valid_df.columns and "autotrain_transcription" in valid_df.columns:
+                print("Auto-renaming columns from autotrain_* to standard names (valid)")
+                valid_df = valid_df.rename(columns={
+                    "autotrain_audio": "audio",
+                    "autotrain_transcription": "transcription"
+                })
+                print("Columns after renaming (valid):", valid_df.columns)
             if 'audio' not in valid_df.columns or 'transcription' not in valid_df.columns:
                 raise ValueError("Validation CSV must have 'audio' and 'transcription' columns.")
 
