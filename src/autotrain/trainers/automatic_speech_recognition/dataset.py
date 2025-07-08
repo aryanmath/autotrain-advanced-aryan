@@ -88,16 +88,26 @@ class AutoTrainASRDataset(Dataset):
             item = self._data[idx]
             audio_path = item[self.audio_column]
             text = item[self.text_column] if self.text_column in item else None
-            # Debug log for audio path and text
             from autotrain import logger
             logger.warning(f"[DEBUG] __getitem__ audio_path: {audio_path}")
             logger.warning(f"[DEBUG] __getitem__ text: {text}")
+            # Encode the text using the processor
+            label_ids = None
+            decoded_from_ids = None
+            if text and isinstance(text, str) and hasattr(self, 'processor') and self.processor is not None:
+                try:
+                    label_ids = self.processor.tokenizer.encode(text, add_special_tokens=False)
+                    decoded_from_ids = self.processor.tokenizer.decode(label_ids)
+                    logger.warning(f"[DEBUG] Encoded label_ids: {label_ids}")
+                    logger.warning(f"[DEBUG] Decoded from label_ids: {decoded_from_ids}")
+                except Exception as e:
+                    logger.warning(f"[DEBUG] Exception in encoding/decoding: {e}")
             # Also write to debug file
             try:
                 with open('asr_debug.txt', 'a', encoding='utf-8') as f:
-                    f.write(f'idx={idx}, audio_path={audio_path}, text={repr(text)}\n')
+                    f.write(f'idx={idx}, audio_path={audio_path}, text={repr(text)}, label_ids={label_ids}, decoded_from_ids={decoded_from_ids}\n')
             except Exception as file_exc:
-                logger.warning(f"[DEBUG] Could not write to asr_debug.txt: {file_exc}")
+                logger.warning(f"[DEBUG] Exception writing to asr_debug.txt: {file_exc}")
             if not text or not isinstance(text, str):
                 logger.warning(f"[DEBUG] __getitem__ FULL ITEM: {item}")
                 raise ValueError(f"[ERROR] Text column '{self.text_column}' is missing or invalid in item at idx {idx}!")
