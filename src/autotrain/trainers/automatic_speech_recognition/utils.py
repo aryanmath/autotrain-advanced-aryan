@@ -52,12 +52,13 @@ def _asr_metrics(pred):
         "accuracy": accuracy,
     }
 
-def compute_metrics(pred):
+def compute_metrics(pred, processor):
     """
     Compute WER, CER, and accuracy for ASR predictions.
     This is the main metrics function used by the Trainer.
     Args:
         pred: Prediction object from Trainer
+        processor: The processor/tokenizer for decoding
     Returns:
         dict: WER, CER, accuracy.
     """
@@ -96,10 +97,8 @@ def compute_metrics(pred):
     print("[DEBUG] Pred IDs sample:", pred_ids[:5])
     print("[DEBUG] Label IDs sample:", label_ids[:5])
 
-    # Decode to strings using processor from global scope
+    # Decode to strings using provided processor
     try:
-        import builtins
-        processor = getattr(builtins, 'current_processor', None)
         if processor is None:
             print("[DEBUG] Processor is None!")
             return {"wer": 1.0, "cer": 1.0, "accuracy": 0.0}

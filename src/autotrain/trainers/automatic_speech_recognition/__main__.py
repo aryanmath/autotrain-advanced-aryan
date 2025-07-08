@@ -11,6 +11,7 @@ import sys
 import glob
 import shutil
 import logging
+import functools
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("autotrain.asr.debug")
 logging.getLogger("transformers").setLevel(logging.WARNING)
@@ -598,7 +599,7 @@ def train(config: Dict[str, Any]):
             model=model,
             callbacks=callbacks_to_use,
             data_collator=dynamic_padding_collator,
-            compute_metrics=compute_metrics if valid_dataset is not None else None,
+            compute_metrics=functools.partial(compute_metrics, processor=processor) if valid_dataset is not None else None,
         )
         
         trainer = Trainer(
