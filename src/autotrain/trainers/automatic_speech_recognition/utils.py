@@ -62,9 +62,6 @@ def compute_metrics(pred, processor):
     Returns:
         dict: WER, CER, accuracy.
     """
-    import jiwer
-    import numpy as np
-
     pred_ids = pred.predictions
     label_ids = pred.label_ids
 

@@ -96,13 +96,6 @@ def load_data(params, is_validation=False):
         Dataset: Loaded dataset
     """
     try:
-        # --- LiFE App dataset integration ---
-        # if getattr(params, 'data_path', None) == 'life_app_data':
-        #     logger.info('Detected LiFE App dataset source. Loading from life_app_data...')
-        #     data = load_life_app_dataset('life_app_data')
-        #     logger.info(f"Loaded LiFE App dataset with {len(data)} examples.")
-        #     return data
-        # --- end LiFE App integration ---
         split = params.valid_split if is_validation else params.train_split
         if params.data_path == f"{params.project_name}/autotrain-data":
             dataset = load_from_disk(params.data_path)[split]
@@ -607,7 +600,7 @@ def train(config: Dict[str, Any]):
             train_dataset=train_dataset,
             eval_dataset=valid_dataset_obj if valid_dataset is not None else None,
         )
-        trainer.remove_callback(PrinterCallback)  # Remove default printer callback for cleaner logs
+        trainer.remove_callback(PrinterCallback)
         logger.info("Trainer initialized. Starting training...")
         logger.info("Starting training loop...")
         logger.info("========================================")
