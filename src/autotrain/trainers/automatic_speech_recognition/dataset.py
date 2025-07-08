@@ -81,31 +81,7 @@ class AutoTrainASRDataset(Dataset):
         self.model_type = model_type or detect_model_type(model)
         # Check processor
         if not hasattr(self, 'processor') or self.processor is None:
-            logger.warning("[DEBUG] Processor is NOT set on ASR dataset! Labels will be broken.")
-        else:
-            logger.warning(f"[DEBUG] Processor type at dataset init: {type(self.processor)}")
-            # Try encoding first 3 texts
-            for i in range(min(3, len(self._data))):
-                item = self._data[i]
-                text = item.get(self.text_column, None)
-                if text and isinstance(text, str):
-                    try:
-                        label_ids_tensor = self.processor.tokenizer(
-                            text,
-                            max_length=getattr(self, 'max_seq_length', 448),
-                            truncation=True,
-                            return_tensors="pt",
-                            add_special_tokens=True,
-                        ).input_ids.squeeze(0)
-                        label_ids = label_ids_tensor.tolist()
-                        decoded_from_ids = self.processor.tokenizer.decode(label_ids)
-                        logger.warning(f"[DEBUG] INIT text: {text}")
-                        logger.warning(f"[DEBUG] INIT label_ids: {label_ids}")
-                        logger.warning(f"[DEBUG] INIT decoded_from_ids: {decoded_from_ids}")
-                    except Exception as e:
-                        logger.warning(f"[DEBUG] INIT Exception encoding '{text}': {e}")
-                else:
-                    logger.warning(f"[DEBUG] INIT text missing or invalid for item {i}: {item}")
+            logger.warning("Processor is NOT set on ASR dataset! Labels will be broken.")
 
     def __len__(self):
         return len(self._data)
@@ -130,11 +106,10 @@ class AutoTrainASRDataset(Dataset):
                     label_ids = label_ids_tensor.tolist()
                     decoded_from_ids = self.processor.tokenizer.decode(label_ids)
                 except Exception as e:
-                    logger.warning(f"[DEBUG] Exception in encoding/decoding: {e}")
-                    raise ValueError(f"[ERROR] Failed to encode text '{text}' at idx {idx}: {e}")
+                    logger.warning(f"Exception in encoding/decoding: {e}")
+                    raise ValueError(f"Failed to encode text '{text}' at idx {idx}: {e}")
             else:
-                logger.warning(f"[DEBUG] __getitem__ FULL ITEM: {item}")
-                raise ValueError(f"[ERROR] Text column '{self.text_column}' is missing or invalid in item at idx {idx}!")
+                raise ValueError(f"Text column '{self.text_column}' is missing or invalid in item at idx {idx}!")
             if not os.path.exists(audio_path):
                 raise ValueError(f"Audio file not found: {audio_path}")
             # Load the audio file and check its duration
@@ -194,12 +169,7 @@ class AutoTrainASRDataset(Dataset):
                 except Exception:
                     input_features = torch.tensor(audio, dtype=torch.float32)
             labels = torch.tensor(label_ids, dtype=torch.long)
-            # Also write to debug file
-            try:
-                with open('asr_debug.txt', 'a', encoding='utf-8') as f:
-                    f.write(f'idx={idx}, audio_path={audio_path}, text={repr(text)}, label_ids={label_ids}, decoded_from_ids={decoded_from_ids}\n')
-            except Exception as file_exc:
-                logger.warning(f"[DEBUG] Exception writing to asr_debug.txt: {file_exc}")
+
             if self.model_type == 'seq2seq':
                 return {
                     "input_features": input_features,
