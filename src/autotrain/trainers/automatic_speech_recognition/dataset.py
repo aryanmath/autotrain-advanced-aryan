@@ -129,8 +129,6 @@ class AutoTrainASRDataset(Dataset):
                     ).input_ids.squeeze(0)
                     label_ids = label_ids_tensor.tolist()
                     decoded_from_ids = self.processor.tokenizer.decode(label_ids)
-                    logger.warning(f"[DEBUG] Encoded label_ids: {label_ids}")
-                    logger.warning(f"[DEBUG] Decoded from label_ids: {decoded_from_ids}")
                 except Exception as e:
                     logger.warning(f"[DEBUG] Exception in encoding/decoding: {e}")
                     raise ValueError(f"[ERROR] Failed to encode text '{text}' at idx {idx}: {e}")
