@@ -79,6 +79,34 @@ class AutoTrainASRDataset(Dataset):
         self.sampling_rate = sampling_rate
         self.max_seq_length = max_seq_length
         self.model_type = model_type or detect_model_type(model)
+        from autotrain import logger
+        # Check processor
+        if not hasattr(self, 'processor') or self.processor is None:
+            logger.warning("[DEBUG] Processor is NOT set on ASR dataset! Labels will be broken.")
+        else:
+            logger.warning(f"[DEBUG] Processor type at dataset init: {type(self.processor)}")
+            # Try encoding first 3 texts
+            for i in range(min(3, len(self._data))):
+                item = self._data[i]
+                text = item.get(self.text_column, None)
+                if text and isinstance(text, str):
+                    try:
+                        label_ids_tensor = self.processor.tokenizer(
+                            text,
+                            max_length=getattr(self, 'max_seq_length', 448),
+                            truncation=True,
+                            return_tensors="pt",
+                            add_special_tokens=True,
+                        ).input_ids.squeeze(0)
+                        label_ids = label_ids_tensor.tolist()
+                        decoded_from_ids = self.processor.tokenizer.decode(label_ids)
+                        logger.warning(f"[DEBUG] INIT text: {text}")
+                        logger.warning(f"[DEBUG] INIT label_ids: {label_ids}")
+                        logger.warning(f"[DEBUG] INIT decoded_from_ids: {decoded_from_ids}")
+                    except Exception as e:
+                        logger.warning(f"[DEBUG] INIT Exception encoding '{text}': {e}")
+                else:
+                    logger.warning(f"[DEBUG] INIT text missing or invalid for item {i}: {item}")
 
     def __len__(self):
         return len(self._data)
