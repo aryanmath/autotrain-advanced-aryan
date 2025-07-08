@@ -91,24 +91,26 @@ class AutoTrainASRDataset(Dataset):
             from autotrain import logger
             logger.warning(f"[DEBUG] __getitem__ audio_path: {audio_path}")
             logger.warning(f"[DEBUG] __getitem__ text: {text}")
-            # Encode the text using the processor
+            # Encode the text using the processor (batch call, like seq2seq)
             label_ids = None
             decoded_from_ids = None
             if text and isinstance(text, str) and hasattr(self, 'processor') and self.processor is not None:
                 try:
-                    label_ids = self.processor.tokenizer.encode(text, add_special_tokens=False)
+                    label_ids_tensor = self.processor.tokenizer(
+                        text,
+                        max_length=self.max_seq_length,
+                        truncation=True,
+                        return_tensors="pt",
+                        add_special_tokens=True,
+                    ).input_ids.squeeze(0)
+                    label_ids = label_ids_tensor.tolist()
                     decoded_from_ids = self.processor.tokenizer.decode(label_ids)
                     logger.warning(f"[DEBUG] Encoded label_ids: {label_ids}")
                     logger.warning(f"[DEBUG] Decoded from label_ids: {decoded_from_ids}")
                 except Exception as e:
                     logger.warning(f"[DEBUG] Exception in encoding/decoding: {e}")
-            # Also write to debug file
-            try:
-                with open('asr_debug.txt', 'a', encoding='utf-8') as f:
-                    f.write(f'idx={idx}, audio_path={audio_path}, text={repr(text)}, label_ids={label_ids}, decoded_from_ids={decoded_from_ids}\n')
-            except Exception as file_exc:
-                logger.warning(f"[DEBUG] Exception writing to asr_debug.txt: {file_exc}")
-            if not text or not isinstance(text, str):
+                    raise ValueError(f"[ERROR] Failed to encode text '{text}' at idx {idx}: {e}")
+            else:
                 logger.warning(f"[DEBUG] __getitem__ FULL ITEM: {item}")
                 raise ValueError(f"[ERROR] Text column '{self.text_column}' is missing or invalid in item at idx {idx}!")
             if not os.path.exists(audio_path):
@@ -169,7 +171,13 @@ class AutoTrainASRDataset(Dataset):
                         input_features = torch.tensor(audio, dtype=torch.float32)
                 except Exception:
                     input_features = torch.tensor(audio, dtype=torch.float32)
-            labels = safe_tokenize_text(self.processor, text, self.max_seq_length)
+            labels = torch.tensor(label_ids, dtype=torch.long)
+            # Also write to debug file
+            try:
+                with open('asr_debug.txt', 'a', encoding='utf-8') as f:
+                    f.write(f'idx={idx}, audio_path={audio_path}, text={repr(text)}, label_ids={label_ids}, decoded_from_ids={decoded_from_ids}\n')
+            except Exception as file_exc:
+                logger.warning(f"[DEBUG] Exception writing to asr_debug.txt: {file_exc}")
             if self.model_type == 'seq2seq':
                 return {
                     "input_features": input_features,
