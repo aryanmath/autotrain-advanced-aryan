@@ -367,8 +367,9 @@ class LossLoggingCallback(TrainerCallback):
 
     def on_log(self, args, state, control, logs=None, **kwargs):
         _ = logs.pop("total_flos", None)
-        if state.is_local_process_zero:
-            logger.info(logs)
+        if state.is_local_process_zero and logs:
+            log_str = " | ".join(f"{k}: {v}" for k, v in logs.items())
+            logger.info(log_str)
 
 
 class TrainStartCallback(TrainerCallback):
