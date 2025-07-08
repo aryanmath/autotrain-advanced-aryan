@@ -165,7 +165,7 @@ class AutomaticSpeechRecognitionPreprocessor:
                     "validation": os.path.join(data_dir, "validation", "data.csv")
                 }
             )
-            dataset = dataset.rename_columns({"audio": "autotrain_audio", "transcription": "autotrain_transcription"})
+            dataset = dataset.rename_columns({"audio": "audio", "transcription": "transcription"})
             if self.local:
                 dataset.save_to_disk(f"{self.project_name}/autotrain-data")
             else:
@@ -198,7 +198,7 @@ class AutomaticSpeechRecognitionPreprocessor:
                     "validation": os.path.join(data_dir, "validation", "data.csv")
                 }
             )
-            dataset = dataset.rename_columns({"audio": "autotrain_audio", "transcription": "autotrain_transcription"})
+            dataset = dataset.rename_columns({"audio": "audio", "transcription": "transcription"})
             if self.local:
                 dataset.save_to_disk(f"{self.project_name}/autotrain-data")
             else:
