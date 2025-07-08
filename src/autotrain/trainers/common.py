@@ -58,7 +58,7 @@ def remove_global_step(directory):
         for name in dirs:
             if name.startswith("global_step"):
                 folder_path = os.path.join(root, name)
-                print(f"Removing folder: {folder_path}")
+                logger.info(f"Removing folder: {folder_path}")
                 shutil.rmtree(folder_path)
 
 

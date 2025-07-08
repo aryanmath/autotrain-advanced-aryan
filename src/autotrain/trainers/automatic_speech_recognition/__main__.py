@@ -744,7 +744,7 @@ def train(config: Dict[str, Any]):
         try:
             logger.error(f"Error in training pipeline: {str(e)}")
         except Exception:
-            print(f"Error in training pipeline: {str(e)}")
+            logger.error(f"Error in training pipeline: {str(e)}")
         logger.error(traceback.format_exc())
         raise
 
