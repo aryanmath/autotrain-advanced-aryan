@@ -539,19 +539,13 @@ def train(config: Dict[str, Any]):
             logger.info(f"Using standard epochs: {adjusted_epochs}")
             
         # Calculate logging_steps the same way as other tasks
-        if getattr(config, 'logging_steps', -1) == -1:
-            if valid_dataset is not None:
-                logging_steps = int(0.2 * len(valid_dataset) / config.batch_size)
-            else:
-                logging_steps = int(0.2 * len(dataset) / config.batch_size)
-            if logging_steps == 0:
-                logging_steps = 1
-            if logging_steps > 25:
-                logging_steps = 25
-            config.logging_steps = logging_steps
+        user_set_logging_steps = hasattr(config, 'logging_steps') and config.logging_steps != -1
+        if user_set_logging_steps:
+            logging_steps = config.logging_steps
+            logger.info(f"Logging steps (from config): {logging_steps}")
         else:
-            logging_steps = getattr(config, 'logging_steps', 10)
-        logger.info(f"Logging steps: {logging_steps}")
+            logging_steps = None  # Do not set, use Trainer default
+            logger.info("Logging steps: using Trainer default (500)")
         
         # Set evaluation_strategy from config.evaluation_strategy if available, else 'no'
         eval_strategy = getattr(config, 'evaluation_strategy', None)
@@ -568,7 +562,6 @@ def train(config: Dict[str, Any]):
             num_train_epochs=adjusted_epochs,
             save_strategy=eval_strategy,
             disable_tqdm=False,  # enables the progress bar like other tasks
-            logging_steps=logging_steps,  # use calculated value
             evaluation_strategy=eval_strategy,  # use config or fallback
             load_best_model_at_end=True if valid_dataset is not None else False,
             report_to=config.log,
@@ -584,7 +577,9 @@ def train(config: Dict[str, Any]):
             bf16=config.mixed_precision == "bf16",
             ddp_find_unused_parameters=False,
         )
-        
+        if logging_steps is not None:
+            training_args["logging_steps"] = logging_steps
+            
         # Add mixed precision settings
         if config.mixed_precision == "fp16":
             training_args["fp16"] = True
@@ -710,19 +705,6 @@ def train(config: Dict[str, Any]):
                 del cfg["token"]
             with open(config_path, "w") as f:
                 json.dump(cfg, f, indent=2)
-        # Remove token from training_params.json before upload (fixes HF Hub error)
-        params_path = os.path.join(config.project_name, "training_params.json")
-        if os.path.exists(params_path):
-            with open(params_path, "r") as f:
-                params = json.load(f)
-            if "token" in params:
-                del params["token"]
-            with open(params_path, "w") as f:
-                json.dump(params, f, indent=2)
-        # Always delete the entire logs directory before upload
-        log_dir = os.path.join(config.project_name, "logs")
-        if os.path.exists(log_dir):
-            shutil.rmtree(log_dir)
         # Push model to Hugging Face Hub if push_to_hub is True (main process only)
         if config.push_to_hub:
             if PartialState().process_index == 0:
@@ -731,13 +713,24 @@ def train(config: Dict[str, Any]):
                 logger.info("========================================")
                 
                 remove_autotrain_data(config)
-                save_training_params(config)
+
+                # Remove token from training_params.json (again, just before upload)
+                params_path = os.path.join(config.project_name, "training_params.json")
+                if os.path.exists(params_path):
+                    with open(params_path, "r") as f:
+                        params = json.load(f)
+                    if "token" in params:
+                        del params["token"]
+                    with open(params_path, "w") as f:
+                        json.dump(params, f, indent=2)
+                    logger.info("Token removed from training_params.json before upload.")
+
                 logger.info("Creating repository...")
                 api = HfApi(token=config.token)
                 api.create_repo(
                     repo_id=f"{config.username}/{config.project_name}", repo_type="model", private=True, exist_ok=True
                 )
-                
+
                 logger.info("Uploading model files...")
                 api.upload_folder(
                     folder_path=config.project_name, repo_id=f"{config.username}/{config.project_name}", repo_type="model"
