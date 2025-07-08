@@ -114,6 +114,10 @@ def compute_metrics(pred):
     pred_str_clean = [p for p, l in valid_pairs]
     label_str_clean = [l for p, l in valid_pairs]
 
+    # Debug print for predictions and labels
+    print("[DEBUG] Decoded Predictions:", pred_str_clean)
+    print("[DEBUG] Decoded Labels:", label_str_clean)
+
     # Compute metrics
     try:
         wer_score = jiwer.wer(label_str_clean, pred_str_clean)
