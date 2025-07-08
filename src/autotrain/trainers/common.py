@@ -245,13 +245,16 @@ class AutoTrainParams(BaseModel):
 
     def save(self, output_dir):
         """
-        Save parameters to a json file.
+        Save parameters to a json file, always removing the 'token' key before writing.
         """
         os.makedirs(output_dir, exist_ok=True)
         path = os.path.join(output_dir, "training_params.json")
+        data = self.model_dump()
+        if "token" in data:
+            del data["token"]
         # save formatted json
         with open(path, "w", encoding="utf-8") as f:
-            f.write(self.model_dump_json(indent=4))
+            f.write(json.dumps(data, indent=4))
 
     def __str__(self):
         """
