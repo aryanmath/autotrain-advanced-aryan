@@ -54,47 +54,23 @@ def parse_args():
     return parser.parse_args()
 
 def dynamic_padding_collator(batch):
-    """Custom collator that handles dynamic padding for different audio lengths."""
-    
-    input_features = [item['input_features'] for item in batch]
-    labels = [item['labels'] for item in batch]
-    
-    target_length = 3000  
-    
-    
-    padded_features = []
-    for feat in input_features:
-        if feat.shape[1] < target_length:
-            
-            padding = torch.zeros(80, target_length - feat.shape[1])
-            padded_feat = torch.cat([feat, padding], dim=1)
-        elif feat.shape[1] > target_length:
-            
-            padded_feat = feat[:, :target_length]
-        else:
-            padded_feat = feat
-        padded_features.append(padded_feat)
-    
-    
-    input_features = torch.stack(padded_features)
-    
-    
-    max_label_length = max(len(label) for label in labels)
-    padded_labels = []
-    for label in labels:
-        if len(label) < max_label_length:
-            padding = torch.full((max_label_length - len(label),), -100)  # -100 is ignore_index
-            padded_label = torch.cat([label, padding])
-        else:
-            padded_label = label
-        padded_labels.append(padded_label)
-    
-    labels = torch.stack(padded_labels)
-    #hello
-    return {
-        'input_features': input_features,
-        'labels': labels,
-    }
+    # Main repo style: support both seq2seq and ctc batches
+    if "input_features" in batch[0]:
+        input_features = [item["input_features"] for item in batch]
+        labels = [item["labels"] for item in batch]
+        return {
+            "input_features": torch.stack(input_features),
+            "labels": torch.nn.utils.rnn.pad_sequence(labels, batch_first=True, padding_value=-100),
+        }
+    elif "input_values" in batch[0]:
+        input_values = [item["input_values"] for item in batch]
+        labels = [item["labels"] for item in batch]
+        return {
+            "input_values": torch.stack(input_values),
+            "labels": torch.nn.utils.rnn.pad_sequence(labels, batch_first=True, padding_value=-100),
+        }
+    else:
+        raise ValueError("Batch items must have either 'input_features' or 'input_values'.")
 
 def load_data(params, is_validation=False):
     """
