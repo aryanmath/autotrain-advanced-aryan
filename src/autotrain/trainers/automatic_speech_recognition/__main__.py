@@ -11,6 +11,8 @@ import sys
 import glob
 import shutil
 import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("autotrain.asr.debug")
 logging.getLogger("transformers").setLevel(logging.WARNING)
 logging.getLogger("datasets").setLevel(logging.WARNING)
 logging.getLogger("accelerate").setLevel(logging.WARNING)
@@ -318,6 +320,9 @@ def train(config: Dict[str, Any]):
     try:
         if isinstance(config, dict):
             config = AutomaticSpeechRecognitionParams(**config)
+        # Debug: Log all key training arguments
+        logger.info(f"[DEBUG] Model name: {getattr(config, 'model', None)}")
+        logger.info(f"[DEBUG] Training arguments: lr={getattr(config, 'lr', None)}, epochs={getattr(config, 'epochs', None)}, batch_size={getattr(config, 'batch_size', None)}, warmup_ratio={getattr(config, 'warmup_ratio', None)}, weight_decay={getattr(config, 'weight_decay', None)}, max_seq_length={getattr(config, 'max_seq_length', None)}, sampling_rate={getattr(config, 'sampling_rate', None)}")
         # Enforce push_to_hub defaults
         if not hasattr(config, "push_to_hub") or config.push_to_hub is None:
             config.push_to_hub = True
@@ -377,13 +382,9 @@ def train(config: Dict[str, Any]):
             valid_dataset = None
         logger.info("Loading model and processor...")
         model, processor = load_model_and_processor(config)
-        from autotrain.trainers.automatic_speech_recognition import utils
-        # Set global processor for metrics computation
-        import builtins
-        builtins.current_processor = processor
         logger.info("Model and processor loaded.")
-        logger.info(f"Model type: {type(model).__name__}")
-        logger.info(f"Processor type: {type(processor).__name__}")
+        logger.info(f"[DEBUG] Model type: {type(model).__name__}")
+        logger.info(f"[DEBUG] Processor type: {type(processor).__name__}")
         
         # Add dropout for small datasets to prevent overfitting
         dataset_size = len(dataset)
