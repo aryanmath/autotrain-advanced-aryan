@@ -94,152 +94,117 @@ def load_data(params, is_validation=False):
     """
     try:
         # --- LiFE App dataset integration ---
-        if getattr(params, 'data_path', None) == 'life_app_data':
-            logger.info('Detected LiFE App dataset source. Loading from life_app_data...')
-            data = load_life_app_dataset('life_app_data')
-            logger.info(f"Loaded LiFE App dataset with {len(data)} examples.")
-            return data
+        # if getattr(params, 'data_path', None) == 'life_app_data':
+        #     logger.info('Detected LiFE App dataset source. Loading from life_app_data...')
+        #     data = load_life_app_dataset('life_app_data')
+        #     logger.info(f"Loaded LiFE App dataset with {len(data)} examples.")
+        #     return data
         # --- end LiFE App integration ---
         split = params.valid_split if is_validation else params.train_split
         if params.data_path == f"{params.project_name}/autotrain-data":
             dataset = load_from_disk(params.data_path)[split]
             logger.info(f"Loaded {'validation' if is_validation else 'train'} dataset from disk with {len(dataset)} examples.")
             return dataset
-        else:
-            if ":" in split:
-                dataset_config_name, split_name = split.split(":")
-                dataset = load_dataset(
-                    params.data_path,
-                    name=dataset_config_name,
-                    split=split_name,
-                    token=params.token if params.token else None,
-                    trust_remote_code=ALLOW_REMOTE_CODE,
-                )
-            else:
-                dataset = load_dataset(
-                    params.data_path,
-                    split=split,
-                    token=params.token if params.token else None,
-                    trust_remote_code=ALLOW_REMOTE_CODE,
-                )
+        if ":" in split:
+            dataset_config_name, split_name = split.split(":")
+            dataset = load_dataset(
+                params.data_path,
+                name=dataset_config_name,
+                split=split_name,
+                token=params.token if params.token else None,
+                trust_remote_code=ALLOW_REMOTE_CODE,
+            )
             logger.info(f"Loaded {'validation' if is_validation else 'train'} dataset from hub with {len(dataset)} examples.")
             return dataset
-        # The rest (CSV/local folder logic) remains unchanged below this point for custom local datasets
-            if not os.path.exists(params.data_path):
-                logger.error(f"Data path does not exist: {params.data_path}")
-                raise ValueError(f"Data path does not exist: {params.data_path}")
-            
-            
-            files = os.listdir(params.data_path)
-            logger.info(f"Files in directory: {files}")
-            
-            
-            if 'train' in files and 'validation' in files:
-                logger.info("Detected HuggingFace dataset format")
-                if is_validation:
-                    dataset = load_from_disk(os.path.join(params.data_path, 'validation'))
-                else:
-                    dataset = load_from_disk(os.path.join(params.data_path, 'train'))
-                logger.info(f"Loaded {'validation' if is_validation else 'train'} dataset with {len(dataset)} examples")
-                return dataset
-            
-           
-            csv_files = [f for f in files if f.endswith('.csv')]
-            if not csv_files:
-                raise ValueError(f"No CSV file found in {params.data_path}")
-            csv_file_path = os.path.join(params.data_path, csv_files[0])
-            logger.info(f"Using CSV file: {csv_file_path}")
-            
-            
-            logger.info(f"Loading CSV file: {csv_file_path}")
-            df = pd.read_csv(csv_file_path)
-            
-            
-            logger.info(f"CSV columns: {df.columns.tolist()}")
-            logger.info(f"Number of examples: {len(df)}")
-            
-           
-            if 'audio' in df.columns:
-                logger.info("Mapping audio to audio")
-                df = df.rename(columns={'audio': 'audio'})
-            if 'transcription' in df.columns:
-                logger.info("Mapping transcription to transcription")
-                df = df.rename(columns={'transcription': 'transcription'})
-            
-            
-            required_columns = ['audio', 'transcription']
-            missing_columns = [col for col in required_columns if col not in df.columns]
-            if missing_columns:
-                raise ValueError(f"Missing required columns in CSV: {missing_columns}. Available columns: {df.columns.tolist()}")
-            
-            
+        if split:
+            dataset = load_dataset(
+                params.data_path,
+                split=split,
+                token=params.token if params.token else None,
+                trust_remote_code=ALLOW_REMOTE_CODE,
+            )
+            logger.info(f"Loaded {'validation' if is_validation else 'train'} dataset from hub with {len(dataset)} examples.")
+            return dataset
+        # If none of the above, use the robust local CSV/audio loader (previously dead code)
+        if not os.path.exists(params.data_path):
+            logger.error(f"Data path does not exist: {params.data_path}")
+            raise ValueError(f"Data path does not exist: {params.data_path}")
+        files = os.listdir(params.data_path)
+        logger.info(f"Files in directory: {files}")
+        if 'train' in files and 'validation' in files:
+            logger.info("Detected HuggingFace dataset format")
             if is_validation:
-                
-                valid_size = int(len(df) * 0.2)
-                df = df.sample(n=valid_size, random_state=42)
-                logger.info(f"Using {valid_size} examples for validation")
+                dataset = load_from_disk(os.path.join(params.data_path, 'validation'))
             else:
-                
-                train_size = int(len(df) * 0.8)
-                df = df.sample(n=train_size, random_state=42)
-                logger.info(f"Using {train_size} examples for training")
-            
-            
-            invalid_audio_files = []
-            audio_folder = os.path.join(params.data_path, 'audio')
-            
-            
-            if not os.path.exists(audio_folder):
-                logger.warning(f"Audio folder not found: {audio_folder}")
-                logger.warning("Will try to use audio paths as provided in CSV")
-            
-            for idx, audio_path in enumerate(df['audio']):
-                
-                if not os.path.isabs(audio_path):
-                    
-                    if os.path.exists(audio_folder):
-                        audio_file = os.path.join(audio_folder, os.path.basename(audio_path))
-                        if os.path.exists(audio_file):
-                            df.at[idx, 'audio'] = os.path.abspath(audio_file)
-                            continue
-                    
-                    audio_file = os.path.join(params.data_path, audio_path)
+                dataset = load_from_disk(os.path.join(params.data_path, 'train'))
+            logger.info(f"Loaded {'validation' if is_validation else 'train'} dataset with {len(dataset)} examples")
+            return dataset
+        csv_files = [f for f in files if f.endswith('.csv')]
+        if not csv_files:
+            raise ValueError(f"No CSV file found in {params.data_path}")
+        csv_file_path = os.path.join(params.data_path, csv_files[0])
+        logger.info(f"Using CSV file: {csv_file_path}")
+        logger.info(f"Loading CSV file: {csv_file_path}")
+        df = pd.read_csv(csv_file_path)
+        logger.info(f"CSV columns: {df.columns.tolist()}")
+        logger.info(f"Number of examples: {len(df)}")
+        if 'audio' in df.columns:
+            logger.info("Mapping audio to audio")
+            df = df.rename(columns={'audio': 'audio'})
+        if 'transcription' in df.columns:
+            logger.info("Mapping transcription to transcription")
+            df = df.rename(columns={'transcription': 'transcription'})
+        required_columns = ['audio', 'transcription']
+        missing_columns = [col for col in required_columns if col not in df.columns]
+        if missing_columns:
+            raise ValueError(f"Missing required columns in CSV: {missing_columns}. Available columns: {df.columns.tolist()}")
+        if is_validation:
+            valid_size = int(len(df) * 0.2)
+            df = df.sample(n=valid_size, random_state=42)
+            logger.info(f"Using {valid_size} examples for validation")
+        else:
+            train_size = int(len(df) * 0.8)
+            df = df.sample(n=train_size, random_state=42)
+            logger.info(f"Using {train_size} examples for training")
+        invalid_audio_files = []
+        audio_folder = os.path.join(params.data_path, 'audio')
+        if not os.path.exists(audio_folder):
+            logger.warning(f"Audio folder not found: {audio_folder}")
+            logger.warning("Will try to use audio paths as provided in CSV")
+        for idx, audio_path in enumerate(df['audio']):
+            if not os.path.isabs(audio_path):
+                if os.path.exists(audio_folder):
+                    audio_file = os.path.join(audio_folder, os.path.basename(audio_path))
                     if os.path.exists(audio_file):
                         df.at[idx, 'audio'] = os.path.abspath(audio_file)
                         continue
-                
-               
-                if not os.path.exists(audio_path):
-                    invalid_audio_files.append((idx, audio_path))
-            
-            if invalid_audio_files:
-                error_msg = "The following audio files were not found:\n"
-                for idx, path in invalid_audio_files[:5]:  
-                    error_msg += f"Row {idx}: {path}\n"
-                if len(invalid_audio_files) > 5:
-                    error_msg += f"... and {len(invalid_audio_files) - 5} more files"
-                raise ValueError(error_msg)
-            
-            
-            dataset = Dataset.from_pandas(df)
-            
-            
-            if len(dataset) > 0:
-                logger.info("First example in dataset:")
-                logger.info(f"Audio path: {dataset[0]['audio']}")
-                logger.info(f"Transcription: {dataset[0]['transcription']}")
-                if 'duration' in dataset[0]:
-                    logger.info(f"Duration: {dataset[0]['duration']}")
-                
-                
-                try:
-                    audio, sr = librosa.load(dataset[0]['audio'], sr=params.sampling_rate)
-                    logger.info(f"Successfully loaded first audio file. Duration: {len(audio)/sr:.2f}s")
-                except Exception as e:
-                    logger.error(f"Error loading first audio file: {str(e)}")
-                    raise
-            
-            return dataset
+                audio_file = os.path.join(params.data_path, audio_path)
+                if os.path.exists(audio_file):
+                    df.at[idx, 'audio'] = os.path.abspath(audio_file)
+                    continue
+            if not os.path.exists(audio_path):
+                invalid_audio_files.append((idx, audio_path))
+        if invalid_audio_files:
+            error_msg = "The following audio files were not found:\n"
+            for idx, path in invalid_audio_files[:5]:
+                error_msg += f"Row {idx}: {path}\n"
+            if len(invalid_audio_files) > 5:
+                error_msg += f"... and {len(invalid_audio_files) - 5} more files"
+            raise ValueError(error_msg)
+        dataset = Dataset.from_pandas(df)
+        if len(dataset) > 0:
+            logger.info("First example in dataset:")
+            logger.info(f"Audio path: {dataset[0]['audio']}")
+            logger.info(f"Transcription: {dataset[0]['transcription']}")
+            if 'duration' in dataset[0]:
+                logger.info(f"Duration: {dataset[0]['duration']}")
+            try:
+                audio, sr = librosa.load(dataset[0]['audio'], sr=params.sampling_rate)
+                logger.info(f"Successfully loaded first audio file. Duration: {len(audio)/sr:.2f}s")
+            except Exception as e:
+                logger.error(f"Error loading first audio file: {str(e)}")
+                raise
+        return dataset
             
     except Exception as e:
         logger.error(f"Error loading dataset: {str(e)}")
