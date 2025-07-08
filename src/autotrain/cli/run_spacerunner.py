@@ -7,7 +7,7 @@ from autotrain.trainers.generic.params import GenericParams
 from autotrain.trainers.generic.utils import create_dataset_repo
 
 from . import BaseAutoTrainCommand
-#hello
+
 
 BACKEND_CHOICES = list(AVAILABLE_HARDWARE.keys())
 BACKEND_CHOICES = [b for b in BACKEND_CHOICES if b.startswith("spaces-")]

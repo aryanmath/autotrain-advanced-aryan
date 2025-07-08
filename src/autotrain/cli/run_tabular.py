@@ -6,7 +6,7 @@ from autotrain.project import AutoTrainProject
 from autotrain.trainers.tabular.params import TabularParams
 
 from . import BaseAutoTrainCommand
-#hello
+
 
 def run_tabular_command_factory(args):
     return RunAutoTrainTabularCommand(args)

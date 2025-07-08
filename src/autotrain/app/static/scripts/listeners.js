@@ -1,29 +1,15 @@
 document.addEventListener('DOMContentLoaded', function () {
-
-    // ============================================================================
-    // 1. VARIABLE DECLARATIONS - Get references to important HTML elements
-    // ============================================================================
-
-    // Dataset source related elements
     const dataSource = document.getElementById("dataset_source");
     const uploadDataTabContent = document.getElementById("upload-data-tab-content");
     const hubDataTabContent = document.getElementById("hub-data-tab-content");
     const uploadDataTabs = document.getElementById("upload-data-tabs");
 
-    // Parameter management elements
     const jsonCheckbox = document.getElementById('show-json-parameters');
     const jsonParametersDiv = document.getElementById('json-parameters');
     const dynamicUiDiv = document.getElementById('dynamic-ui');
+
     const paramsTextarea = document.getElementById('params_json');
 
-    // ============================================================================
-    // 2. PARAMETER MANAGEMENT FUNCTIONS - Handle parameter editing and JSON mode
-    // ============================================================================
-
-    /**
-     * Updates the JSON textarea with current parameter values
-     * Called whenever any parameter input changes
-     */
     const updateTextarea = () => {
         const paramElements = document.querySelectorAll('[id^="param_"]');
         const params = {};
@@ -32,24 +18,15 @@ document.addEventListener('DOMContentLoaded', function () {
             params[key] = el.value;
         });
         paramsTextarea.value = JSON.stringify(params, null, 2);
+        //paramsTextarea.className = 'p-2.5 w-full text-sm text-gray-600 border-white border-transparent focus:border-transparent focus:ring-0'
         paramsTextarea.style.height = '600px';
     };
-
-    /**
-     * Adds change listeners to all parameter input fields
-     * This ensures the JSON textarea stays in sync with the UI
-     */
     const observeParamChanges = () => {
         const paramElements = document.querySelectorAll('[id^="param_"]');
         paramElements.forEach(el => {
             el.addEventListener('input', updateTextarea);
         });
     };
-
-    /**
-     * Updates parameter input fields from JSON textarea content
-     * Called when user edits the JSON directly
-     */
     const updateParamsFromTextarea = () => {
         try {
             const params = JSON.parse(paramsTextarea.value);
@@ -63,11 +40,6 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error('Invalid JSON:', e);
         }
     };
-
-    /**
-     * Switches between dynamic UI mode and JSON editing mode
-     * When JSON checkbox is checked, hides the form and shows JSON textarea
-     */
     function switchToJSON() {
         if (jsonCheckbox.checked) {
             dynamicUiDiv.style.display = 'none';
@@ -78,14 +50,18 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // ============================================================================
-    // 3. UI RENDERING FUNCTIONS - Create and display parameter input fields
-    // ============================================================================
+    // function handleDataSource() {
+    //     if (dataSource.value === "hub") {
+    //         uploadDataTabContent.style.display = "none";
+    //         uploadDataTabs.style.display = "none";
+    //         hubDataTabContent.style.display = "block";
+    //     } else if (dataSource.value === "local") {
+    //         uploadDataTabContent.style.display = "block";
+    //         uploadDataTabs.style.display = "block";
+    //         hubDataTabContent.style.display = "none";
+    //     }
+    // }
 
-    /**
-     * Fetches parameter configuration from backend based on task and mode
-     * Returns the parameter definitions (type, label, default value, etc.)
-     */
     async function fetchParams() {
         const taskValue = document.getElementById('task').value;
         const parameterMode = document.getElementById('parameter_mode').value;
@@ -94,10 +70,6 @@ document.addEventListener('DOMContentLoaded', function () {
         return params;
     }
 
-    /**
-     * Creates HTML element for a single parameter based on its type
-     * Supports: number, dropdown, checkbox, and string input types
-     */
     function createElement(param, config) {
         let element = '';
         switch (config.type) {
@@ -136,10 +108,6 @@ document.addEventListener('DOMContentLoaded', function () {
         return element;
     }
 
-    /**
-     * Renders the complete parameter UI in a grid layout
-     * Groups parameters by type and arranges them in rows of 3
-     */
     function renderUI(params) {
         const uiContainer = document.getElementById('dynamic-ui');
         let rowDiv = null;
@@ -161,15 +129,57 @@ document.addEventListener('DOMContentLoaded', function () {
         if (rowDiv) uiContainer.appendChild(rowDiv);
     }
 
-    // ============================================================================
-    // 4. DATASET SOURCE HANDLING - Manage different dataset input methods
-    // ============================================================================
 
-    /**
-     * Handles dataset source selection and shows/hides appropriate UI sections
-     * Supports: Local upload, Hugging Face Hub, and LiFE App (ASR only)
-     * Fixes: Hides local upload UI when LiFE App is selected, and vice versa
-     */
+    fetchParams().then(params => renderUI(params));
+    document.getElementById('task').addEventListener('change', function () {
+        fetchParams().then(params => {
+            document.getElementById('dynamic-ui').innerHTML = '';
+            let jsonCheckBoxFlag = false;
+            if (jsonCheckbox.checked) {
+                jsonCheckbox.checked = false;
+                jsonCheckBoxFlag = true;
+
+            }
+            renderUI(params);
+            if (jsonCheckBoxFlag) {
+                jsonCheckbox.checked = true;
+                updateTextarea();
+                observeParamChanges();
+            }
+        });
+    });
+    document.getElementById('parameter_mode').addEventListener('change', function () {
+        fetchParams().then(params => {
+            document.getElementById('dynamic-ui').innerHTML = '';
+            let jsonCheckBoxFlag = false;
+            if (jsonCheckbox.checked) {
+                jsonCheckbox.checked = false;
+                jsonCheckBoxFlag = true;
+
+            }
+            renderUI(params);
+            if (jsonCheckBoxFlag) {
+                jsonCheckbox.checked = true;
+                updateTextarea();
+                observeParamChanges();
+            }
+        });
+    });
+
+    jsonCheckbox.addEventListener('change', function () {
+        if (jsonCheckbox.checked) {
+            updateTextarea();
+            observeParamChanges();
+        }
+    });
+    document.getElementById('task').addEventListener('change', function () {
+        if (jsonCheckbox.checked) {
+            updateTextarea();
+            observeParamChanges();
+        }
+    });
+    // Attach event listeners to dataset_source dropdown
+    
     function handleDataSource() {
         const lifeAppOption = document.getElementById("dataset_source").querySelector('option[value="life_app"]');
         const lifeAppSelection = document.getElementById("life-app-selection");
@@ -342,10 +352,9 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    /**
-     * Loads LiFE App projects from backend API
-     * Populates the project dropdown with available projects
-     */
+    // LiFE App integration for ASR: handles project, script, and dataset selection UI and data loading
+
+    // Load available LiFE App projects and populate the dropdown
     async function loadLifeAppProjects() {
         const projectSelect = document.getElementById('life_app_project');
         if (!projectSelect) return;
@@ -387,16 +396,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
         } catch (error) {
+            alert('Failed to fetch LiFE App projects. Please try again.');
             console.error('Error loading projects:', error);
         }
     }
 
-    /**
-     * Loads scripts for selected LiFE App projects
-     * Fetches available scripts from backend and populates dropdown
-     * Fixes: Ensures Select2 always shows the selected script after re-initialization
-     * Also: Adds a visible UI element to display the selected script name
-     */
+    // Load scripts for the selected LiFE App projects
     async function loadScriptsForProjects(selectedProjects) {
         const scriptSelect = $('#life_app_script');
         scriptSelect.prop('disabled', false).empty();
@@ -446,42 +451,36 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
         } catch (error) {
+            alert('Failed to fetch LiFE App scripts. Please try again.');
             console.error('Error loading scripts:', error);
         }
     }
 
-    /**
-     * Loads datasets for selected LiFE App script
-     * Fetches available datasets from backend and populates dropdown
-     */
+    // Load datasets for the selected LiFE App script
     async function loadDatasetsForScript(selectedScript) {
         const datasetSelect = $('#dataset_file');
-        datasetSelect.prop('disabled', false).empty();
+        datasetSelect.prop('disabled', false);
+        datasetSelect.empty();
         datasetSelect.append(new Option('Select Dataset', ''));
 
         try {
             const response = await fetch('/ui/script_selected', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    script: selectedScript
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ script: selectedScript })
             });
 
-            if (!response.ok) {
-                throw new Error('Failed to fetch datasets');
-            }
-
+            if (!response.ok) throw new Error('Failed to fetch datasets');
             const data = await response.json();
+            console.log("Datasets from backend:", data.datasets);
+
             if (data.datasets && data.datasets.length > 0) {
                 data.datasets.forEach(dataset => {
                     datasetSelect.append(new Option(dataset, dataset));
                 });
             }
+            console.log("Options in datasetSelect:", datasetSelect.children());
 
-            // Reinitialize Select2
             if (datasetSelect.data('select2')) {
                 datasetSelect.select2('destroy');
             }
@@ -493,11 +492,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
             datasetSelect.trigger('change');
         } catch (error) {
+            alert('Failed to fetch LiFE App datasets. Please try again.');
             console.error('Error loading datasets:', error);
         }
     }
 
-    // --- Select2 for LiFE App Script with plain text templateSelection ---
+    // Format script selection for Select2 (plain text)
     function formatState (state) {
         // Always return plain text for compatibility
         return state.text;
@@ -509,6 +509,22 @@ document.addEventListener('DOMContentLoaded', function () {
         templateSelection: formatState
     });
 
-    // === ASR-SPECIFIC LOGIC END ===
+    // Show the selected script below the dropdown
+    $('#life_app_script').on('change', function() {
+        const selectedScript = $(this).val();
+        if (selectedScript) {
+            $('#selected-script-summary').text('Selected Script: ' + selectedScript);
+        } else {
+            $('#selected-script-summary').text('');
+        }
+    });
+
+    $(document).ready(function() {
+        const selectedScript = $('#life_app_script').val();
+        if (selectedScript) {
+            $('#selected-script-summary').text('Selected Script: ' + selectedScript);
+        }
+    });
+
 
 });

@@ -7,7 +7,7 @@ from autotrain.trainers.seq2seq.params import Seq2SeqParams
 
 from . import BaseAutoTrainCommand
 
-#hello
+
 def run_seq2seq_command_factory(args):
     return RunAutoTrainSeq2SeqCommand(args)
 

@@ -5,7 +5,7 @@ from autotrain.backends.base import BaseBackend
 
 ENDPOINTS_URL = "https://api.endpoints.huggingface.cloud/v2/endpoint/"
 
-#hello
+
 class EndpointsRunner(BaseBackend):
     """
     EndpointsRunner is responsible for creating and managing endpoint instances.

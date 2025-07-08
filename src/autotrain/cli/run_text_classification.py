@@ -6,7 +6,7 @@ from autotrain.project import AutoTrainProject
 from autotrain.trainers.text_classification.params import TextClassificationParams
 
 from . import BaseAutoTrainCommand
-#hello
+
 
 def run_text_classification_command_factory(args):
     return RunAutoTrainTextClassificationCommand(args)

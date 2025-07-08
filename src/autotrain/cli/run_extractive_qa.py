@@ -7,7 +7,7 @@ from autotrain.trainers.extractive_question_answering.params import ExtractiveQu
 
 from . import BaseAutoTrainCommand
 
-#hello
+
 def run_extractive_qa_command_factory(args):
     return RunAutoTrainExtractiveQACommand(args)
 

@@ -6,7 +6,7 @@ from autotrain.project import AutoTrainProject
 from autotrain.trainers.image_classification.params import ImageClassificationParams
 
 from . import BaseAutoTrainCommand
-#hello
+
 
 def run_image_classification_command_factory(args):
     return RunAutoTrainImageClassificationCommand(args)

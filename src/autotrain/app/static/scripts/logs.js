@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Check if the modal display property is 'flex'
         if (displayStyle === 'flex') {
             fetchLogs(); // Initial fetch when the modal is opened
-// This
+
             // Clear any existing interval to avoid duplicates
             clearInterval(fetchLogsInterval);
 

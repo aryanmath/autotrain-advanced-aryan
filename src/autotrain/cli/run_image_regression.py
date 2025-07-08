@@ -6,7 +6,7 @@ from autotrain.project import AutoTrainProject
 from autotrain.trainers.image_regression.params import ImageRegressionParams
 
 from . import BaseAutoTrainCommand
-#hello
+
 
 def run_image_regression_command_factory(args):
     return RunAutoTrainImageRegressionCommand(args)

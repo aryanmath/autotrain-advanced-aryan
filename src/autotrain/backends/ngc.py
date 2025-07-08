@@ -66,7 +66,7 @@ class NGCRunner(BaseBackend):
             logger.error(f"Failed to request NGC token - {repr(err)}")
             raise Exception("%s is unreachable, please try again later." % NGC_AUTH)
         return json.loads(response.text.encode("utf8"))["token"]
-#hello
+
     def _create_ngc_job(self, token, url, payload):
         logger.info("Creating NGC Job")
         headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}

@@ -43,18 +43,6 @@ def colab_app():
         "ST Triplet",
         "ST Question Answering",
         "Automatic Speech Recognition",
-        "text_classification",
-        "seq2seq",
-        "dreambooth",
-        "image_classification",
-        "token_classification",
-        "object_detection",
-        "single_column_dreambooth",
-        "translation",
-        "tabular_classification",
-        "tabular_regression",
-        "text_generation",
-        "text_to_image",
         "speech_separation",
     ]
 
@@ -79,18 +67,6 @@ def colab_app():
         "ST Triplet": "st:triplet",
         "ST Question Answering": "st:qa",
         "Automatic Speech Recognition": "ASR",
-        "text_classification": "text_classification",
-        "seq2seq": "seq2seq",
-        "dreambooth": "dreambooth",
-        "image_classification": "image_classification",
-        "token_classification": "token_classification",
-        "object_detection": "object_detection",
-        "single_column_dreambooth": "single_column_dreambooth",
-        "translation": "translation",
-        "tabular_classification": "tabular_classification",
-        "tabular_regression": "tabular_regression",
-        "text_generation": "text_generation",
-        "text_to_image": "text_to_image",
         "speech_separation": "speech_separation",
     }
 
@@ -379,7 +355,7 @@ def colab_app():
             push_to_hub = params_val.get("push_to_hub", True)
             if "push_to_hub" in params_val:
                 params_val = {k: v for k, v in params_val.items() if k != "push_to_hub"}
-#hello
+
             config = {
                 "task": TASK_MAP[task_dropdown.value].split(":")[0],
                 "base_model": base_model.value,
